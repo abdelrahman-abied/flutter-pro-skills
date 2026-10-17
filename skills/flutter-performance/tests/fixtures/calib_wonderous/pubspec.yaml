@@ -1,0 +1,10 @@
+name: calib_wonderous
+description: Calibration regression fixture (minimal repro of a false positive, plus the related true positive).
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  flutter_hooks: ^0.20.0
+  hooks_riverpod: ^2.6.0

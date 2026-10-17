@@ -1,0 +1,6 @@
+name: calib_compass_dimens
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter

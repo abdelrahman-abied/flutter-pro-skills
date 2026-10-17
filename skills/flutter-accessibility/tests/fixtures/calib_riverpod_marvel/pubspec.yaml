@@ -1,0 +1,6 @@
+name: calib_riverpod_marvel
+description: Regression from rrousselGit/riverpod examples/marvel (search_bar.dart).
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0

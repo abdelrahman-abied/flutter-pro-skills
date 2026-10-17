@@ -4,7 +4,7 @@ description: Write and review Flutter widget code the way the Flutter team recom
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.0.0"
+  version: "1.1.0"
   suite: flutter-pro-skills
 ---
 
@@ -225,5 +225,12 @@ Sibling skills (if your agent doesn't auto-load skills, read `../<name>/SKILL.md
 `flutter-architecture` (layers, patterns, state management, import-graph
 checker), `dart-naming` (names of widgets, callbacks, files) and
 `dart-flutter-review` (full reviews that run the script above and merge `UI-*`
-findings with the rest). If a sibling is missing, this skill still works on its
-own. Say which check you skipped.
+findings with the rest). For depth on one concern, load its specialist:
+`flutter-performance` (rebuild scope, lazy lists, isolates, image decode
+size, DevTools; its `PERF-` IDs beat `UI-image-decode-size`,
+`UI-blocking-ui-isolate` and `UI-rebuild-scope`), `flutter-design-system`
+(tokens, `ThemeExtension`, dark mode; `DS-` beats `UI-hardcoded-style`),
+`flutter-accessibility` (semantics, targets, contrast, text scale; `A11Y-`
+beats `UI-a11y`) and `flutter-persistence` (local storage behind the
+repository). If a sibling is missing, this skill still works on its own. Say
+which check you skipped.

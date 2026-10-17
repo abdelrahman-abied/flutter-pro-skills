@@ -1,0 +1,7 @@
+name: perf_suppressed
+description: Fixture for perf-ignore comments.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter

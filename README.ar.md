@@ -20,9 +20,9 @@
 
   أي أداة بتفرض stack واحد هتطلّع لك أخطاء مش حقيقية.
 - **أدوات فحص حقيقية، مش بس كلام.**
-  - 8 checkers بتقرأ الكود من غير ما تعدّل فيه حاجة: المعمارية، والأخطاء، والتستات، والأمان، والتنقّل، والـ forms، والترجمة والـ RTL، والـ review.
-  - مكتوبة بـ Python من غير أي مكتبات خارجية، وعليها حوالي 1000 تست.
-  - اتجرّبت على تطبيقات مفتوحة المصدر حقيقية، زي Compass الرسمي من فريق Flutter، وأمثلة Bloc و Riverpod الرسمية، و lichess، و immich.
+  - 12 checker بيقروا الكود من غير ما يعدّلوا فيه حاجة: المعمارية، والأخطاء، والتستات، والأمان، والتنقّل، والـ forms، والترجمة والـ RTL، والأداء، والتخزين المحلي، والـ design system، والـ accessibility، والـ review.
+  - مكتوبين بـ Python من غير أي مكتبات خارجية، وعليهم حوالي 1600 تست.
+  - اتجرّبوا على تطبيقات مفتوحة المصدر حقيقية، زي Compass الرسمي من فريق Flutter، وأمثلة Bloc و Riverpod الرسمية، و lichess، و immich، و Wonderous، وأمثلة drift.
 - **GitHub Action بيقفل الـ PR على المشاكل الجديدة بس،** فالمشاكل القديمة في المشروع متعطّلش الفريق.
 - **شغالة مع أي agent بيقرأ `SKILL.md`:** Claude Code، و Codex، و Cursor، و GitHub Copilot، و Gemini CLI، و OpenCode. اتجربت فعلًا على Claude Code و OpenCode.
 
@@ -54,10 +54,13 @@ cd flutter-pro-skills && ./install.sh
 - *"احفظ الـ token بشكل آمن"*
 - *"إيه اللي ملوش تستات؟"*
 - *"راجع الترجمة العربية والـ RTL"*
+- *"الليستة دي بتقطّع ليه؟"*
+- *"ضيف dark mode بالـ design tokens بتاعتنا"*
+- *"الشاشة دي شغالة مع TalkBack؟"*
 
 الـ agent بيختار الـ skill المناسبة لوحده.
 
-## الـ 12 skill
+## الـ 16 skill
 
 | الـ skill | بتعمل إيه |
 |---|---|
@@ -70,7 +73,11 @@ cd flutter-pro-skills && ./install.sh
 | `flutter-navigation` | go_router، والـ guards، و validation للـ deep links |
 | `flutter-forms` | الـ validation، وحقول الباسورد والـ OTP، والحماية من الضغط مرتين |
 | `flutter-i18n` | ملفات الترجمة، **صيغ الجمع العربي**، والـ RTL، والأيقونات اللي لازم تنعكس |
-| `flutter-ui-practices` | الـ dispose، و `context` بعد `await`، والأداء، والـ accessibility |
+| `flutter-performance` | الـ rebuilds حسب معماريتك، و `const`، و `RepaintBoundary`، والليستات الـ lazy والـ slivers، والـ isolates، وحجم الصور، وتشخيص التقطيع بـ DevTools |
+| `flutter-persistence` | Drift و sqflite و Hive و shared_preferences، والـ caching، والـ offline-first والـ sync، والـ migrations، وكلها ورا الـ repository. والـ SQL بـ parameters بس |
+| `flutter-design-system` | الـ tokens، و `ThemeData` و `ColorScheme`، و `ThemeExtension`، وطبقة components، والـ dark mode، ومفيش ألوان أو مقاسات مكتوبة على طول في الـ features |
+| `flutter-accessibility` | `Semantics` والـ labels، وحجم الـ tap targets، والـ contrast، وتكبير الخط، وترتيب الـ focus، وتستات الـ screen reader. ومفيش أسرار بتتقري بصوت عالي |
+| `flutter-ui-practices` | الـ dispose، و `context` بعد `await`، وتكلفة الـ build، والـ keys |
 | `dart-naming` | قواعد التسمية، وأسماء كل دور في كل معمارية |
 | `dart-flutter-review` | **review كامل** بـ agents شغالين بالتوازي، وتقرير واحد مرتّب حسب الخطورة |
 

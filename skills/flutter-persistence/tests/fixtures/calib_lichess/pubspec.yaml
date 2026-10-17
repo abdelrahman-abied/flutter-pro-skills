@@ -1,0 +1,9 @@
+name: calib_lichess
+description: Regression fixture from lichess-org/mobile (sqflite).
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  sqflite: ^2.4.0

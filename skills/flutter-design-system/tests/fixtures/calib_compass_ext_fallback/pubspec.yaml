@@ -1,0 +1,6 @@
+name: calib_compass_ext_fallback
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter

@@ -23,7 +23,7 @@ the gate on today without fixing the whole codebase first.
 | Analyzer results when the analyzer **crashed** (often an analyzer plugin), or when the pubspec SDK constraint excludes the installed SDK | No, the section says why |
 | Architecture violations below `fail-on`, or recorded in the baseline | No, reported |
 | Analyzer warnings and infos, format, `dart fix` | No, reported |
-| Test gaps, error handling, security defaults, the `flutter-security-audit` `scan.sh` pass (whatever its own exit code), navigation, forms, i18n, heuristic candidates | No, informational |
+| Test gaps, error handling, security defaults, the `flutter-security-audit` `scan.sh` pass (whatever its own exit code), navigation, forms, i18n, performance, persistence, design system, accessibility, heuristic candidates | No, informational |
 | A usage or environment error (no `pubspec.yaml`, bad input, missing base ref) | Yes (exit 2) |
 
 `fail-on` is `high` by default. `medium` also fails on medium violations, and
@@ -151,10 +151,15 @@ python3 -I <skills>/flutter-secure-defaults/scripts/check_secure_defaults.py . [
 python3 -I <skills>/flutter-navigation/scripts/check_navigation.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-forms/scripts/check_forms.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-i18n/scripts/check_i18n.py . [--files <list>] [--profile <p>]
+python3 -I <skills>/flutter-performance/scripts/check_performance.py . [--files <list>] [--profile <p>]
+python3 -I <skills>/flutter-persistence/scripts/check_persistence.py . [--files <list>] [--profile <p>]
+python3 -I <skills>/flutter-design-system/scripts/check_design_system.py . [--files <list>] [--profile <p>]
+python3 -I <skills>/flutter-accessibility/scripts/check_accessibility.py . [--files <list>] [--profile <p>]
 bash <skills>/flutter-security-audit/scan.sh . [--json]   # separate skill; exits 1 on Critical/High by itself
 
 # skip sections in review.sh: --no-security (both security passes), --no-audit, --no-nav,
-# --no-forms, --no-i18n, or one list: --skip audit,nav,forms,i18n
+# --no-forms, --no-i18n, --no-perf, --no-persist, --no-ds, --no-a11y,
+# or one list: --skip audit,nav,forms,i18n,perf,persist,ds,a11y
 ```
 
 `echo $?` after any of them: `0` pass, `1` CI failure, `2` usage error.

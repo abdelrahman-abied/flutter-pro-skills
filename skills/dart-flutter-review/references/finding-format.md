@@ -51,9 +51,13 @@ template). This format is the hand-off between passes.
 | `NAV-0xx` / `NAV-<slug>` | Navigation and deep links (`flutter-navigation`): `check_navigation.py` rules (`NAV-003` unvalidated-route-param) or reading-level slugs (`NAV-deep-link-skips-guard`) |
 | `FORM-0xx` / `FORM-<slug>` | Forms and input (`flutter-forms`): `check_forms.py` rules (`FORM-005` submit-without-busy-guard) or slugs (`FORM-client-only-validation`) |
 | `I18N-0xx` / `I18N-<slug>` | Localisation, RTL and formatting (`flutter-i18n`): `check_i18n.py` rules (`I18N-010` hardcoded-ui-string) or slugs (`I18N-overflow-when-translated`) |
+| `PERF-0xx` / `PERF-<slug>` | Performance (`flutter-performance`): `check_performance.py` rules (`PERF-001` eager-list-over-data) or slugs (`PERF-rebuild-whole-screen`) |
+| `PERSIST-0xx` / `PERSIST-<slug>` | Local storage, caching and migrations (`flutter-persistence`): `check_persistence.py` rules (`PERSIST-001` sql-built-from-strings) or slugs (`PERSIST-no-cache-policy`) |
+| `DS-0xx` / `DS-<slug>` | Design system and theming (`flutter-design-system`): `check_design_system.py` rules (`DS-005` theme-extension-not-registered) or slugs (`DS-no-component-layer`) |
+| `A11Y-0xx` / `A11Y-<slug>` | Accessibility (`flutter-accessibility`): `check_accessibility.py` rules (`A11Y-001` icon-button-without-label) or slugs (`A11Y-focus-order`) |
 | `LINT:<code>` | An analyzer diagnostic with no better home: `LINT:unused_field`. When a lint is the symptom of a judgment finding, fold it into that finding's evidence |
 
-Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N are free-form but stable: lower-kebab-case,
+Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/DS/A11Y are free-form but stable: lower-kebab-case,
 named after the problem. Reuse one slug for one problem across the whole report.
 
 **Overlaps.** An empty or default-returning `catch` can surface three ways: the
@@ -74,11 +78,20 @@ they're stable and the sibling skill documents them:
 | `check_secure_defaults.py` | `SEC-0xx` | the `scan.sh` id for the same line (e.g. `SEC-001` over `STO-TOKEN-PREFS`) |
 | `check_forms.py` | `FORM-008` controller-created-inline | the `undisposed-resource` candidate / `UI-lifecycle` on that controller |
 | `check_navigation.py` | `NAV-0xx` | a `UI-` slug about the same route or link |
+| `check_performance.py` | `PERF-001/002/003` (eager, shrinkWrap, intrinsic lists) | `UI-eager-list`, the `eager-children-map` candidate |
+| `check_performance.py` | `PERF-005/006` (animated Opacity, saveLayer in list items) | `UI-opacity`, the `opacity-widget` candidate |
+| `check_performance.py` | `PERF-004` / `PERF-008/009` / `PERF-010` / `PERF-011` | `UI-image-decode-size` / `UI-rebuild-scope` / `UI-build-side-effect` (sort in build) / `UI-blocking-ui-isolate` |
+| `check_design_system.py` | `DS-001/002` (raw colour, raw text style) | `UI-hardcoded-style`, the `hardcoded-color` candidate |
+| `check_accessibility.py` | `A11Y-0xx` | `UI-a11y` |
 
 Some overlaps go the other way, because the suite already owns them: navigation
 or `BuildContext` inside a logic class stays `ARCH-102`, `context` after
 `await` stays `UI-context-after-await`, and controllers held in providers stay
-`ARCH-109`. The checker ID, if any, goes in `rule:`.
+`ARCH-109`. Tokens and credentials in SharedPreferences or Hive stay `SEC-001`
+(not `PERSIST-`), storage I/O in widgets stays `ARCH-101`, a hard-coded label
+stays `I18N-010` (A11Y reports only a *missing* label), obscured fields and
+autofill stay `FORM-001/002/003`, and physical left/right geometry stays
+`I18N-012` (DS judges only magic numbers). The checker ID, if any, goes in `rule:`.
 
 ### Severity
 

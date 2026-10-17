@@ -1,0 +1,7 @@
+name: calib_marvel_local_theme
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.0

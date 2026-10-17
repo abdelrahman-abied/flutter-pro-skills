@@ -27,12 +27,13 @@ that is clean and secure by default, judged by your app's own architecture.**
   repositories, MVN notifiers go through use cases, and Bloc forbids
   bloc→bloc. Other packs pick one stack and flag everything else.
 - **Real checkers, not just prose.**
-  - Eight read-only checkers: architecture (import graph), error handling,
-    test gaps, security defaults, navigation, forms, i18n/RTL, and review
-    heuristics.
-  - All of them use stdlib Python and have about 1,000 regression tests.
+  - Twelve read-only checkers: architecture (import graph), error handling,
+    test gaps, security defaults, navigation, forms, i18n/RTL, performance,
+    persistence, design system, accessibility, and review heuristics.
+  - All of them use stdlib Python and have about 1,600 regression tests.
   - They are calibrated on real open-source apps: Flutter's Compass sample,
-    the bloc and riverpod examples, lichess, immich and others.
+    the bloc and riverpod examples, lichess, immich, Wonderous, the drift
+    examples and others.
 - **A CI gate that fails PRs only on *new* violations,** so legacy code never
   blocks adoption.
 - **Works with any agent that reads `SKILL.md`:** Claude Code, Codex, Cursor,
@@ -59,6 +60,9 @@ Then just ask:
 - *"Is our structure right? We use Clean + MVN."*
 - *"Store the auth token securely."*
 - *"Find untested code."*
+- *"Why does this list jank?"*
+- *"Add dark mode with our design tokens."*
+- *"Is this screen usable with TalkBack?"*
 - *"Why does the spinner never stop?"*
 - *"راجع الترجمة العربية والـ RTL."* ("Review the Arabic translation and the RTL.")
 
@@ -75,7 +79,11 @@ Then just ask:
 | [`flutter-navigation`](skills/flutter-navigation/SKILL.md) | go_router, guards, deep-link validation, navigation placement per pattern | `check_navigation.py` |
 | [`flutter-forms`](skills/flutter-forms/SKILL.md) | Validation, form state per pattern, password/OTP inputs, double-submit | `check_forms.py` |
 | [`flutter-i18n`](skills/flutter-i18n/SKILL.md) | gen-l10n/ARB parity, Arabic plural forms, RTL layout and mirrored icons, formatting | `check_i18n.py` |
-| [`flutter-ui-practices`](skills/flutter-ui-practices/SKILL.md) | Lifecycle and `dispose`, `context` after `await`, build cost, lists, keys, a11y | (review heuristics) |
+| [`flutter-performance`](skills/flutter-performance/SKILL.md) | Rebuild scope per pattern, `const`, `RepaintBoundary`, lazy lists and slivers, isolates, image decode size, jank diagnosis in DevTools | `check_performance.py` |
+| [`flutter-persistence`](skills/flutter-persistence/SKILL.md) | Drift, sqflite, Hive, shared_preferences, caching, offline-first and sync, migrations, placed behind your repositories. Parameterised SQL only | `check_persistence.py` |
+| [`flutter-design-system`](skills/flutter-design-system/SKILL.md) | Tokens, `ThemeData`/`ColorScheme`, `ThemeExtension`, a component layer, dark mode, no raw colours or sizes in features | `check_design_system.py` |
+| [`flutter-accessibility`](skills/flutter-accessibility/SKILL.md) | `Semantics` and labels, tap targets, WCAG contrast, text scale, focus order, screen-reader tests. No secrets read aloud | `check_accessibility.py` |
+| [`flutter-ui-practices`](skills/flutter-ui-practices/SKILL.md) | Lifecycle and `dispose`, `context` after `await`, build cost, lists, keys | (review heuristics) |
 | [`dart-naming`](skills/dart-naming/SKILL.md) | Effective Dart naming plus role names per architecture | — |
 | [`dart-flutter-review`](skills/dart-flutter-review/SKILL.md) | **Review orchestrator.** Every checker, then parallel reviewer sub-agents, verified Highs, one deduplicated report, CI mode | `review.sh` |
 
@@ -95,7 +103,11 @@ The review runs its `scan.sh` automatically when it is installed.
 | "go_router guards", "deep links" | `flutter-navigation` |
 | "Validation", "login form", "double submit" | `flutter-forms` |
 | "Translate", "Arabic", "RTL", "hardcoded strings" | `flutter-i18n` |
-| "Memory leak", "jank", "setState after dispose" | `flutter-ui-practices` |
+| "Memory leak", "setState after dispose" | `flutter-ui-practices` |
+| "Jank", "slow list", "too many rebuilds", "compute / isolate" | `flutter-performance` |
+| "Cache this offline", "Drift migration", "Hive or SQLite?" | `flutter-persistence` |
+| "Dark mode", "design tokens", "ThemeExtension", "hard-coded colours" | `flutter-design-system` |
+| "Screen reader", "TalkBack/VoiceOver", "contrast", "tap target" | `flutter-accessibility` |
 | "What should I call this?" | `dart-naming` |
 | "Review my PR / codebase" | `dart-flutter-review` |
 | "Write / refactor this", "set up lints" | `dart-flutter-best-practices` |
@@ -120,6 +132,7 @@ Agents pick the right skill from its description. To force one:
 bash ~/.agents/skills/dart-flutter-review/scripts/review.sh path/to/app [--diff main]   # everything, read-only
 python3 ~/.agents/skills/flutter-architecture/scripts/arch_check.py path/to/app [--json]
 python3 ~/.agents/skills/flutter-secure-defaults/scripts/check_secure_defaults.py path/to/app
+python3 ~/.agents/skills/flutter-accessibility/scripts/check_accessibility.py path/to/app
 python3 ~/.agents/skills/flutter-feature-scaffold/scripts/scaffold.py path/to/app orders    # dry run
 ```
 
@@ -184,8 +197,8 @@ recipe exists, these skills point to it.
 4. **Gate PRs** with the GitHub Action above.
 
 To accept a specific finding, add `// arch-ignore: ARCH-005 <reason>` on that
-line or the line above it. There are matching `err-`, `sec-`, `nav-`, `form-`
-and `i18n-ignore` comments.
+line or the line above it. There are matching `err-`, `sec-`, `nav-`, `form-`,
+`i18n-`, `perf-`, `persist-`, `ds-` and `a11y-ignore` comments.
 
 **Precedence:**
 1. Your project's own decisions: lints, the declared architecture, and

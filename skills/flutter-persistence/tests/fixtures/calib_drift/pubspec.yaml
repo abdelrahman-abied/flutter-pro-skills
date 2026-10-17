@@ -1,0 +1,9 @@
+name: calib_drift
+description: Regression fixture from simolus3/drift examples (app, modular, encryption).
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  drift: ^2.20.0

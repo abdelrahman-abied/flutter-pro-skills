@@ -11,7 +11,11 @@
 8. Template G: navigation reviewer (optional)
 9. Template H: forms reviewer (optional)
 10. Template I: i18n reviewer (optional)
-11. Template V: adversarial verifier (one per High finding)
+11. Template J: performance reviewer (optional)
+12. Template K: persistence reviewer (optional)
+13. Template L: design-system reviewer (optional)
+14. Template M: accessibility reviewer (optional)
+15. Template V: adversarial verifier (one per High finding)
 
 ## 1. How to use these templates
 
@@ -32,14 +36,16 @@ between the `PROMPT` fences verbatim and replace every `{{PLACEHOLDER}}`:
 
 The security template (D) uses `SEC-0xx` (the `flutter-secure-defaults`
 checker) and `SEC-<slug>` (found by reading). The optional templates use
-`TEST-` (E), `ERR-` (F), `NAV-` (G), `FORM-` (H) and `I18N-` (I) IDs: `-0xx`
+`TEST-` (E), `ERR-` (F), `NAV-` (G), `FORM-` (H), `I18N-` (I), `PERF-` (J),
+`PERSIST-` (K), `DS-` (L) and `A11Y-` (M) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
 Spawn A, B, C and D, plus E if the `flutter-testing` skill is installed or
 tests were asked about, F if `flutter-error-handling` is installed or error
-handling was asked about, and G, H and I when their skill is installed (the
-section isn't "skipped") and the code has a router, forms or user-facing
-strings respectively, or the user asked about that area, **at the same time**, as read-only sub-agents, in whatever form your agent has
+handling was asked about, and G to M when their skill is installed (the
+section isn't "skipped") and the code has, respectively, a router, forms,
+user-facing strings, widgets or lists, local storage, theme code, or widgets,
+or the user asked about that area, **at the same time**, as read-only sub-agents, in whatever form your agent has
 (for example Claude Code's Agent/Task tool, Codex sub-agents, or another agent's equivalent). Then wait
 for all of them. Don't redo their work while they run. If your agent can't
 spawn sub-agents, run the same templates yourself one after another, as
@@ -183,7 +189,11 @@ Then read the files in scope (widgets and State classes first) for, in order:
    targets. If the mechanical output has an `== I18N` section that isn't
    "skipped", the i18n reviewer owns hard-coded strings (I18N-010) and RTL
    geometry (I18N-012): skip them here. Likewise leave form fields to an
-   `== FORMS` reviewer and routing to a `== NAVIGATION` reviewer.
+   `== FORMS` reviewer and routing to a `== NAVIGATION` reviewer. When the
+   `== PERFORMANCE`, `== DESIGN SYSTEM` or `== ACCESSIBILITY` sections aren't
+   "skipped", their reviewers own the list, image, colour and semantics
+   findings in items 4 and 5: report only what they don't cover (lifecycle,
+   context, keys, helper methods, `MediaQuery.of`).
 Respect the project's own consistent conventions (for example, `_onTap`
 handlers). Architecture layering is another reviewer's job, so mention it only
 if it causes a UI bug.
@@ -815,7 +825,263 @@ PROMPT
 
 ---
 
-## 11. Template V: adversarial verifier (one per High finding)
+## 11. Template J: performance reviewer (optional)
+
+Use this when the `flutter-performance` skill is installed (the mechanical output has
+a `== PERFORMANCE` section that isn't "skipped") and the scope has widgets, lists, images, animations or data parsing, or when the user
+asked about jank, slow scrolling, rebuilds or memory. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the PERFORMANCE reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-performance` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-performance/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): rebuild-scope.md, lists-images-painting.md, isolates.md and diagnosing-jank.md, plus rules.md for the PERF-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter performance best-practices guide.
+
+Start from the `== PERFORMANCE` section of the mechanical output:
+`grep -n '^== PERFORMANCE' {{MECHANICAL_OUTPUT}}`. It comes from `check_performance.py` and lists
+`[PERF-0xx]` groups with example locations (eager lists over data, nested shrinkWrap scrollables, intrinsics and saveLayer widgets in list items, full-size image decodes, animated Opacity, GlobalKeys made in build, whole-object watches, per-frame setState listeners, sorting in build, large JSON decoded on the UI isolate). In diff mode it covers
+only the changed files. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-performance/scripts/check_performance.py {{PROJECT_ROOT}} [--files <list>] [--profile <p>]`.
+
+What to do:
+1. Confirm every PERF-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (a short fixed list, a list that is never long in this app, an image already sized by its source, a listener that only sets state on a threshold).
+2. Then read the files in scope for what the script can't see: rebuild scope wider than what changes (watching a whole provider, a BlocBuilder without buildWhen, setState at the screen root), work in build() that belongs in the state layer, missing const on big static subtrees, RepaintBoundary missing around a frequently repainting subtree or added where it only costs memory, and CPU work that should move to Isolate.run or compute in the data layer. Claim jank only with evidence, and when it is a suspicion say what to measure in DevTools (profile mode).
+3. Place each fix where this architecture puts it (MVN and Riverpod `ref.watch(p.select(...))`, Bloc `BlocSelector`/`buildWhen`, MVVM `ListenableBuilder` with `child`, Provider `Selector`, GetX narrow `Obx`; isolates in repositories or sources, never in widgets), and respect the
+   project's own consistent conventions.
+4. The PERF- id leads, and doesn't duplicate the rest of the suite: when check_performance ran, PERF-001/002/003 replace UI-eager-list, PERF-004 UI-image-decode-size, PERF-005/006 UI-opacity, PERF-008/009 UI-rebuild-scope, PERF-010 UI-build-side-effect (sorting in build) and PERF-011 UI-blocking-ui-isolate for the same file and line. `MediaQuery.of`, `UniqueKey()` in build, futures made in build and widget-helper methods stay with the UI reviewer.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <PERF-0xx (the script's rule) | PERF-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-performance › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is reserved for measured or certain jank on a main path (an unbounded list built eagerly on the home screen). MEDIUM is a structural cost that grows with data (eager or shrinkWrap lists over data, saveLayer in list items, a GlobalKey per build). LOW is a local improvement. INFO is a suspicion to measure. Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (performance): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 12. Template K: persistence reviewer (optional)
+
+Use this when the `flutter-persistence` skill is installed (the mechanical output has
+a `== PERSISTENCE` section that isn't "skipped") and the app stores data locally (Drift, sqflite, Hive, Isar, ObjectBox, shared_preferences) or caches remote data, or when the user
+asked about storage, caching, offline mode, sync or migrations. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the PERSISTENCE reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-persistence` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-persistence/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): choosing-storage.md, placement-by-architecture.md, caching-and-offline.md and migrations.md, plus rules.md for the PERSIST-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter persistence cookbook and the drift and sqflite documentation.
+
+Start from the `== PERSISTENCE` section of the mechanical output:
+`grep -n '^== PERSISTENCE' {{MECHANICAL_OUTPUT}}`. It comes from `check_persistence.py` and lists
+`[PERSIST-0xx]` groups with example locations (SQL built from strings, Drift or sqflite schema bumps without a migration, Hive typeId and HiveField collisions, databases opened per use, writes in loops without a transaction, untested Drift migrations, sensitive data in unencrypted stores). In diff mode it covers
+only the changed files. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-persistence/scripts/check_persistence.py {{PROJECT_ROOT}} [--files <list>] [--profile <p>]`.
+
+What to do:
+1. Confirm every PERSIST-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (an interpolated value that is a constant, a version bump handled by a destructive strategy the project documents, a test-only database).
+2. Then read the files in scope for what the script can't see: the store chosen for the job (shared_preferences used as a database), cache policy (TTL, invalidation, size bounds), offline writes that can be lost, sync without a conflict policy, retries that are not idempotent, key renames without a migration, PII in keys or file names, and persistence types (Drift rows, Hive objects) leaking into domain or presentation.
+3. Place each fix where this architecture puts it (a local data source behind the repository in every pattern; the repository owns cache policy and merges remote and local; MVN use cases, MVVM view models and blocs never know which store is used; Clean puts it under data/datasources/local), and respect the
+   project's own consistent conventions.
+4. The PERSIST- id leads, and doesn't duplicate the rest of the suite: tokens and credentials in storage stay SEC-001/SEC-010 (flutter-secure-defaults), storage I/O in widgets or logic stays ARCH-101/005/007/012, swallowed or unmapped storage errors stay ERR-001/002/004/007, and android:allowBackup belongs to flutter-security-audit.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <PERSIST-0xx (the script's rule) | PERSIST-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-persistence › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is data loss, corruption or injection under ordinary use (SQL built from user input, a schema bump with no migration, colliding Hive ids). MEDIUM is a cost or risk that grows (a database opened per use, unbatched writes, sensitive data unencrypted). LOW is hygiene (untested migrations). Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (persistence): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 13. Template L: design-system reviewer (optional)
+
+Use this when the `flutter-design-system` skill is installed (the mechanical output has
+a `== DESIGN SYSTEM` section that isn't "skipped") and the scope has widgets or theme code, or when the user
+asked about theming, dark mode, tokens or shared components. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the DESIGN SYSTEM reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-design-system` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-design-system/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): tokens-and-theming.md and components-and-placement.md, plus rules.md for the DS-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter theming guide and the Material 3 ThemeData documentation.
+
+Start from the `== DESIGN SYSTEM` section of the mechanical output:
+`grep -n '^== DESIGN SYSTEM' {{MECHANICAL_OUTPUT}}`. It comes from `check_design_system.py` and lists
+`[DS-0xx]` groups with example locations (raw colours and text styles in widgets, magic spacing and radius when the app has a scale, ThemeExtensions missing from one theme, not lerping or mutable, themeMode without darkTheme, brightness branches in widgets, fresh ThemeData in a subtree, visual tokens in logic or state, google_fonts runtime fetching). In diff mode it covers
+only the changed files. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-design-system/scripts/check_design_system.py {{PROJECT_ROOT}} [--files <list>] [--profile <p>]`.
+
+What to do:
+1. Confirm every DS-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (a one-off illustration colour, a value the project documents as intentional, a brand colour defined once in a token file).
+2. Then read the files in scope for what the script can't see: whether the app has a component layer at all, feature widgets styling raw Material widgets instead of composing components, token naming and scale, dark and high-contrast themes kept in step, and remote theme data used without validation.
+3. Place each fix where this architecture puts it (tokens and components live in presentation or core (`lib/core/design_system/` or a package); MVN notifiers and states, MVVM view models, Bloc states and GetX controllers expose semantic values (an enum) and the view maps them to tokens), and respect the
+   project's own consistent conventions.
+4. The DS- id leads, and doesn't duplicate the rest of the suite: when check_design_system ran, DS-001/002 replace UI-hardcoded-style and the hardcoded-color candidate for the same file and line. Physical left/right geometry stays I18N-012, and contrast and text scale belong to the accessibility reviewer.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <DS-0xx (the script's rule) | DS-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-design-system › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is a crash or broken UI under ordinary use (an extension read with `!` that one theme does not register). MEDIUM is a theme that drifts (themeMode without darkTheme, a fresh ThemeData in a subtree, colours in logic). LOW is a raw literal where a token exists. Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (design system): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 14. Template M: accessibility reviewer (optional)
+
+Use this when the `flutter-accessibility` skill is installed (the mechanical output has
+a `== ACCESSIBILITY` section that isn't "skipped") and the scope has widgets, or when the user
+asked about accessibility, screen readers, contrast, text size or focus. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the ACCESSIBILITY reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-accessibility` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-accessibility/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): semantics-and-labels.md, visual-and-input.md, placement-by-architecture.md and testing-accessibility.md, plus rules.md for the A11Y-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter accessibility guide and WCAG 2.2 AA.
+
+Start from the `== ACCESSIBILITY` section of the mechanical output:
+`grep -n '^== ACCESSIBILITY' {{MECHANICAL_OUTPUT}}`. It comes from `check_accessibility.py` and lists
+`[A11Y-0xx]` groups with example locations (icon buttons and icon-only tappables without labels, images without semantics, disabled text scaling, small tap targets, fixed heights around text, secrets in semantics, low-contrast ColorScheme pairs, ExcludeSemantics hiding controls, multiple autofocus, announcements from logic). In diff mode it covers
+only the changed files. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-accessibility/scripts/check_accessibility.py {{PROJECT_ROOT}} [--files <list>] [--profile <p>]`.
+
+What to do:
+1. Confirm every A11Y-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (a decorative image, a control labelled by a wrapper or an ancestor Semantics, a target padded to 48 dp by its parent).
+2. Then read the files in scope for what the script can't see: focus order and traversal, keyboard and switch access, colour-only meaning, reduced motion (`MediaQuery.disableAnimationsOf`), custom widgets missing button or header semantics, async results never announced, and whether widget tests use `meetsGuideline`.
+3. Place each fix where this architecture puts it (semantics live in views and design-system components; MVN, MVVM, Bloc and GetX logic exposes facts and one-time events, and the view announces them from a listener (`ref.listen`, `BlocListener`, a command listener)), and respect the
+   project's own consistent conventions.
+4. The A11Y- id leads, and doesn't duplicate the rest of the suite: when check_accessibility ran, A11Y-0xx replaces UI-a11y for the same file and line. Hard-coded label text stays I18N-010, obscureText and autofill stay FORM-001/002/003, and token structure stays DS-.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <A11Y-0xx (the script's rule) | A11Y-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-accessibility › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH means a user is locked out or exposed (text scaling disabled app-wide, a secret read aloud). MEDIUM is an unlabelled control, a small target or failing contrast. LOW is an image of unknown decorative status or a fixed height that may clip. Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (accessibility): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 15. Template V: adversarial verifier (one per High finding)
 
 Spawn one per HIGH finding (they can run in parallel), or batch several small
 ones into one verifier. Paste the finding block verbatim. If you can't spawn

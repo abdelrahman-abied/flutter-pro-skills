@@ -1,0 +1,13 @@
+name: persist_clean
+description: Fixture with safe persistence code and near-misses; zero PERSIST findings expected.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.0
+  drift: ^2.20.0
+  sqflite: ^2.4.0
+  hive: ^2.2.3
+  get_it: ^8.0.0
+  sqlcipher_flutter_libs: ^0.6.0

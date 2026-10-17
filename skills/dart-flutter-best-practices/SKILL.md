@@ -1,10 +1,10 @@
 ---
 name: dart-flutter-best-practices
-description: Hub for writing idiomatic Dart and Flutter code - Effective Dart, the official lints, the language features your SDK constraint allows (records, patterns, sealed) and the project's own conventions, verified with `dart format` and `dart analyze`. Use it whenever you write or refactor general Dart code, a package or CLI, when someone asks if code is idiomatic or Effective Dart, or wants to set up or tighten lints, `analysis_options.yaml` or formatting. When one concern dominates, load that specialist first instead - `flutter-feature-scaffold` for a new feature or screen, `dart-naming` for names, `flutter-ui-practices` for widgets and jank, `flutter-architecture` for layers, `flutter-testing`, `flutter-error-handling`, `flutter-secure-defaults` for tokens, auth and interceptors, `flutter-navigation`, `flutter-forms`, `flutter-i18n`, and `dart-flutter-review` for reviewing code or a PR.
+description: Hub for writing idiomatic Dart and Flutter code - Effective Dart, the official lints, the language features your SDK allows (records, patterns, sealed) and the project's own conventions, verified with `dart format` and `dart analyze`. Use it whenever you write or refactor general Dart code, a package or CLI, when someone asks if code is idiomatic, or wants to set up or tighten lints, `analysis_options.yaml` or formatting. When one concern dominates, load that specialist instead - `flutter-feature-scaffold` (new feature), `dart-naming`, `flutter-ui-practices` (widgets), `flutter-performance` (jank), `flutter-architecture` (layers), `flutter-testing`, `flutter-error-handling`, `flutter-secure-defaults` (tokens, auth), `flutter-navigation`, `flutter-forms`, `flutter-i18n`, `flutter-persistence`, `flutter-design-system`, `flutter-accessibility`, `dart-flutter-review` (review or PR).
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.0.0"
+  version: "1.1.0"
   suite: flutter-pro-skills
 ---
 
@@ -64,6 +64,10 @@ missing, say so and carry on with Effective Dart and this file.
 | go_router, deep links, redirects/guards, passing route arguments, url_launcher | `flutter-navigation` | `../flutter-navigation/SKILL.md` |
 | Forms, validation, TextFormField, focus, submit/double-submit, password/OTP inputs | `flutter-forms` | `../flutter-forms/SKILL.md` |
 | Localization, ARB/gen-l10n, plurals, dates/numbers, RTL and Arabic | `flutter-i18n` | `../flutter-i18n/SKILL.md` |
+| Jank, slow scrolling, excess rebuilds, `const`, `RepaintBoundary`, lazy lists and slivers, isolates and `compute`, image decode size, DevTools profiling | `flutter-performance` | `../flutter-performance/SKILL.md` |
+| Local storage and caching: Drift, sqflite, Hive/Isar, shared_preferences, offline-first and sync, migrations | `flutter-persistence` | `../flutter-persistence/SKILL.md` |
+| Design tokens, `ThemeData`/`ColorScheme`, `ThemeExtension`, shared components, dark mode, raw colours or sizes in feature code | `flutter-design-system` | `../flutter-design-system/SKILL.md` |
+| Accessibility: `Semantics`, labels, tap targets, contrast, text scale, focus order, screen-reader tests | `flutter-accessibility` | `../flutter-accessibility/SKILL.md` |
 | Deep security audit: obfuscation, pinning, RASP, attestation, build hardening | `flutter-security-audit` (separate repo, if installed) | `../flutter-security-audit/SKILL.md`; otherwise say it isn't installed |
 
 Writing a Flutter feature usually touches several of these. Scaffold it in
@@ -171,6 +175,7 @@ want the exact guideline and its strength.
 
 - Naming rules (casing, `get`/`k`/`I` prefixes, booleans, callbacks, files, role suffixes) are in `dart-naming`.
 - Widget rules (dispose, `context.mounted`, pure `build()`, widget classes over helper methods, lazy lists, `MediaQuery.sizeOf`) are in `flutter-ui-practices`.
+- Deep dives that widget code often needs: `flutter-performance` (jank and rebuilds), `flutter-design-system` (tokens and themes), `flutter-accessibility` (semantics, targets, contrast), `flutter-persistence` (local storage and caching).
 - Architecture rules (layering, which layer may call which, per-pattern conventions) are in `flutter-architecture`.
 - Review procedure, severity and report format are in `dart-flutter-review`.
 - If one of these isn't installed, apply Effective Dart and say which guidance was unavailable.

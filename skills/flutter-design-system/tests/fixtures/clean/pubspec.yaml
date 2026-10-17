@@ -1,0 +1,11 @@
+name: ds_clean
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.0
+  google_fonts: ^6.2.0
+flutter:
+  assets:
+    - google_fonts/

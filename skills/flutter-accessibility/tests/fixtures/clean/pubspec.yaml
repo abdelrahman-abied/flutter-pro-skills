@@ -1,0 +1,8 @@
+name: a11y_clean
+description: Accessible code and near-misses; the checker must report nothing.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.0

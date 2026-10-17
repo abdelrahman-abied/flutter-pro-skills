@@ -1,0 +1,10 @@
+name: perf_clean
+description: Fixture with fast, correct widget code and near-misses; must produce zero findings.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  flutter_hooks: ^0.20.0
+  cached_network_image: ^3.4.0

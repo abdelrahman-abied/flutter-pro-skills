@@ -1,0 +1,8 @@
+name: persist_suppressed
+description: Fixture for persist-ignore comments.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  sqflite: ^2.4.0

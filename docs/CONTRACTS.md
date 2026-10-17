@@ -884,3 +884,235 @@ Every fix lands with a regression fixture built from the report's minimal repro,
   profile, if any, matches.
 - **`bench/`** holds a reproducible with/without-skills harness. See
   `bench/README.md` for the results and limitations.
+
+---
+
+# Phase 4 contracts (v1.1.0)
+
+## 21. Plan: four new skills
+
+v1.1.0 closes the remaining coverage gaps (performance, persistence, design
+system, accessibility). Each gap becomes its own skill, with the same shape as
+the phase 3 skills: architecture-aware guidance, secure-by-default writing, and
+one read-only checker that `dart-flutter-review` runs.
+
+| Skill | Scope | Prefix | Checker | Header | JSON schema | Suppression |
+|---|---|---|---|---|---|---|
+| `flutter-performance` | rebuild scope per pattern, `const`, `RepaintBoundary`, lazy lists and slivers, isolates and `compute`, image decode sizing, `saveLayer` costs, jank diagnosis with DevTools (profile mode, timeline, raster vs UI thread) | `PERF-0xx` / `PERF-<slug>` | `scripts/check_performance.py` | `== PERFORMANCE` | `flutter-pro-skills/performance@1` | `perf-ignore` |
+| `flutter-persistence` | Drift, sqflite, Hive/Isar, shared_preferences, flutter_secure_storage, caching policy, offline-first and sync, migrations, and where each sits in MVN, MVVM, Bloc and Clean | `PERSIST-0xx` / `PERSIST-<slug>` | `scripts/check_persistence.py` | `== PERSISTENCE` | `flutter-pro-skills/persistence@1` | `persist-ignore` |
+| `flutter-design-system` | tokens (colour, type, spacing, radius, elevation, motion), `ThemeData` + `ColorScheme`, `ThemeExtension`, component structure, dark mode, no raw colours or sizes in feature code | `DS-0xx` / `DS-<slug>` | `scripts/check_design_system.py` | `== DESIGN SYSTEM` | `flutter-pro-skills/design-system@1` | `ds-ignore` |
+| `flutter-accessibility` | `Semantics`, labels, tap targets, contrast, text scale, focus and traversal, screen-reader and `meetsGuideline` tests | `A11Y-0xx` / `A11Y-<slug>` | `scripts/check_accessibility.py` | `== ACCESSIBILITY` | `flutter-pro-skills/accessibility@1` | `a11y-ignore` |
+
+**Ownership (build phase).** Never edit a file you don't own; put requested
+changes in your final report.
+
+| Owner | Files |
+|---|---|
+| Lead | this section, root files, `tests/`, `install.sh`, `README*.md`, `CHANGELOG.md`, the hub routing table, `skills/dart-flutter-review/**` (integration), `metadata.version` bumps |
+| Agent P1 | `skills/flutter-performance/**` |
+| Agent P2 | `skills/flutter-persistence/**` |
+| Agent P3 | `skills/flutter-design-system/**` |
+| Agent P4 | `skills/flutter-accessibility/**` |
+
+## 22. What every new skill ships
+
+- **`SKILL.md`** that follows §2. The frontmatter has `name` equal to the
+  folder, `license: MIT`, `metadata.author: abdelrahman-abied`,
+  `metadata.version: "1.1.0"` and `metadata.suite: flutter-pro-skills`. The
+  `description` is **≤900 characters** and valid strict YAML: no unquoted `: `
+  or ` #` (`tests/validate_skills.py` enforces this). It says what the skill
+  does, when to use it (pushy, keyword-rich), and which sibling to load
+  instead for neighbouring concerns (§20 routing).
+- **The body**, which must include:
+  - **Architecture placement.** Say where each concern lives in MVN, MVVM,
+    Bloc/Cubit, Clean, Provider, GetX and Riverpod. Detect the pattern by
+    running `../flutter-architecture/scripts/arch_check.py --json`, or by
+    reading the project, and judge by that pattern's own rules (§3
+    precedence).
+  - **Secure by default.** Cover the security concern that naturally belongs
+    to the skill, and cross-reference `flutter-secure-defaults` for the rest.
+  - **Review checklist.** Give the finding IDs with severities and a concrete
+    fix each, in the §4 format.
+  - **Deference to the official recipes.** Defer to `flutter/agent-plugins`
+    and `dart-lang/skills` where a step-by-step recipe exists ("if
+    installed").
+- **`references/`**, one level deep. Any file over 300 lines starts with
+  `## Contents`. It must include `references/rules.md`, which documents
+  every checker rule: what it detects, its severity, why it matters, a
+  bad/good Dart example, the profile notes, the known false positives and the
+  suppression.
+- **One read-only checker** with the §14 CLI:
+  `python3 -I scripts/check_<x>.py <project-root> [--json] [--files <list-file-or-comma-list>] [--profile <p>] [--max n]`.
+  - **Runtime.** Use stdlib only. It must parse as Python 3.8
+    (`ast.parse(..., feature_version=(3, 8))`).
+  - **Exit codes.** Exit 0 when the report is produced, including when there
+    are findings. Exit 2 on a usage error: no `pubspec.yaml`, an unknown
+    option or an unknown profile. With no `lib/`, print an empty report and
+    exit 0.
+  - **Classification.** Use arch_check `files[]` (§10, §18): reuse
+    `$FPS_ARCH_JSON` when its `root` matches and any forced profile matches
+    (§20), otherwise run arch_check as a subprocess.
+    - Never import arch_check's internals.
+    - When arch_check is missing, fall back to path-based classification and
+      say so in `classification`.
+    - Accept unknown roles. Skip `barrel`, `di` and generated files.
+  - **Text output.** Start with the header line from §21, then
+    `  profile: …`, `  classification: …` and a `  scanned: …` line.
+    - Each group is `  [ID] name (sev) xN — message`, followed by
+      `      file:line  evidence` lines and `      ... N more` when there are
+      more than `--max`.
+    - With no findings, print `  no <area> findings`.
+    - End with `  suppressed: N (see --json)` when anything was suppressed.
+  - **JSON output.** Use the keys `schema`, `root`, `package`, `profile`
+    (`presentation`, `source`), `classification`, `stats` (`files` at least),
+    `findings` and `suppressed`.
+    - Each finding has exactly `id`, `name`, `severity`, `file`, `line`,
+      `evidence`, `message` and `note`.
+    - Severities are high, medium, low or info.
+    - The `note` carries the profile-specific fix where one exists (e.g.
+      `MVN: …`, `Bloc: …`).
+  - **Suppression.** Honour `// <prefix>-ignore: ID <reason>` on the line or
+    the line above, and `// <prefix>-ignore-file: ID <reason>` anywhere in
+    the file. Keep the reason.
+  - **Rule budget.** Aim for 6–12 rules. A rule ships only if it is cheap to
+    explain, has a precise fix, and survived calibration (§23). Judgement
+    calls that a regex can't make reliably become documented `<PREFIX>-<slug>`
+    reading-level findings, not checker rules.
+- **`tests/run.sh`** (§8). It needs no Flutter SDK, prints `PASS`/`FAIL`
+  lines, exits 1 on failure, and is bash 3.2 safe. It covers:
+  - the Python 3.8 parse
+  - a `violations` fixture where every rule fires (with severities and notes
+    asserted)
+  - a `clean` fixture with zero findings, built from the near-misses
+  - a `suppressed` fixture
+  - read-only, checked with a before/after checksum of the fixture
+  - the JSON contract keys, the text format and `--max` collapsing
+  - `--files` as a list file and as a comma list
+  - the fallback without the arch_check sibling (copy the script into a temp
+    folder)
+  - a `--profile` override changing the `note`
+  - the exit-2 cases, and no `lib/`
+  - one `calib_<app>` regression fixture per false-positive cause fixed during
+    calibration, with a test that the FP no longer fires, plus a test that
+    the related true positive still fires
+
+## 23. No duplicate rules: who owns what
+
+Before adding a rule, check §6, §13, §19 and the heuristics in
+`dart-flutter-review/scripts/heuristics.py`. Cross-reference instead of
+re-implementing. The ownership below is binding:
+
+| Concern | Owner (stays there) | New skill's role |
+|---|---|---|
+| `MediaQuery.of(context).x`, `UniqueKey()` in build, FutureBuilder future made in build, widget-helper methods | heuristics `mediaquery-of`, `unique-key`, `future-in-build`, `widget-helper-method` / `UI-*` | PERF references them; doesn't re-detect them |
+| Eager `children: list.map(...)` lists, `Opacity` widget | **moves to PERF** (more precise rules). When check_performance ran, heuristics `eager-children-map` and `opacity-widget` keep only their count and point at PERFORMANCE (like `defer-catch`) | PERF-0xx owns them |
+| `UI-image-decode-size`, `UI-blocking-ui-isolate`, `UI-rebuild-scope` | PERF-0xx beats these UI slugs for the same file and line | |
+| Hard-coded `Color(0x…)` outside theme files | **moves to DS**. When check_design_system ran, the heuristic `hardcoded-color` keeps only its count and points at DESIGN SYSTEM | DS-0xx owns colour, type, spacing and radius literals; DS beats `UI-hardcoded-style` |
+| `EdgeInsets.only(left:)`, physical direction | I18N-012 | DS ignores direction, and judges only magic numbers |
+| `UI-a11y` | A11Y-0xx beats it for the same file and line | |
+| Hard-coded label strings | I18N-010 | A11Y flags a *missing* label, never a non-localised one |
+| Autofill hints, obscured fields | FORM-001/002/003 | A11Y doesn't re-check them |
+| Tokens and credentials in SharedPreferences, Hive or global state | SEC-001 / SEC-010 | PERSIST cross-references them and doesn't re-detect them |
+| `SharedPreferences.getInstance(` / `openDatabase(` in widgets; I/O-package imports in UI or logic | ARCH-101 / ARCH-005 / ARCH-007 / ARCH-012 | PERSIST judges what arch can't: migrations, schema, queries, cache policy |
+| Swallowed or unmapped storage errors | ERR-001/002/004/007 | PERSIST doesn't re-detect catches |
+| `print` / log of values | SEC-004, FORM-004 | |
+| `material.dart` imported by logic | ARCH-009 (which exempts value-only uses such as `Color`) | DS may own "visual tokens held in logic/state" (a `Color`, `TextStyle` or `IconData` field in a logic or state file), because ARCH-009 deliberately no longer reports it |
+
+When a new checker ran, its ID beats the overlapping reading-level slug for
+the same file and line, and the dropped ID is cited in `rule:`. The lead adds
+these rows to `dart-flutter-review/references/finding-format.md`.
+
+## 24. Calibration (each agent does its own, before handing in)
+
+- **The apps.** A shared pool is cloned read-only (shallow) under the lead's
+  scratch folder `calib/` (path given in the agent brief). It contains
+  `samples` (flutter/samples, canonical: `compass_app`), `bloc` (canonical:
+  `examples/*`), `riverpod` (canonical: `examples/*`), `lichess`
+  (lichess-org/mobile), `wonderous` (gskinnerTeam/flutter-wonderous-app),
+  `drift` (simolus3/drift, `examples/app`) and `immich` (`mobile/`).
+- **Coverage.** Run on all three canonical sets plus **at least two**
+  non-canonical apps that exercise the skill's domain: persistence uses drift
+  and immich, design-system and accessibility use wonderous, performance uses
+  immich and lichess.
+- **Read-only.** Never modify a clone. `git -C <clone> status --porcelain` is
+  empty afterwards. Extra clones go in your own scratch folder, never in the
+  repo.
+- **How to judge.** Read the code behind every high and medium hit and judge
+  it TP or FP by the pattern's canonical source. Fix every FP *cause*.
+- **Exit criterion.** **The canonical apps have zero high or medium false
+  positives.** Low and info hits on canonical apps are allowed only if each is
+  a defensible true positive.
+- **What to report.** Add a short "Calibration" table to
+  `references/rules.md`: app, commit, per-rule hits and TP/FP. Use no local
+  paths, only `org/repo@sha`. The final message to the lead holds the same
+  table, the regression fixtures added, and any change you need in files you
+  don't own.
+
+## 25. Review integration (lead, after the agents finish)
+
+- **New review.sh sections.** They run after I18N, in this order:
+  `== PERFORMANCE`, `== PERSISTENCE`, `== DESIGN SYSTEM`, `== ACCESSIBILITY`.
+  All four are informational and never fail CI.
+- **New flags.** `--no-perf`, `--no-persist`, `--no-ds` and `--no-a11y`, plus
+  `--skip` keys `perf,persist,ds,a11y`.
+- **Heuristic deferral.** `heuristics.py grep` gains `defer-perf` (for
+  `eager-children-map` and `opacity-widget`) and `defer-ds` (for
+  `hardcoded-color`).
+- **Reviewer passes.** `reviewer-prompts.md` gets four new optional passes
+  (performance, persistence, design system, accessibility), and §23's
+  overlap rows go into the dedupe rules.
+- **The rest of the suite.** Add the hub routing rows, extend `install.sh`
+  `ALL_SKILLS` to sixteen, update the README (English and Arabic) and the
+  CHANGELOG `[1.1.0]`, and bump every skill's `metadata.version` to `"1.1.0"`.
+
+## 26. Phase 4 as built (these entries win over §21–25)
+
+- **Checkers and rules:**
+
+  | Checker | Rules |
+  |---|---|
+  | `performance@1` | PERF-001…011 |
+  | `persistence@1` | PERSIST-001…009, plus 11 reading slugs |
+  | `design-system@1` | DS-001…012, plus 9 reading slugs |
+  | `accessibility@1` | A11Y-001…011 |
+
+  Each checker's `references/rules.md` holds the rule catalog and a
+  Calibration table. All four add the `classification` key.
+- **"List item" (PERF):** the code inside a lazy list or grid `itemBuilder`
+  or `*BuilderDelegate`, plus one hop into a project widget built there.
+  `PageView` items are excluded.
+- **Ownership additions to §23:**
+  - PERF-010 (sort in build) beats `UI-build-side-effect` for that case only.
+  - PERSIST-009 (sensitive data in unencrypted stores) deliberately excludes
+    tokens and passwords, which stay SEC-001.
+  - A11Y-008 owns contrast ratios and A11Y-004 owns text scale, while DS owns
+    token structure.
+- **Design-system scales:**
+  - DS-003 and DS-004 fire only when the app has a spacing or radius scale
+    of at least 3 distinct steps.
+  - DS-001 and DS-002 are graded info when the app has no design system at
+    all.
+- **Persistence's own generated-file detection:** the persistence checker
+  detects generated files itself, for drift's `*.drift.dart` modular output.
+  arch_check's banner regex no longer treats drift's
+  "Generated by drift_dev when running build_runner" note in a hand-written
+  file as a generated banner. The regression test is in
+  `calib_riverpod_features`.
+- **review.sh:**
+  - Sections and flags are as in §25.
+  - `heuristics.py grep` takes any of `defer-catch`, `defer-perf` and
+    `defer-ds`.
+  - The step summary lists the new sections.
+- **Calibration result:**
+  - The canonical apps (compass_app, the bloc examples, the riverpod
+    examples) have **zero high or medium false positives** in all four
+    checkers.
+  - Their remaining medium hits are A11Y-001/002/005/008, all true positives
+    on reading:
+    - icon-only FABs and IconButtons without a tooltip
+    - an `InkWell` wrapping only an icon, with no `Semantics` anywhere in
+      compass
+    - a 40 dp tap target
+    - white on red at 3.68:1
+  - The non-canonical apps were immich, lichess, wonderous and the drift
+    examples.

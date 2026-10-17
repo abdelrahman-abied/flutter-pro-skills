@@ -8,13 +8,17 @@
   fix       <root> <files> <dry-run-output> <max>
   mkoptions <root> <asset-options> <out-options> <is_flutter> [<package_config.json>]
   extra     <copy-root> <files> <machine-output> <max> <project-machine-output> <asset-options>
-  grep      <root> <files> <max> <is_flutter> [defer-catch]
+  grep      <root> <files> <max> <is_flutter> [defer-catch] [defer-perf] [defer-ds]
   errors    <root> <files> <machine-output>            -> "<errors> <codegen-cascade errors> <crashed 0|1>" in scope
   audit     <root> <files|-> <scan.sh --json output> <max> -> flutter-security-audit findings as groups
   summary   <section-dir> <scope> <ci 0|1> <fail-on> <exit-code> [arch-only]  -> GitHub step-summary Markdown
 
 `defer-catch`: flutter-error-handling's check_errors.py ran too, so swallowed-catch
 keeps only its count and points at the ERROR HANDLING section (reported once, as ERR-).
+`defer-perf`: flutter-performance's check_performance.py ran, so eager-children-map and
+opacity-widget keep only their count and point at PERFORMANCE (CONTRACTS §23).
+`defer-ds`: flutter-design-system's check_design_system.py ran, so hardcoded-color keeps
+only its count and points at DESIGN SYSTEM.
 """
 import json
 import os
@@ -595,8 +599,10 @@ SEV_RANK = {'high': 0, 'medium': 1, 'low': 2, 'info': 3}
 SECTIONS = (('format', 'Format'), ('analyzer', 'Analyzer'), ('fix', 'Auto-fixable'), ('arch', 'Architecture'),
             ('tests', 'Test gaps'), ('errors', 'Error handling'), ('secure', 'Security defaults'),
             ('audit', 'Security audit (scan.sh)'), ('nav', 'Navigation'), ('forms', 'Forms'), ('i18n', 'I18n'),
+            ('perf', 'Performance'), ('persist', 'Persistence'), ('ds', 'Design system'), ('a11y', 'Accessibility'),
             ('candidates', 'Candidates (unconfirmed)'))
-SECTION_RANK = {'arch': 0, 'errors': 1, 'secure': 2, 'nav': 3, 'forms': 4, 'i18n': 5, 'tests': 6, 'audit': 7}
+SECTION_RANK = {'arch': 0, 'errors': 1, 'secure': 2, 'persist': 3, 'nav': 4, 'forms': 5, 'a11y': 6, 'i18n': 7,
+                'perf': 8, 'ds': 9, 'tests': 10, 'audit': 11}
 
 
 def _groups(lines):
@@ -668,7 +674,7 @@ def cmd_summary(secdir, scope, ci, fail_on, rc, mode=''):
         rows.append((label, str(total), note))
         if key != 'candidates':
             for g in groups:
-                g['src'] = SECTION_RANK.get(key, 8)
+                g['src'] = SECTION_RANK.get(key, 12)
             top += groups
     out = ['## Flutter review', '', 'Scope: %s' % scope, '']
     if ci == '1':
@@ -870,7 +876,16 @@ def future_in_build_hits(masked, builds):
     return hits
 
 
-def cmd_grep(root, files, maxn, is_flutter, defer_catch=False):
+# heuristic id -> (defer flag, section that owns it, owning checker) when that checker ran (CONTRACTS §23)
+DEFERRED = {
+    'swallowed-catch': ('defer-catch', 'ERROR HANDLING', 'check_errors.py covers these with ERR- ids'),
+    'eager-children-map': ('defer-perf', 'PERFORMANCE', 'check_performance.py covers these with PERF- ids'),
+    'opacity-widget': ('defer-perf', 'PERFORMANCE', 'check_performance.py covers these with PERF- ids'),
+    'hardcoded-color': ('defer-ds', 'DESIGN SYSTEM', 'check_design_system.py covers these with DS- ids'),
+}
+
+
+def cmd_grep(root, files, maxn, is_flutter, defer=()):
     scope = [f for f in read_scope(files) if f.startswith(('lib/', 'bin/'))] or read_scope(files)
     hits = defaultdict(list)
     dispose_hits = []
@@ -977,9 +992,9 @@ def cmd_grep(root, files, maxn, is_flutter, defer_catch=False):
         if not items:
             continue
         any_hit = True
-        if hid == 'swallowed-catch' and defer_catch:
-            print(f"  [CANDIDATE] {hid} ({sev}) x{len(items)} — see ERROR HANDLING: check_errors.py covers "
-                  "these with ERR- ids; report each catch once, there")
+        if hid in DEFERRED and DEFERRED[hid][0] in defer:
+            _flag, section, why = DEFERRED[hid]
+            print(f"  [CANDIDATE] {hid} ({sev}) x{len(items)} — see {section}: {why}; report each once, there")
             continue
         print(f"  [CANDIDATE] {hid} ({sev}) x{len(items)} — {desc}")
         for it in items[:maxn]:
@@ -1001,7 +1016,7 @@ def main():
     elif cmd == 'extra':
         cmd_extra(args[0], args[1], args[2], int(args[3]), args[4], args[5])
     elif cmd == 'grep':
-        cmd_grep(args[0], args[1], int(args[2]), args[3], len(args) > 4 and args[4] == 'defer-catch')
+        cmd_grep(args[0], args[1], int(args[2]), args[3], set(args[4:]))
     elif cmd == 'errors':
         cmd_errors(args[0], args[1], args[2])
     elif cmd == 'context':

@@ -1,0 +1,5 @@
+name: calib_immich
+description: Regression from immich-app/immich mobile (local_network_preference.dart).
+dependencies:
+  flutter:
+    sdk: flutter

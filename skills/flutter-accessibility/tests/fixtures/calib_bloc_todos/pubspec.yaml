@@ -1,0 +1,6 @@
+name: calib_bloc_todos
+description: Regression from felangel/bloc examples/flutter_todos (home_page.dart).
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.0

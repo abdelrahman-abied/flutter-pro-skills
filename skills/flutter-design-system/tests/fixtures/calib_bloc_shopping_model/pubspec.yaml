@@ -1,0 +1,7 @@
+name: calib_bloc_shopping_model
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.0

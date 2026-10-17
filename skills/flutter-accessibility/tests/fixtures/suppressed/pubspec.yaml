@@ -1,0 +1,4 @@
+name: a11y_suppressed
+dependencies:
+  flutter:
+    sdk: flutter

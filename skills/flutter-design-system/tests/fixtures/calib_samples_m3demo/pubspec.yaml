@@ -1,0 +1,6 @@
+name: calib_samples_m3demo
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter

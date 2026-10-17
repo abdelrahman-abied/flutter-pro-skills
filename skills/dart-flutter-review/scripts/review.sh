@@ -3,7 +3,8 @@
 #
 # Usage:
 #   review.sh <project-root> [--diff <git-ref>] [--no-extra] [--no-arch] [--no-tests] [--no-errors]
-#             [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n] [--skip <list>]
+#             [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n]
+#             [--no-perf] [--no-persist] [--no-ds] [--no-a11y] [--skip <list>]
 #             [--profile <p>] [--max <n>] [--ci] [--fail-on high|medium|low] [--baseline <file>]
 #
 #   --diff <ref>     only report on .dart files changed vs <ref> (committed + uncommitted + untracked)
@@ -14,8 +15,10 @@
 #   --no-security    skip both security passes (SECURITY DEFAULTS and SECURITY AUDIT)
 #   --no-audit       skip only the flutter-security-audit scan.sh pass
 #   --no-nav / --no-forms / --no-i18n   skip the navigation / forms / i18n checker
+#   --no-perf / --no-persist / --no-ds / --no-a11y   skip the performance / persistence /
+#                    design-system / accessibility checker
 #   --skip <list>    comma-separated sections to skip, same as the --no-* flags:
-#                    extra,arch,tests,errors,security,audit,nav,forms,i18n
+#                    extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,ds,a11y
 #   --profile <p>    declared architecture for the sibling passes (auto|mvn|mvvm|bloc|mvc|getx|provider|riverpod|setstate)
 #   --max <n>        max example locations printed per rule / heuristic (default 5)
 #   --ci             CI mode: exit 1 on new architecture violations at or above --fail-on, or on analyzer errors
@@ -29,6 +32,8 @@
 # SECURITY DEFAULTS (../flutter-secure-defaults/scripts/check_secure_defaults.py),
 # SECURITY AUDIT (../flutter-security-audit/scan.sh, a separate skill; $FLUTTER_SECURITY_AUDIT_SCAN overrides the path),
 # NAVIGATION, FORMS, I18N (../flutter-{navigation,forms,i18n}/scripts/check_*.py),
+# PERFORMANCE, PERSISTENCE, DESIGN SYSTEM, ACCESSIBILITY
+# (../flutter-{performance,persistence,design-system,accessibility}/scripts/check_*.py),
 # CANDIDATES (heuristics: confirm by reading), CI RESULT (--ci only). Missing sibling skills are skipped, not errors.
 # Only new architecture violations and analyzer errors can fail --ci; every other section is informational.
 # Pub workspace members use the workspace root's .dart_tool/package_config.json. Generated files are out of
@@ -45,16 +50,22 @@ CHECK_SECURE="$SKILL_DIR/../flutter-secure-defaults/scripts/check_secure_default
 CHECK_NAV="$SKILL_DIR/../flutter-navigation/scripts/check_navigation.py"
 CHECK_FORMS="$SKILL_DIR/../flutter-forms/scripts/check_forms.py"
 CHECK_I18N="$SKILL_DIR/../flutter-i18n/scripts/check_i18n.py"
+CHECK_PERF="$SKILL_DIR/../flutter-performance/scripts/check_performance.py"
+CHECK_PERSIST="$SKILL_DIR/../flutter-persistence/scripts/check_persistence.py"
+CHECK_DS="$SKILL_DIR/../flutter-design-system/scripts/check_design_system.py"
+CHECK_A11Y="$SKILL_DIR/../flutter-accessibility/scripts/check_accessibility.py"
 AUDIT_SCAN="${FLUTTER_SECURITY_AUDIT_SCAN:-$SKILL_DIR/../flutter-security-audit/scan.sh}"
-USAGE="usage: review.sh <project-root> [--diff <ref>] [--no-extra] [--no-arch] [--no-tests] [--no-errors] [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n] [--skip <list>] [--profile <p>] [--max n] [--ci] [--fail-on high|medium|low] [--baseline <file>]"
+USAGE="usage: review.sh <project-root> [--diff <ref>] [--no-extra] [--no-arch] [--no-tests] [--no-errors] [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n] [--no-perf] [--no-persist] [--no-ds] [--no-a11y] [--skip <list>] [--profile <p>] [--max n] [--ci] [--fail-on high|medium|low] [--baseline <file>]"
 ROOT=""; DIFF_REF=""; EXTRA=1; ARCH=1; TESTS=1; ERRORS=1; SECURE=1; AUDIT=1; NAV=1; FORMS=1; I18N=1
+PERF=1; PERSIST=1; DS=1; A11Y=1
 PROFILE=""; MAX=5; CI=0; FAIL_ON=high; BASELINE=""
 needs() { [[ -n "${2:-}" ]] || { echo "error: $1 needs a value" >&2; echo "$USAGE" >&2; exit 2; }; }
 skip_one() {
   case "$1" in
     extra) EXTRA=0 ;; arch) ARCH=0 ;; tests) TESTS=0 ;; errors) ERRORS=0 ;;
     security) SECURE=0; AUDIT=0 ;; audit) AUDIT=0 ;; nav|navigation) NAV=0 ;; forms) FORMS=0 ;; i18n) I18N=0 ;;
-    *) echo "error: --skip: unknown section '$1' (extra,arch,tests,errors,security,audit,nav,forms,i18n)" >&2; exit 2 ;;
+    perf|performance) PERF=0 ;; persist|persistence) PERSIST=0 ;; ds|design-system) DS=0 ;; a11y|accessibility) A11Y=0 ;;
+    *) echo "error: --skip: unknown section '$1' (extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,ds,a11y)" >&2; exit 2 ;;
   esac
 }
 while [[ $# -gt 0 ]]; do
@@ -72,6 +83,10 @@ while [[ $# -gt 0 ]]; do
     --no-nav) NAV=0; shift ;;
     --no-forms) FORMS=0; shift ;;
     --no-i18n) I18N=0; shift ;;
+    --no-perf) PERF=0; shift ;;
+    --no-persist) PERSIST=0; shift ;;
+    --no-ds) DS=0; shift ;;
+    --no-a11y) A11Y=0; shift ;;
     --skip) for k in $(echo "$2" | tr ',' ' '); do skip_one "$k"; done; shift 2 ;;
     --profile) PROFILE="$2"; shift 2 ;;
     --max) MAX="$2"; shift 2 ;;
@@ -310,10 +325,26 @@ fi
 [[ $FORMS == 1 ]] && SIB_NOTE="" run_sibling forms "FORMS" "$CHECK_FORMS" flutter-forms "${CK_ARGS[@]}"
 [[ $I18N == 1 ]] && SIB_NOTE="" run_sibling i18n "I18N" "$CHECK_I18N" flutter-i18n "${CK_ARGS[@]}"
 
+# ---- PERFORMANCE, PERSISTENCE, DESIGN SYSTEM, ACCESSIBILITY (CONTRACTS §21-§25 checkers) ----
+PERF_RAN=0; DS_RAN=0
+if [[ $PERF == 1 ]]; then
+  SIB_NOTE="" run_sibling perf "PERFORMANCE" "$CHECK_PERF" flutter-performance "${CK_ARGS[@]}"
+  [[ -f "$CHECK_PERF" && $SIB_RC == 0 ]] && PERF_RAN=1
+fi
+[[ $PERSIST == 1 ]] && SIB_NOTE="" run_sibling persist "PERSISTENCE" "$CHECK_PERSIST" flutter-persistence "${CK_ARGS[@]}"
+if [[ $DS == 1 ]]; then
+  SIB_NOTE="" run_sibling ds "DESIGN SYSTEM" "$CHECK_DS" flutter-design-system "${CK_ARGS[@]}"
+  [[ -f "$CHECK_DS" && $SIB_RC == 0 ]] && DS_RAN=1
+fi
+[[ $A11Y == 1 ]] && SIB_NOTE="" run_sibling a11y "ACCESSIBILITY" "$CHECK_A11Y" flutter-accessibility "${CK_ARGS[@]}"
+
 # ---- CANDIDATES (heuristics) ------------------------------------------------
 # swallowed-catch overlaps check_errors.py's swallowed-catch rule: when that ran, keep only the
-# count here and point at ERROR HANDLING, so the same catch is not reported twice.
+# count here and point at ERROR HANDLING, so the same catch is not reported twice. Likewise
+# eager-children-map / opacity-widget defer to PERFORMANCE and hardcoded-color to DESIGN SYSTEM (§23).
 DEFER=""; [[ $ERR_RAN == 1 ]] && DEFER="defer-catch"
+[[ $PERF_RAN == 1 ]] && DEFER="$DEFER defer-perf"
+[[ $DS_RAN == 1 ]] && DEFER="$DEFER defer-ds"
 {
 echo "== CANDIDATES (heuristic — confirm each by reading the code before reporting)"
 python3 -I "$SKILL_DIR/scripts/heuristics.py" grep "$ROOT" "$WORK/files" "$MAX" "$IS_FLUTTER" $DEFER
@@ -349,7 +380,7 @@ if [[ $CI == 1 ]]; then
   else
     echo "  analyzer: pass (0 errors in scope$CASC)"
   fi
-  echo "  test gaps, error handling, security, navigation, forms, i18n, candidates: informational (never fail CI)"
+  echo "  test gaps, error handling, security, navigation, forms, i18n, performance, persistence, design system, accessibility, candidates: informational (never fail CI)"
   echo "  result: $([[ $RC == 1 ]] && echo "FAIL (exit 1)" || echo "pass")"
 fi
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then
