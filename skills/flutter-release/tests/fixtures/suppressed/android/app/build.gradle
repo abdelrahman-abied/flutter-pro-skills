@@ -1,0 +1,16 @@
+android {
+    defaultConfig {
+        applicationId "com.acme.sideload"
+    }
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE_PATH") ?: "missing.jks")
+        }
+    }
+    buildTypes {
+        release {
+            // rel-ignore: REL-001 internal sideload build, never uploaded to a store
+            signingConfig signingConfigs.debug
+        }
+    }
+}

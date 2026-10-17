@@ -4,7 +4,7 @@
 # Usage:
 #   review.sh <project-root> [--diff <git-ref>] [--no-extra] [--no-arch] [--no-tests] [--no-errors]
 #             [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n]
-#             [--no-perf] [--no-persist] [--no-net] [--no-ds] [--no-a11y] [--skip <list>]
+#             [--no-perf] [--no-persist] [--no-net] [--no-ds] [--no-a11y] [--no-release] [--skip <list>]
 #             [--profile <p>] [--max <n>] [--ci] [--fail-on high|medium|low] [--baseline <file>]
 #
 #   --diff <ref>     only report on .dart files changed vs <ref> (committed + uncommitted + untracked)
@@ -17,8 +17,9 @@
 #   --no-nav / --no-forms / --no-i18n   skip the navigation / forms / i18n checker
 #   --no-perf / --no-persist / --no-net / --no-ds / --no-a11y   skip the performance /
 #                    persistence / networking / design-system / accessibility checker
+#   --no-release     skip the release checker (flavors, signing, store readiness, CI/CD)
 #   --skip <list>    comma-separated sections to skip, same as the --no-* flags:
-#                    extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y
+#                    extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y,release
 #   --profile <p>    declared architecture for the sibling passes (auto|mvn|mvvm|bloc|mvc|getx|provider|riverpod|setstate)
 #   --max <n>        max example locations printed per rule / heuristic (default 5)
 #   --ci             CI mode: exit 1 on new architecture violations at or above --fail-on, or on analyzer errors
@@ -34,6 +35,7 @@
 # NAVIGATION, FORMS, I18N (../flutter-{navigation,forms,i18n}/scripts/check_*.py),
 # PERFORMANCE, PERSISTENCE, NETWORKING, DESIGN SYSTEM, ACCESSIBILITY
 # (../flutter-{performance,persistence,networking,design-system,accessibility}/scripts/check_*.py),
+# RELEASE (../flutter-release/scripts/check_release.py; whole project even in diff mode: it reads Gradle/plist/CI files),
 # CANDIDATES (heuristics: confirm by reading), CI RESULT (--ci only). Missing sibling skills are skipped, not errors.
 # Only new architecture violations and analyzer errors can fail --ci; every other section is informational.
 # Pub workspace members use the workspace root's .dart_tool/package_config.json. Generated files are out of
@@ -53,20 +55,21 @@ CHECK_I18N="$SKILL_DIR/../flutter-i18n/scripts/check_i18n.py"
 CHECK_PERF="$SKILL_DIR/../flutter-performance/scripts/check_performance.py"
 CHECK_PERSIST="$SKILL_DIR/../flutter-persistence/scripts/check_persistence.py"
 CHECK_NET="$SKILL_DIR/../flutter-networking/scripts/check_networking.py"
+CHECK_REL="$SKILL_DIR/../flutter-release/scripts/check_release.py"
 CHECK_DS="$SKILL_DIR/../flutter-design-system/scripts/check_design_system.py"
 CHECK_A11Y="$SKILL_DIR/../flutter-accessibility/scripts/check_accessibility.py"
 AUDIT_SCAN="${FLUTTER_SECURITY_AUDIT_SCAN:-$SKILL_DIR/../flutter-security-audit/scan.sh}"
-USAGE="usage: review.sh <project-root> [--diff <ref>] [--no-extra] [--no-arch] [--no-tests] [--no-errors] [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n] [--no-perf] [--no-persist] [--no-net] [--no-ds] [--no-a11y] [--skip <list>] [--profile <p>] [--max n] [--ci] [--fail-on high|medium|low] [--baseline <file>]"
+USAGE="usage: review.sh <project-root> [--diff <ref>] [--no-extra] [--no-arch] [--no-tests] [--no-errors] [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n] [--no-perf] [--no-persist] [--no-net] [--no-ds] [--no-a11y] [--no-release] [--skip <list>] [--profile <p>] [--max n] [--ci] [--fail-on high|medium|low] [--baseline <file>]"
 ROOT=""; DIFF_REF=""; EXTRA=1; ARCH=1; TESTS=1; ERRORS=1; SECURE=1; AUDIT=1; NAV=1; FORMS=1; I18N=1
-PERF=1; PERSIST=1; NET=1; DS=1; A11Y=1
+PERF=1; PERSIST=1; NET=1; DS=1; A11Y=1; RELEASE=1
 PROFILE=""; MAX=5; CI=0; FAIL_ON=high; BASELINE=""
 needs() { [[ -n "${2:-}" ]] || { echo "error: $1 needs a value" >&2; echo "$USAGE" >&2; exit 2; }; }
 skip_one() {
   case "$1" in
     extra) EXTRA=0 ;; arch) ARCH=0 ;; tests) TESTS=0 ;; errors) ERRORS=0 ;;
     security) SECURE=0; AUDIT=0 ;; audit) AUDIT=0 ;; nav|navigation) NAV=0 ;; forms) FORMS=0 ;; i18n) I18N=0 ;;
-    perf|performance) PERF=0 ;; persist|persistence) PERSIST=0 ;; net|networking) NET=0 ;; ds|design-system) DS=0 ;; a11y|accessibility) A11Y=0 ;;
-    *) echo "error: --skip: unknown section '$1' (extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y)" >&2; exit 2 ;;
+    perf|performance) PERF=0 ;; persist|persistence) PERSIST=0 ;; net|networking) NET=0 ;; ds|design-system) DS=0 ;; a11y|accessibility) A11Y=0 ;; release) RELEASE=0 ;;
+    *) echo "error: --skip: unknown section '$1' (extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y,release)" >&2; exit 2 ;;
   esac
 }
 while [[ $# -gt 0 ]]; do
@@ -89,6 +92,7 @@ while [[ $# -gt 0 ]]; do
     --no-net) NET=0; shift ;;
     --no-ds) DS=0; shift ;;
     --no-a11y) A11Y=0; shift ;;
+    --no-release) RELEASE=0; shift ;;
     --skip) for k in $(echo "$2" | tr ',' ' '); do skip_one "$k"; done; shift 2 ;;
     --profile) PROFILE="$2"; shift 2 ;;
     --max) MAX="$2"; shift 2 ;;
@@ -340,6 +344,12 @@ if [[ $DS == 1 ]]; then
   [[ -f "$CHECK_DS" && $SIB_RC == 0 ]] && DS_RAN=1
 fi
 [[ $A11Y == 1 ]] && SIB_NOTE="" run_sibling a11y "ACCESSIBILITY" "$CHECK_A11Y" flutter-accessibility "${CK_ARGS[@]}"
+if [[ $RELEASE == 1 ]]; then
+  RL_ARGS=("$ROOT" --max "$MAX")
+  [[ -n "$PROFILE" ]] && RL_ARGS+=(--profile "$PROFILE")
+  NOTE=""; [[ -n "$DIFF_REF" ]] && NOTE="  note: whole project (release config lives in Gradle, plist and CI files, outside the .dart diff)"
+  SIB_NOTE="$NOTE" run_sibling release "RELEASE" "$CHECK_REL" flutter-release "${RL_ARGS[@]}"
+fi
 
 # ---- CANDIDATES (heuristics) ------------------------------------------------
 # swallowed-catch overlaps check_errors.py's swallowed-catch rule: when that ran, keep only the
@@ -383,7 +393,7 @@ if [[ $CI == 1 ]]; then
   else
     echo "  analyzer: pass (0 errors in scope$CASC)"
   fi
-  echo "  test gaps, error handling, security, navigation, forms, i18n, performance, persistence, networking, design system, accessibility, candidates: informational (never fail CI)"
+  echo "  test gaps, error handling, security, navigation, forms, i18n, performance, persistence, networking, design system, accessibility, release, candidates: informational (never fail CI)"
   echo "  result: $([[ $RC == 1 ]] && echo "FAIL (exit 1)" || echo "pass")"
 fi
 if [[ -n "${GITHUB_STEP_SUMMARY:-}" ]]; then

@@ -1,0 +1,15 @@
+android {
+    defaultConfig {
+        applicationId "com.example.signed_demo"
+    }
+    signingConfigs {
+        release {
+            storeFile file(System.getenv("KEYSTORE") ?: "key.properties")
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+}

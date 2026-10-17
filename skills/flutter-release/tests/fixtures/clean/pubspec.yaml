@@ -1,0 +1,14 @@
+name: rel_clean
+description: Fixture for check_release.py (near-misses only).
+publish_to: none
+version: 1.4.0+42
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.0
+  local_auth: ^2.3.0
+  image_picker: ^1.1.0

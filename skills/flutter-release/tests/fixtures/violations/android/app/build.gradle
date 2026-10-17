@@ -1,0 +1,52 @@
+plugins {
+    id "com.android.application"
+    id "dev.flutter.flutter-gradle-plugin"
+}
+
+def keystoreProperties = new Properties()
+def keystorePropertiesFile = rootProject.file('key.properties')
+if (keystorePropertiesFile.exists()) {
+    keystoreProperties.load(new FileInputStream(keystorePropertiesFile))
+}
+
+android {
+    namespace "com.example.shop"
+    compileSdk flutter.compileSdkVersion
+
+    defaultConfig {
+        applicationId "com.example.shop"
+        minSdkVersion 23
+        targetSdkVersion 33
+        versionCode flutter.versionCode
+        versionName flutter.versionName
+    }
+
+    flavorDimensions "env"
+    productFlavors {
+        dev {
+            dimension "env"
+            applicationIdSuffix ".dev"
+        }
+        staging {
+            dimension "env"
+        }
+        prod {
+            dimension "env"
+        }
+    }
+
+    signingConfigs {
+        release {
+            keyAlias keystoreProperties['keyAlias']
+            storeFile keystoreProperties['storeFile'] ? file(keystoreProperties['storeFile']) : null
+        }
+    }
+
+    buildTypes {
+        release {
+            // shipping soon, wire the real key later
+            signingConfig signingConfigs.debug
+            minifyEnabled true
+        }
+    }
+}

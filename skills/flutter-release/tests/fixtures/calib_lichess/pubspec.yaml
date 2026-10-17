@@ -1,0 +1,7 @@
+name: board_app
+publish_to: none
+version: 0.3.0+300
+
+dependencies:
+  flutter:
+    sdk: flutter

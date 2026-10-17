@@ -1,0 +1,8 @@
+name: news_demo
+publish_to: none
+version: 0.0.1+1
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.0.0

@@ -1,0 +1,22 @@
+name: Deploy
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Signing
+        working-directory: android
+        env:
+          UPLOAD_KEY: ${{ secrets.UPLOAD_KEY }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          echo "$UPLOAD_KEY" | base64 --decode > app/upload-keystore.jks
+          echo "storeFile=upload-keystore.jks" >> key.properties
+          echo "keyPassword=$KEY_PASSWORD" >> key.properties
+      - uses: actions/upload-artifact@v4
+        with:
+          path: build/app/outputs/bundle/release/app-release.aab

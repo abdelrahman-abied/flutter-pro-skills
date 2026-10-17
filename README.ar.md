@@ -20,8 +20,8 @@
 
   أي أداة بتفرض stack واحد هتطلّع لك أخطاء مش حقيقية.
 - **أدوات فحص حقيقية، مش بس كلام.**
-  - 13 checker بيقروا الكود من غير ما يعدّلوا فيه حاجة: المعمارية، والأخطاء، والتستات، والأمان، والتنقّل، والـ forms، والترجمة والـ RTL، والأداء، والتخزين المحلي، والـ networking، والـ design system، والـ accessibility، والـ review.
-  - مكتوبين بـ Python من غير أي مكتبات خارجية، وعليهم حوالي 1800 تست.
+  - 14 checker بيقروا الكود من غير ما يعدّلوا فيه حاجة: المعمارية، والأخطاء، والتستات، والأمان، والتنقّل، والـ forms، والترجمة والـ RTL، والأداء، والتخزين المحلي، والـ networking، والـ design system، والـ accessibility، والـ release، والـ review.
+  - مكتوبين بـ Python من غير أي مكتبات خارجية، وعليهم حوالي 1950 تست.
   - اتجرّبوا على تطبيقات مفتوحة المصدر حقيقية، زي Compass الرسمي من فريق Flutter، وأمثلة Bloc و Riverpod الرسمية، و lichess، و immich، و Wonderous، وأمثلة drift.
 - **GitHub Action بيقفل الـ PR على المشاكل الجديدة بس،** فالمشاكل القديمة في المشروع متعطّلش الفريق.
 - **شغالة مع أي agent بيقرأ `SKILL.md`:** Claude Code، و Codex، و Cursor، و GitHub Copilot، و Gemini CLI، و OpenCode. اتجربت فعلًا على Claude Code و OpenCode.
@@ -60,7 +60,7 @@ cd flutter-pro-skills && ./install.sh
 
 الـ agent بيختار الـ skill المناسبة لوحده.
 
-## الـ 17 skill
+## الـ 18 skill
 
 | الـ skill | بتعمل إيه |
 |---|---|
@@ -78,6 +78,7 @@ cd flutter-pro-skills && ./install.sh
 | `flutter-networking` | طبقة الـ API حسب معماريتك: client واحد متظبّط (Dio أو http) بـ timeouts، و DTOs و JSON متأكد منه، وحماية الـ pagination من الطلب المكرر، والـ cancellation، والـ retry للطلبات الآمنة بس، والـ WebSockets، و fake clients في التستات |
 | `flutter-design-system` | الـ tokens، و `ThemeData` و `ColorScheme`، و `ThemeExtension`، وطبقة components، والـ dark mode، ومفيش ألوان أو مقاسات مكتوبة على طول في الـ features |
 | `flutter-accessibility` | `Semantics` والـ labels، وحجم الـ tap targets، والـ contrast، وتكبير الخط، وترتيب الـ focus، وتستات الـ screen reader. ومفيش أسرار بتتقري بصوت عالي |
+| `flutter-release` | النشر: الـ flavors والـ environments بتتحدد في مكان واحد، والـ signing بره الـ git، والـ versioning، ومتطلبات المتاجر، و CI/CD آمن (مفيش secrets في الـ logs ولا ثغرات `pull_request_target`) |
 | `flutter-ui-practices` | الـ dispose، و `context` بعد `await`، وتكلفة الـ build، والـ keys |
 | `dart-naming` | قواعد التسمية، وأسماء كل دور في كل معمارية |
 | `dart-flutter-review` | **review كامل** بـ agents شغالين بالتوازي، وتقرير واحد مرتّب حسب الخطورة |

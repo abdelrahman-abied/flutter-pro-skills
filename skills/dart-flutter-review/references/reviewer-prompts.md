@@ -16,7 +16,8 @@
 13. Template L: design-system reviewer (optional)
 14. Template M: accessibility reviewer (optional)
 15. Template N: networking reviewer (optional)
-16. Template V: adversarial verifier (one per High finding)
+16. Template O: release reviewer (optional)
+17. Template V: adversarial verifier (one per High finding)
 
 ## 1. How to use these templates
 
@@ -38,15 +39,15 @@ between the `PROMPT` fences verbatim and replace every `{{PLACEHOLDER}}`:
 The security template (D) uses `SEC-0xx` (the `flutter-secure-defaults`
 checker) and `SEC-<slug>` (found by reading). The optional templates use
 `TEST-` (E), `ERR-` (F), `NAV-` (G), `FORM-` (H), `I18N-` (I), `PERF-` (J),
-`PERSIST-` (K), `DS-` (L), `A11Y-` (M) and `NET-` (N) IDs: `-0xx`
+`PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N) and `REL-` (O) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
 Spawn A, B, C and D, plus E if the `flutter-testing` skill is installed or
 tests were asked about, F if `flutter-error-handling` is installed or error
-handling was asked about, and G to N when their skill is installed (the
+handling was asked about, and G to O when their skill is installed (the
 section isn't "skipped") and the code has, respectively, a router, forms,
-user-facing strings, widgets or lists, local storage, theme code, widgets, or
-HTTP calls,
+user-facing strings, widgets or lists, local storage, theme code, widgets,
+HTTP calls, or platform folders and CI config,
 or the user asked about that area, **at the same time**, as read-only sub-agents, in whatever form your agent has
 (for example Claude Code's Agent/Task tool, Codex sub-agents, or another agent's equivalent). Then wait
 for all of them. Don't redo their work while they run. If your agent can't
@@ -1147,7 +1148,70 @@ PROMPT
 
 ---
 
-## 16. Template V: adversarial verifier (one per High finding)
+## 16. Template O: release reviewer (optional)
+
+Use this when the `flutter-release` skill is installed (the mechanical output has
+a `== RELEASE` section that isn't "skipped") and the project has android/ or ios/ folders, flavors, signing config or CI workflows, or when the user
+asked about flavors, environments, signing, store submission, versioning or CI/CD. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the RELEASE reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-release` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-release/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): flavors-and-environments.md, signing-and-versioning.md, store-requirements.md, ci-cd.md and release-checklist.md, plus rules.md for the REL-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter deployment and flavors guides.
+
+Start from the `== RELEASE` section of the mechanical output:
+`grep -n '^== RELEASE' {{MECHANICAL_OUTPUT}}`. It comes from `check_release.py` and lists
+`[REL-0xx]` groups with example locations (release builds signed with the debug key, signing files not ignored by git, placeholder application ids, flavors that differ between Android, iOS and the entrypoints, environments chosen by build mode, flavor reads outside the composition root, debug switches left on, a target SDK below the Play minimum, missing iOS usage descriptions, pull_request_target running untrusted code, secrets printed in CI, signing keys exposed in CI artifacts). It reads Gradle, Xcode, plist and CI files as well as lib/, and it always covers the whole project, even in diff mode, because release config lives outside the .dart diff. Sample and example apps get info at most for store-readiness rules. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-release/scripts/check_release.py {{PROJECT_ROOT}} [--profile <p>]`.
+
+What to do:
+1. Confirm every REL-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (a debug-key fallback used only when the release keystore is absent, a sample app that is never published, a debug switch guarded by kDebugMode, a secret piped into a file rather than the log).
+2. Then read the files in scope for what the script can't see: build numbers reused or hard-coded, symbols never uploaded for crash reports, config read inside features, an unpinned Flutter version in CI, workflows without least-privilege permissions, a missing iOS privacy manifest, and releases with no staged rollout.
+3. Place each fix where this architecture puts it (the flavor and environment are chosen once at the composition root (main_<flavor>.dart, app/, di/) and injected: a Riverpod override, a get_it registration, a RepositoryProvider or a constructor; the data layer receives baseUrl and keys, and logic and views never branch on the flavor), and respect the
+   project's own consistent conventions.
+4. The REL- id leads, and doesn't duplicate the rest of the suite: secrets in source or build config stay SEC-008/009, missing obfuscation or --split-debug-info stays SEC-012, HTTP loggers in release stay SEC-005, cleartext URLs stay SEC-003, router debug logging stays NAV-011, duplicated base URLs stay NET-008, and debuggable, allowBackup, ATS and pinning stay with flutter-security-audit. REL-006 replaces AP-hardcoded-config-in-sources for flavor and environment reads.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <REL-0xx (the script's rule) | REL-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-release › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is a release that can leak or be hijacked (a debug-signed release, a committed keystore, pull_request_target running untrusted code with secrets, a secret printed in CI). MEDIUM blocks or breaks a store release (a placeholder application id, a flavor mismatch, the environment chosen by build mode, a target SDK below the Play minimum, a missing usage description). LOW is hygiene. Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (release): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 17. Template V: adversarial verifier (one per High finding)
 
 Spawn one per HIGH finding (they can run in parallel), or batch several small
 ones into one verifier. Paste the finding block verbatim. If you can't spawn

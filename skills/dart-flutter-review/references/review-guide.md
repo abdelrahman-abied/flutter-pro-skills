@@ -44,8 +44,8 @@ bash <skill-dir>/scripts/review.sh <project-root> --profile mvn   # declared arc
 `<skill-dir>` is the `dart-flutter-review` folder. Other flags: `--no-extra`
 skips the stricter lint pass, `--no-arch` the architecture pass, `--no-tests`,
 `--no-errors`, `--no-security` (both security passes), `--no-audit`,
-`--no-nav`, `--no-forms`, `--no-i18n`, `--no-perf`, `--no-persist`, `--no-net`, `--no-ds`
-and `--no-a11y` the sibling passes (or one
+`--no-nav`, `--no-forms`, `--no-i18n`, `--no-perf`, `--no-persist`, `--no-net`, `--no-ds`,
+`--no-a11y` and `--no-release` the sibling passes (or one
 `--skip <list>`), and `--max <n>` sets how many example locations each rule
 prints (default 5). Generated files (`arch_check.py`'s `files[]` decides for
 `lib/`) are never in scope.

@@ -5,6 +5,47 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [1.3.0] - 2026-10-17
+
+The suite now has eighteen skills and fourteen checkers.
+
+### Added
+
+- **flutter-release** covers getting the app to the stores safely:
+  - **Flavors and environments.** These are chosen once at the composition
+    root and injected per architecture (a Riverpod override, get_it, a
+    `RepositoryProvider` or a constructor).
+  - **Signing.** Keystores and `key.properties` stay out of git, with Play
+    App Signing for Android and CI secrets for iOS.
+  - **Versioning.**
+  - **Store requirements.** These are the application id, the target SDK and
+    the iOS usage descriptions.
+  - **CI/CD.** This covers GitHub Actions, Codemagic and Fastlane: no
+    secrets in logs, no `pull_request_target` running untrusted code, and no
+    keystore in artifacts.
+
+  It ships `check_release.py` with 12 rules (`REL-001…012`). The checker
+  reads Gradle, Xcode, plist and CI files as well as `lib/`. It is app-aware:
+  sample apps get info at most for store-readiness rules.
+- **dart-flutter-review** gets:
+  - a `RELEASE` section that always covers the whole project, even in diff
+    mode
+  - the `--no-release` / `--skip release` flags
+  - reviewer Template O
+  - dedupe rows: REL-006 beats `AP-hardcoded-config-in-sources`, secrets stay
+    `SEC-008/009`, and obfuscation stays `SEC-012`
+
+### Changed
+
+- Every skill is versioned 1.3.0, and `install.sh` installs all eighteen.
+
+### Quality
+
+- `check_release.py` was calibrated on the canonical apps, the Flutter
+  team's `news_toolkit` example (real flavors), `io_flip`, immich, lichess,
+  hiddify and Wonderous, and about 120 CI workflows. The canonical apps have
+  no high or medium hits.
+
 ## [1.2.0] - 2026-10-17
 
 The suite now has seventeen skills and thirteen checkers.

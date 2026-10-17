@@ -1,0 +1,16 @@
+android {
+    defaultConfig {
+        applicationId "org.sample.gallery"
+    }
+    signingConfigs {
+        release {
+            storeFile file("../key.jks")
+        }
+    }
+    buildTypes {
+        release {
+            def releaseKeyPresent = file("../key.jks").exists()
+            signingConfig releaseKeyPresent ? signingConfigs.release : signingConfigs.debug
+        }
+    }
+}

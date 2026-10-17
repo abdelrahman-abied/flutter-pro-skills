@@ -1,0 +1,7 @@
+name: rel_suppressed
+publish_to: none
+version: 1.0.0+1
+
+dependencies:
+  flutter:
+    sdk: flutter

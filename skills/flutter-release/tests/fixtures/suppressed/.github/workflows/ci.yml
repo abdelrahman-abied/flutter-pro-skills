@@ -1,0 +1,11 @@
+name: CI
+on: push
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # rel-ignore: REL-011 the sentry project slug is not a secret, it only lives in the secret store
+      - run: echo "project ${{ secrets.SENTRY_PROJECT }}"
+      - run: echo "token ${{ secrets.SENTRY_TOKEN }}"

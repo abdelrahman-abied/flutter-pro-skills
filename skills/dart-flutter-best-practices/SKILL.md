@@ -1,10 +1,10 @@
 ---
 name: dart-flutter-best-practices
-description: Hub for writing idiomatic Dart and Flutter code - Effective Dart, the official lints, the language features your SDK allows and the project's own conventions, verified with `dart format` and `dart analyze`. Use it whenever you write or refactor general Dart code, a package or CLI, when someone asks if code is idiomatic, or wants to set up or tighten lints, `analysis_options.yaml` or formatting. When one concern dominates, load that specialist instead - `flutter-feature-scaffold` (new feature), `dart-naming`, `flutter-ui-practices` (widgets), `flutter-performance` (jank), `flutter-architecture` (layers), `flutter-testing`, `flutter-error-handling`, `flutter-secure-defaults` (tokens, auth), `flutter-navigation`, `flutter-forms`, `flutter-i18n`, `flutter-persistence`, `flutter-networking` (API), `flutter-design-system`, `flutter-accessibility`, `dart-flutter-review` (review or PR).
+description: Hub for writing idiomatic Dart and Flutter code - Effective Dart, the official lints, the language features your SDK allows and the project's own conventions, verified with `dart format` and `dart analyze`. Use it whenever you write or refactor general Dart code, a package or CLI, ask if code is idiomatic, or set up lints, `analysis_options.yaml` or formatting. When one concern dominates, load that specialist instead - `flutter-feature-scaffold` (new feature), `dart-naming`, `flutter-ui-practices` (widgets), `flutter-performance` (jank), `flutter-architecture` (layers), `flutter-testing`, `flutter-error-handling`, `flutter-secure-defaults` (tokens, auth), `flutter-navigation`, `flutter-forms`, `flutter-i18n`, `flutter-persistence`, `flutter-networking` (API), `flutter-design-system`, `flutter-accessibility`, `flutter-release` (ship), `dart-flutter-review` (review or PR).
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.2.0"
+  version: "1.3.0"
   suite: flutter-pro-skills
 ---
 
@@ -69,6 +69,7 @@ missing, say so and carry on with Effective Dart and this file.
 | API calls and the HTTP client: Dio/http/retrofit setup, timeouts, interceptors, DTOs and JSON, pagination, cancellation, retry, WebSockets | `flutter-networking` | `../flutter-networking/SKILL.md` |
 | Design tokens, `ThemeData`/`ColorScheme`, `ThemeExtension`, shared components, dark mode, raw colours or sizes in feature code | `flutter-design-system` | `../flutter-design-system/SKILL.md` |
 | Accessibility: `Semantics`, labels, tap targets, contrast, text scale, focus order, screen-reader tests | `flutter-accessibility` | `../flutter-accessibility/SKILL.md` |
+| Shipping the app: flavors and environments, signing, versioning, store requirements, CI/CD (GitHub Actions, Codemagic, Fastlane) | `flutter-release` | `../flutter-release/SKILL.md` |
 | Deep security audit: obfuscation, pinning, RASP, attestation, build hardening | `flutter-security-audit` (separate repo, if installed) | `../flutter-security-audit/SKILL.md`; otherwise say it isn't installed |
 
 Writing a Flutter feature usually touches several of these. Scaffold it in

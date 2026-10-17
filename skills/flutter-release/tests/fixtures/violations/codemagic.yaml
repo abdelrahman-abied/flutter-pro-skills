@@ -1,0 +1,17 @@
+workflows:
+  android-release:
+    name: Android release
+    environment:
+      flutter: 3.24.5
+      vars:
+        CM_KEYSTORE_PASSWORD: Encrypted(placeholder)
+    scripts:
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > keys/upload.jks
+          echo "keystore password: $CM_KEYSTORE_PASSWORD"
+      - name: Build
+        script: flutter build appbundle --release
+    artifacts:
+      - build/**/outputs/**/*.aab
+      - keys/**

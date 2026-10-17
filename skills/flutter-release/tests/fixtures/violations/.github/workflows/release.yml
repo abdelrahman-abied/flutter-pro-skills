@@ -1,0 +1,24 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+
+env:
+  STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+
+jobs:
+  android:
+    runs-on: [self-hosted, linux]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Decode keystore
+        run: |
+          echo "${{ secrets.KEYSTORE_B64 }}" | base64 --decode > android/app/upload.jks
+          echo "Using password $STORE_PASSWORD"
+      - name: Debug service account
+        run: echo ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+      - run: flutter build appbundle --release --flavor prod -t lib/main_prod.dart
+      - uses: actions/upload-artifact@v4
+        with:
+          name: everything
+          path: android/

@@ -1228,3 +1228,130 @@ DTO boundary, never trusted.
   accessibility), enforced in the scaffold tests.
 - **Benchmark.** Task T4 (a product list screen) is scored by
   `grade.py t4`. `all.sh` takes a `TASKS` variable.
+
+---
+
+# Phase 6 contracts (v1.3.0)
+
+## 29. flutter-release
+
+**Scope.** Getting a Flutter app from the repo to the stores, safely and
+repeatably:
+- flavors and environments (Android `productFlavors`, iOS schemes and
+  xcconfigs, `main_<flavor>.dart` or `--dart-define-from-file`)
+- environment config read once at the composition root and injected, never
+  read in features
+- signing (upload keystore and `key.properties` kept out of the repo,
+  Play App Signing, iOS certificates and profiles via CI secrets)
+- versioning (`version: x.y.z+build`, a monotonically increasing build
+  number)
+- release build flags (`--release`, `--split-debug-info`; obfuscation itself
+  belongs to SEC-012 and flutter-security-audit)
+- store requirements (`applicationId`/bundle id, target SDK level, iOS privacy
+  manifest, permission usage strings)
+- CI/CD (GitHub Actions, Codemagic, Fastlane): a pinned Flutter version,
+  cached pub, secrets handled safely, no `pull_request_target` running
+  untrusted code with secrets, and build artifacts that never contain the
+  keystore
+- release checklists and staged rollouts
+
+**Architecture placement.** Flavor and environment selection belongs to the
+composition root (`main_*.dart`, `app/`, `di/`). The data layer receives
+`baseUrl` and keys through DI. Logic and views never branch on the flavor.
+The patterns differ only in how the environment is injected: Riverpod
+override, get_it registration, `RepositoryProvider`, a constructor.
+
+**Contract values.**
+
+| Item | Value |
+|---|---|
+| Owner | Agent P6, `skills/flutter-release/**` |
+| Prefix | `REL-0xx` / `REL-<slug>` |
+| Checker | `scripts/check_release.py`. The §22 CLI and output contract apply. Unlike the other checkers, it also reads `android/**/build.gradle(.kts)`, `android/key.properties`, `ios/**/Info.plist`, `ios/**/*.xcconfig`, `ios/Runner/PrivacyInfo.xcprivacy`, `pubspec.yaml`, `.gitignore`, `.github/workflows/*.y*ml`, `codemagic.yaml` and `fastlane/**`. Findings in those files report the project-relative path. `--files` filters by path like the others |
+| Header | `== RELEASE` |
+| Schema | `flutter-pro-skills/release@1` |
+| Suppression | `rel-ignore`, as a `//` or `#` comment in Dart, Gradle, YAML or xcconfig files |
+
+**App-aware by default.** A sample or example app (`publish_to: none` with
+`com.example` ids, no store metadata, or an examples folder) gets info at
+most for store-readiness rules. The rules apply in full when the project
+shows release intent: a changed `applicationId`, flavors, a fastlane or
+codemagic config, a release workflow, or signing configs.
+
+**No duplicates.** Cross-reference these; never re-detect them:
+
+| Concern | Owner |
+|---|---|
+| Hard-coded secrets, and secrets in build config or `--dart-define` defaults | SEC-008 / SEC-009 |
+| Obfuscation and `--split-debug-info` absence | SEC-012 |
+| HTTP loggers in release | SEC-005 |
+| Cleartext URLs | SEC-003 |
+| Router debug logging in release | NAV-011 |
+| Debuggable, `allowBackup`, ATS arbitrary loads, pinning, RASP | flutter-security-audit (`scan.sh`) |
+| Base URLs duplicated across sources | NET-008 |
+| `print` calls | `avoid_print` lint |
+
+**Review integration (lead).** `== RELEASE` runs after `== ACCESSIBILITY`,
+with `--no-release` and the `--skip` key `release`. It is informational and
+never fails CI. Add reviewer Template O and the dedupe rows. Bump the release
+to v1.3.0: eighteen skills, fourteen checkers.
+
+**Calibration (§24).**
+- **Canonical apps** (zero high or medium false positives):
+  - compass_app
+  - the bloc examples and riverpod examples (samples: store-readiness rules
+    must stay quiet)
+  - `news_toolkit/flutter_news_example` (Flutter team and VGV, real
+    flavors; BSD)
+- **Non-canonical apps:** `io_flip` (VGV, BSD), immich (fastlane, GitHub
+    Actions; AGPL), lichess (fastlane; GPL) and hiddify (CI; GPL).
+- **Fixtures for copyleft apps** are fresh minimal repros with no copied
+    lines.
+
+## 30. Phase 6 as built: v1.3.0 (these entries win over §29)
+
+- **Release.** v1.3.0 has eighteen skills and fourteen checkers. Every
+  `metadata.version` is `"1.3.0"`.
+- **Rules.** `release@1` has REL-001…012:
+  - REL-001 release-signed-with-debug-key
+  - REL-002 signing-file-not-ignored
+  - REL-003 placeholder-application-id
+  - REL-004 flavor-mismatch
+  - REL-005 environment-by-build-mode
+  - REL-006 flavor-read-outside-root (automates
+    `AP-hardcoded-config-in-sources` for environment reads)
+  - REL-007 debug-switch-left-on
+  - REL-008 target-sdk-below-play-minimum (`PLAY_MIN_TARGET_SDK = 35`, a
+    dated constant)
+  - REL-009 usage-description-missing
+  - REL-010 pr-target-runs-untrusted-code
+  - REL-011 secret-printed-in-ci
+  - REL-012 signing-key-exposed-in-ci
+
+  There are also 8 reading slugs. Pinned Flutter in CI, top-level
+  `permissions:` and the iOS privacy manifest are reading-level only.
+- **Files read** (in addition to §29):
+  - `ios/Runner.xcodeproj/project.pbxproj` (bundle ids and native targets)
+  - `ios/Runner.xcodeproj/xcshareddata/xcschemes/*.xcscheme`
+  - every `.gitignore` up to the repo root
+  - repo-root `.github/workflows` and `codemagic.yaml` when they mention the
+    project. These are reported with `../` paths.
+- **App-aware (correction to §29).** A changed `applicationId` alone is not
+  release intent. Release intent needs one of:
+  - a release signing config
+  - flavors
+  - a fastlane or codemagic config
+  - a release workflow
+
+  An `examples/` or `samples/` path also marks a project as a sample. A
+  debug-key fallback used only when the keystore is missing is info.
+- **review.sh.** `== RELEASE` runs after ACCESSIBILITY with `--no-release`
+  and the `--skip` key `release`. It runs **whole-project even in diff mode**,
+  and says so in a note. It has reviewer Template O.
+- **Calibration.**
+  - Canonical apps: compass_app, the bloc examples, the riverpod examples
+    (`riverpod@87aad84`, re-cloned) and `news_toolkit/flutter_news_example`
+    have zero high or medium hits.
+  - Non-canonical apps: `io_flip`, immich, lichess, hiddify and wonderous.
+  - About 120 CI workflows were scanned; the only hit was 1 low (immich: a
+    keystore left on a persistent self-hosted runner).

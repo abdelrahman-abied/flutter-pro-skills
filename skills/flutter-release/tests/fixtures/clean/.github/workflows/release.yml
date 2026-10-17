@@ -1,0 +1,34 @@
+name: Release
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  android:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version-file: pubspec.yaml
+          cache: true
+      - name: Decode keystore
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+          STORE_PASSWORD: ${{ secrets.STORE_PASSWORD }}
+        run: |
+          echo "::add-mask::$STORE_PASSWORD"
+          echo "$KEYSTORE_B64" | base64 --decode > "$RUNNER_TEMP/upload.jks"
+          echo "storeFile=$RUNNER_TEMP/upload.jks" > android/key.properties
+          echo "storePassword=$STORE_PASSWORD" >> android/key.properties
+          echo "Building ${{ github.ref_name }}"
+      - run: flutter build appbundle --release --flavor prod -t lib/main_prod.dart --build-number ${{ github.run_number }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bundle
+          path: build/app/outputs/bundle/prodRelease/
+      - if: always()
+        run: rm -f "$RUNNER_TEMP/upload.jks" android/key.properties

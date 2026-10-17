@@ -1,0 +1,22 @@
+android {
+    defaultConfig {
+        applicationId "org.sample.tunnel"
+        targetSdkVersion 36
+    }
+    if (hasSigningKey) {
+        signingConfigs {
+            release {
+                storeFile file(props['storeFile'])
+            }
+        }
+    }
+    buildTypes {
+        release {
+            if (hasSigningKey) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
+        }
+    }
+}

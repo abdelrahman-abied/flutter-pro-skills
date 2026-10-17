@@ -1,0 +1,7 @@
+name: gallery_app
+publish_to: none
+version: 3.0.0+3000
+
+dependencies:
+  flutter:
+    sdk: flutter

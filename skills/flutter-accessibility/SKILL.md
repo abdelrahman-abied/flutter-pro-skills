@@ -4,7 +4,7 @@ description: Write and review accessible Flutter UI, placed by the app's own arc
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.2.0"
+  version: "1.3.0"
   suite: flutter-pro-skills
 ---
 

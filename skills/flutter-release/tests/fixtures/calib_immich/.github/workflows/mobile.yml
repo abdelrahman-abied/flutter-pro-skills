@@ -1,0 +1,30 @@
+name: Mobile
+on:
+  push:
+    branches: [main]
+permissions: {}
+jobs:
+  android:
+    runs-on: build-box
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - name: Keystore
+        env:
+          KEY_JKS: ${{ secrets.KEY_JKS }}
+        working-directory: ./app
+        run: printf "%s" $KEY_JKS | base64 -d > android/key.jks
+      - run: flutter build apk --release
+        working-directory: ./app
+      - uses: actions/upload-artifact@v4
+        with:
+          path: app/build/app/outputs/flutter-apk/*.apk
+  android-hosted:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - working-directory: ./app
+        env:
+          KEY_JKS: ${{ secrets.KEY_JKS }}
+        run: printf "%s" $KEY_JKS | base64 -d > android/key.jks

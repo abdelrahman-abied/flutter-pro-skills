@@ -599,10 +599,10 @@ SEV_RANK = {'high': 0, 'medium': 1, 'low': 2, 'info': 3}
 SECTIONS = (('format', 'Format'), ('analyzer', 'Analyzer'), ('fix', 'Auto-fixable'), ('arch', 'Architecture'),
             ('tests', 'Test gaps'), ('errors', 'Error handling'), ('secure', 'Security defaults'),
             ('audit', 'Security audit (scan.sh)'), ('nav', 'Navigation'), ('forms', 'Forms'), ('i18n', 'I18n'),
-            ('perf', 'Performance'), ('persist', 'Persistence'), ('net', 'Networking'), ('ds', 'Design system'), ('a11y', 'Accessibility'),
+            ('perf', 'Performance'), ('persist', 'Persistence'), ('net', 'Networking'), ('ds', 'Design system'), ('a11y', 'Accessibility'), ('release', 'Release'),
             ('candidates', 'Candidates (unconfirmed)'))
 SECTION_RANK = {'arch': 0, 'errors': 1, 'secure': 2, 'persist': 3, 'net': 4, 'nav': 5, 'forms': 6, 'a11y': 7,
-                'i18n': 8, 'perf': 9, 'ds': 10, 'tests': 11, 'audit': 12}
+                'i18n': 8, 'perf': 9, 'ds': 10, 'tests': 11, 'release': 12, 'audit': 13}
 
 
 def _groups(lines):
@@ -674,7 +674,7 @@ def cmd_summary(secdir, scope, ci, fail_on, rc, mode=''):
         rows.append((label, str(total), note))
         if key != 'candidates':
             for g in groups:
-                g['src'] = SECTION_RANK.get(key, 13)
+                g['src'] = SECTION_RANK.get(key, 14)
             top += groups
     out = ['## Flutter review', '', 'Scope: %s' % scope, '']
     if ci == '1':

@@ -1,0 +1,14 @@
+name: rel_violations
+description: Fixture for check_release.py (every rule fires).
+publish_to: none
+version: 1.0.0
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.0
+  camera: ^0.11.0
+  local_auth: ^2.3.0

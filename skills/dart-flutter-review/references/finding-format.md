@@ -54,11 +54,12 @@ template). This format is the hand-off between passes.
 | `PERF-0xx` / `PERF-<slug>` | Performance (`flutter-performance`): `check_performance.py` rules (`PERF-001` eager-list-over-data) or slugs (`PERF-rebuild-whole-screen`) |
 | `PERSIST-0xx` / `PERSIST-<slug>` | Local storage, caching and migrations (`flutter-persistence`): `check_persistence.py` rules (`PERSIST-001` sql-built-from-strings) or slugs (`PERSIST-no-cache-policy`) |
 | `NET-0xx` / `NET-<slug>` | The API client layer (`flutter-networking`): `check_networking.py` rules (`NET-001` client-without-timeouts) or slugs (`NET-unvalidated-json`). Not to be confused with `flutter-security-audit`'s upper-case `NET-ACCEPT-ALL` style ids, which become `SEC-<slug>` |
+| `REL-0xx` / `REL-<slug>` | Release and delivery (`flutter-release`): `check_release.py` rules (`REL-001` release-signed-with-debug-key), which can point at Gradle, Xcode, plist or CI files, or slugs (`REL-build-number-reused`) |
 | `DS-0xx` / `DS-<slug>` | Design system and theming (`flutter-design-system`): `check_design_system.py` rules (`DS-005` theme-extension-not-registered) or slugs (`DS-no-component-layer`) |
 | `A11Y-0xx` / `A11Y-<slug>` | Accessibility (`flutter-accessibility`): `check_accessibility.py` rules (`A11Y-001` icon-button-without-label) or slugs (`A11Y-focus-order`) |
 | `LINT:<code>` | An analyzer diagnostic with no better home: `LINT:unused_field`. When a lint is the symptom of a judgment finding, fold it into that finding's evidence |
 
-Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/NET/DS/A11Y are free-form but stable: lower-kebab-case,
+Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/NET/DS/A11Y/REL are free-form but stable: lower-kebab-case,
 named after the problem. Reuse one slug for one problem across the whole report.
 
 **Overlaps.** An empty or default-returning `catch` can surface three ways: the
@@ -87,6 +88,8 @@ they're stable and the sibling skill documents them:
 | `check_networking.py` | `NET-004` retry-resends-any-method | `ERR-retry-non-idempotent` |
 | `check_networking.py` | `NET-007` websocket-never-closed | the `undisposed-resource` candidate / `UI-lifecycle` on that channel |
 | `check_networking.py` | `NET-008` base-url-duplicated (API hosts) | `AP-hardcoded-config-in-sources` |
+| `check_release.py` | `REL-006` flavor-read-outside-root | `AP-hardcoded-config-in-sources` (environment and flavor reads) |
+| `check_release.py` | `REL-0xx` on Gradle/Xcode/CI files | a `scan.sh` id for the same file and line (keep REL for signing, flavors, store and CI; `scan.sh` keeps debuggable, allowBackup, ATS, pinning, RASP) |
 
 Some overlaps go the other way, because the suite already owns them: navigation
 or `BuildContext` inside a logic class stays `ARCH-102`, `context` after
@@ -95,7 +98,10 @@ or `BuildContext` inside a logic class stays `ARCH-102`, `context` after
 (not `PERSIST-`), storage I/O in widgets stays `ARCH-101`, a hard-coded label
 stays `I18N-010` (A11Y reports only a *missing* label), obscured fields and
 autofill stay `FORM-001/002/003`, and physical left/right geometry stays
-`I18N-012` (DS judges only magic numbers). The checker ID, if any, goes in `rule:`.
+`I18N-012` (DS judges only magic numbers). Secrets in build config stay
+`SEC-008/009`, missing obfuscation stays `SEC-012`, and a base URL that is
+both duplicated and chosen by build mode carries `NET-008` and `REL-005`
+(two root causes). The checker ID, if any, goes in `rule:`.
 
 ### Severity
 
