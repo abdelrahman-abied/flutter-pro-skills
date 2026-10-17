@@ -1,0 +1,18 @@
+import 'package:meta/meta.dart';
+
+/// A {{title_lc}} business object. Pure Dart: no JSON, no Flutter, no data imports.
+// TODO: replace the placeholder fields with the real {{title_lc}} data.
+@immutable
+final class {{Entity}} {
+  const {{Entity}}({required this.id, required this.title});
+
+  final String id;
+  final String title;
+
+  @override
+  bool operator ==(Object other) =>
+      other is {{Entity}} && other.id == id && other.title == title;
+
+  @override
+  int get hashCode => Object.hash(id, title);
+}

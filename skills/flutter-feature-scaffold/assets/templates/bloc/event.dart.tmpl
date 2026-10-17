@@ -1,0 +1,19 @@
+part of '{{feature}}_bloc.dart';
+
+/// Events are past-tense facts from the bloc's point of view.
+sealed class {{Event}} extends Equatable {
+  const {{Event}}();
+
+  @override
+  List<Object> get props => const [];
+}
+
+/// The screen opened: load the {{title_lc}} for the first time.
+final class {{Feature}}Started extends {{Event}} {
+  const {{Feature}}Started();
+}
+
+/// The user asked for fresh data (pull to refresh, retry).
+final class {{Feature}}RefreshRequested extends {{Event}} {
+  const {{Feature}}RefreshRequested();
+}

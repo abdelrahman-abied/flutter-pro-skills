@@ -1,0 +1,8 @@
+name: getx_or_mvc_violations
+publish_to: 'none'
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.6.6

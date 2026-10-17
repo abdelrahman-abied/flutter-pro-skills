@@ -1,0 +1,41 @@
+import 'package:flutter/foundation.dart';
+
+import '{{import:failure}}';
+import '{{import:dep}}';
+import '{{import:state}}';
+
+/// Holds the {{title_lc}} screen state. Provide it with
+/// `ChangeNotifierProvider(create: ...)`, which disposes it.
+class {{Logic}} extends ChangeNotifier {
+{{#privnamed}}  {{Logic}}({required this._{{dep}}});
+{{/privnamed}}{{^privnamed}}  {{Logic}}({required {{Dep}} {{dep}}}) : _{{dep}} = {{dep}};
+{{/privnamed}}
+  final {{Dep}} _{{dep}};
+
+  {{State}} _state = const {{Feature}}Initial();
+  {{State}} get state => _state;
+
+  bool _disposed = false;
+
+  Future<void> load() async {
+    _emit(const {{Feature}}Loading());
+    try {
+      final items = await {{depCall}};
+      _emit({{Feature}}Success(items));
+    } on Failure catch (failure) {
+      _emit({{Feature}}Error(failure));
+    }
+  }
+
+  void _emit({{State}} state) {
+    if (_disposed) return;
+    _state = state;
+    notifyListeners();
+  }
+
+  @override
+  void dispose() {
+    _disposed = true;
+    super.dispose();
+  }
+}

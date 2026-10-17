@@ -1,0 +1,54 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:result}}';
+import '{{import:api_model}}';
+import '{{import:source}}';
+import '{{import:repository_impl}}';
+
+class Fake{{Source}} implements {{Source}} {
+  Fake{{Source}}([this._failure]);
+
+  final Failure? _failure;
+
+  @override
+  Future<Result<List<{{Feature}}ApiModel>>> fetch{{Feature}}List() async =>
+      switch (_failure) {
+        final failure? => Result.error(failure),
+        null => const Result.ok([{{Feature}}ApiModel(id: '1', title: 'First')]),
+      };
+}
+
+void main() {
+  test('{{RepositoryImpl}} maps API models to domain models', () async {
+    final repository = {{RepositoryImpl}}(apiClient: Fake{{Source}}());
+
+    final result = await repository.fetch{{Feature}}List();
+
+    expect(result, isA<Ok<List<{{Entity}}>>>());
+    expect(
+      (result as Ok<List<{{Entity}}>>).value,
+      const [{{Entity}}(id: '1', title: 'First')],
+    );
+  });
+
+  test('{{RepositoryImpl}} passes a typed failure through', () async {
+    final repository = {{RepositoryImpl}}(
+      apiClient: Fake{{Source}}(const NetworkFailure()),
+    );
+
+    final result = await repository.fetch{{Feature}}List();
+
+    expect(
+      result,
+      isA<Error<List<{{Entity}}>>>()
+          .having((r) => r.error, 'error', isA<NetworkFailure>()),
+    );
+  });
+
+  test('{{Feature}}ApiModel.fromJson rejects a malformed payload', () {
+    expect(() => {{Feature}}ApiModel.fromJson({'id': 1}), throwsFormatException);
+    expect(() => {{Feature}}ApiModel.fromJson(null), throwsFormatException);
+  });
+}

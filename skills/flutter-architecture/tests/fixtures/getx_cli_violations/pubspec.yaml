@@ -1,0 +1,9 @@
+name: getx_cli_violations
+publish_to: 'none'
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.6.6
+  dio: ^5.4.0

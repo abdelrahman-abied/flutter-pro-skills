@@ -1,0 +1,30 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:provider/provider.dart';
+
+import '{{import:entity}}';
+import '{{import:repository}}';
+{{#clean}}import '{{import:usecase}}';
+{{/clean}}import '{{import:notifier}}';
+import '{{import:view}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async =>
+      const [{{Entity}}(id: '1', title: 'First')];
+}
+
+void main() {
+  testWidgets('{{View}} renders the loaded items', (tester) async {
+    await tester.pumpWidget(
+      ChangeNotifierProvider(
+        create: (context) => {{Logic}}({{dep}}: {{fakeDep}})..load(),
+        child: const MaterialApp(home: {{View}}()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsOneWidget);
+  });
+}

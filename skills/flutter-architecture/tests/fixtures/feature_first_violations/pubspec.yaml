@@ -1,0 +1,8 @@
+name: feature_first_violations
+publish_to: 'none'
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0

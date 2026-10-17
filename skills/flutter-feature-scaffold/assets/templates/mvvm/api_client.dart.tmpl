@@ -1,0 +1,31 @@
+import 'package:dio/dio.dart';
+
+import '{{import:failure}}';
+import '{{import:http_client}}';
+import '{{import:result}}';
+import '{{import:api_model}}';
+
+/// Wraps the {{title_lc}} endpoints. Stateless: one service per data source.
+class {{Source}} {
+  /// [_client] is the app's configured client: base URL, timeouts and auth.
+  const {{Source}}(this._client);
+
+  final Dio _client;
+
+  Future<Result<List<{{Feature}}ApiModel>>> fetch{{Feature}}List() async {
+    // TODO: call the backend through the injected client; auth headers come from its interceptor.
+    try {
+      final response = await _client.get<Object?>('/{{feature}}');
+      return switch (response.data) {
+        final List<Object?> rows => Result.ok([
+            for (final row in rows) {{Feature}}ApiModel.fromJson(row),
+          ]),
+        _ => const Result.error(ParseFailure()),
+      };
+    } on DioException catch (error) {
+      return Result.error(failureFromDio(error));
+    } on FormatException {
+      return const Result.error(ParseFailure());
+    }
+  }
+}

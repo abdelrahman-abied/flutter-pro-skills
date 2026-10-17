@@ -1,0 +1,13 @@
+lib/core/error/failure.dart
+lib/core/network/http_client.dart
+lib/features/orders/cubit/orders_cubit.dart
+lib/features/orders/cubit/orders_state.dart
+lib/features/orders/data/data_providers/orders_api.dart
+lib/features/orders/data/models/orders.dart
+lib/features/orders/data/repositories/orders_repository.dart
+lib/features/orders/data/repositories/orders_repository_impl.dart
+lib/features/orders/view/orders_page.dart
+lib/features/orders/widgets/orders_list.dart
+test/features/orders/cubit/orders_cubit_test.dart
+test/features/orders/data/repositories/orders_repository_impl_test.dart
+test/features/orders/view/orders_page_test.dart

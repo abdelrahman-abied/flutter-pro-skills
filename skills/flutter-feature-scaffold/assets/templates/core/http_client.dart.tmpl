@@ -1,0 +1,35 @@
+import 'package:dio/dio.dart';
+{{#riverpod}}import 'package:riverpod_annotation/riverpod_annotation.dart';
+{{/riverpod}}
+import '{{import:failure}}';
+{{#riverpod}}
+part '{{self}}.g.dart';
+{{/riverpod}}
+/// Builds the app's one configured HTTP client. Remote sources receive it, so
+/// the base URL, timeouts and auth are set here once, never in a feature.
+Dio createHttpClient() {
+  final dio = Dio(
+    BaseOptions(
+      // TODO: read the base URL from AppConfig or the flavor; keep it https://.
+      baseUrl: 'https://api.example.com',
+      connectTimeout: const Duration(seconds: 10),
+      receiveTimeout: const Duration(seconds: 20),
+    ),
+  );
+  // TODO: add the app's auth interceptor here; sources never set auth headers.
+  // Any HTTP logging goes inside `if (kDebugMode)`, with request headers off.
+  return dio;
+}
+{{#riverpod}}
+@Riverpod(keepAlive: true)
+Dio httpClient(Ref ref) {
+  final dio = createHttpClient();
+  ref.onDispose(dio.close);
+  return dio;
+}
+{{/riverpod}}
+/// Maps a Dio error to a [Failure] that carries no URL, headers or body.
+Failure failureFromDio(DioException error) => switch (error.type) {
+      DioExceptionType.badResponse => ServerFailure(error.response?.statusCode),
+      _ => const NetworkFailure(),
+    };

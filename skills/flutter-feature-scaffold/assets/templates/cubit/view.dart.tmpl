@@ -1,0 +1,52 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '{{import:failure}}';
+import '{{import:dep}}';
+import '{{import:logic}}';
+import '{{import:list}}';
+
+/// Provides the [{{Logic}}] (which `BlocProvider` closes) and shows [{{InnerView}}].
+class {{View}} extends StatelessWidget {
+  const {{View}}({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => {{Logic}}({{dep}}: context.read<{{Dep}}>())..load(),
+      child: const {{InnerView}}(),
+    );
+  }
+}
+
+/// Renders the {{title_lc}} states. One-time effects belong in a `BlocListener`.
+class {{InnerView}} extends StatelessWidget {
+  const {{InnerView}}({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{title}}')),
+      body: BlocBuilder<{{Logic}}, {{State}}>(
+        builder: (context, state) => switch (state) {
+          {{Feature}}Initial() ||
+          {{Feature}}LoadInProgress() => const Center(child: CircularProgressIndicator()),
+          {{Feature}}LoadFailure(:final failure) => Center(
+              child: TextButton.icon(
+                onPressed: context.read<{{Logic}}>().load,
+                icon: const Icon(Icons.refresh),
+                label: Text(_failureMessage(failure)),
+              ),
+            ),
+          {{Feature}}LoadSuccess(:final items) => {{ListWidget}}(items: items),
+        },
+      ),
+    );
+  }
+}
+
+// TODO: map the failure to a localized, user-safe message.
+String _failureMessage(Failure failure) => switch (failure) {
+      NetworkFailure() => 'No connection. Tap to retry.',
+      _ => 'Could not load {{title_lc}}. Tap to retry.',
+    };

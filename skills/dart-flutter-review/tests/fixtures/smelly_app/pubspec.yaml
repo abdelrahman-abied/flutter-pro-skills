@@ -1,0 +1,15 @@
+name: smelly_app
+description: Test fixture for dart-flutter-review. Planted smells; not a real app.
+publish_to: none
+
+environment:
+  sdk: ^3.5.0
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ">=2.5.0 <4.0.0"
+  dio: ^5.4.0
+
+dev_dependencies:
+  flutter_lints: ">=4.0.0 <7.0.0"

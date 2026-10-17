@@ -1,0 +1,8 @@
+{
+  "@@locale": "en",
+  "appTitle": "Shop",
+  "productsTitle": "Products",
+  "searchHint": "Search products",
+  "genericError": "Something went wrong. Please try again.",
+  "retry": "Retry"
+}

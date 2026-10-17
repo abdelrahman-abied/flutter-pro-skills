@@ -1,0 +1,32 @@
+import 'package:dio/dio.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '{{import:http_client}}';
+import '{{import:response}}';
+
+part '{{self}}.g.dart';
+
+abstract interface class {{Source}} {
+  Future<List<{{Feature}}Response>> get{{Feature}}List();
+}
+
+class {{SourceImpl}} implements {{Source}} {
+  // The app's configured client: base URL, timeouts and the auth interceptor.
+  final Dio _client;
+  const {{SourceImpl}}(this._client);
+
+  @override
+  Future<List<{{Feature}}Response>> get{{Feature}}List() async {
+    // TODO: call the backend through the injected client; auth headers come from its interceptor.
+    final response = await _client.get<Object?>('/{{feature}}');
+    return switch (response.data) {
+      final List<Object?> rows => [
+          for (final row in rows) {{Feature}}Response.fromJson(row),
+        ],
+      _ => throw const FormatException('Expected a list of {{title_lc}}'),
+    };
+  }
+}
+
+@riverpod
+{{Source}} {{sourceFn}}(Ref ref) => {{SourceImpl}}(ref.watch(httpClientProvider));

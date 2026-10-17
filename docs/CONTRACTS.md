@@ -1,0 +1,886 @@
+# Suite contracts (maintainers & contributors)
+
+This file is the single source of truth for everything that crosses a skill
+boundary: file ownership, portability rules, rule IDs, output formats and CLIs.
+If you change something here, update every skill that depends on it in the same PR.
+
+Repo: `flutter-pro-skills`. Author: Abdulrahman Obaid (`abdelrahman-abied`). License: MIT
+(content derived from dart.dev / docs.flutter.dev is CC BY; see `NOTICE.md`).
+
+---
+
+## 1. Layout and ownership
+
+```
+flutter-pro-skills/
+├── README.md  LICENSE  NOTICE.md  AGENTS.md  install.sh  .gitignore
+├── docs/CONTRACTS.md                     ← this file
+├── tests/run_all.sh  tests/validate_skills.py
+├── .github/workflows/test.yml
+└── skills/
+    ├── dart-flutter-best-practices/      hub: router + WRITE mode + Effective Dart + lints
+    │   ├── SKILL.md
+    │   ├── references/effective-dart.md   (generated from dart.dev; do not hand-edit rows)
+    │   ├── assets/analysis_options.yaml   assets/AGENTS-snippet.md
+    │   └── scripts/format-dart-hook.sh
+    ├── dart-naming/                      naming conventions (Dart, Flutter, general, per-architecture roles)
+    │   ├── SKILL.md  references/naming.md
+    ├── flutter-ui-practices/             widgets, lifecycle, async/context, performance, theming, a11y, UI tests
+    │   ├── SKILL.md  references/flutter-ui.md
+    ├── flutter-architecture/             architecture detection, patterns, anti-patterns, import-graph checker
+    │   ├── SKILL.md
+    │   ├── references/  detect.md mvvm.md mvn.md mvc.md clean-architecture.md
+    │   │                repository-pattern.md bloc.md state-management.md anti-patterns.md (index)
+    │   │                anti-patterns/<group>.md (entries, see §15)
+    │   ├── scripts/arch_check.py
+    │   └── tests/  run.sh  fixtures/…  (expected results asserted in run.sh)
+    └── dart-flutter-review/              review orchestrator (mechanical pass + parallel reviewers + report)
+        ├── SKILL.md  references/review-guide.md  references/finding-format.md
+        ├── scripts/review.sh  scripts/heuristics.py
+        └── tests/run.sh  tests/fixtures/…
+```
+
+| Owner (build phase) | Files |
+|---|---|
+| Lead | root files, `docs/`, `tests/`, `.github/` |
+| Agent A: architecture knowledge | `skills/flutter-architecture/SKILL.md`, `skills/flutter-architecture/references/**` |
+| Agent B: architecture tooling | `skills/flutter-architecture/scripts/**`, `skills/flutter-architecture/tests/**` |
+| Agent C: split skills | `skills/dart-naming/**`, `skills/flutter-ui-practices/**` |
+| Agent D: hub + review | `skills/dart-flutter-best-practices/**`, `skills/dart-flutter-review/**` |
+
+Never edit a file you don't own. If you need a change in someone else's file,
+say so in your final report.
+
+---
+
+## 2. Portability rules (any agent, not just one vendor)
+
+The skills follow the open Agent Skills standard (https://agentskills.io/specification)
+and must work in Claude Code, Cursor, Codex, Gemini CLI, GitHub Copilot, OpenCode,
+Antigravity, and plain "read this file" agents.
+
+**Frontmatter** (validated by `tests/validate_skills.py`):
+
+```yaml
+---
+name: <must equal folder name; a-z 0-9 single hyphens; ≤64>
+description: <≤1024 chars, target ≤900; what it does + when to use; keyword-rich; "pushy">
+license: MIT
+metadata:
+  author: abdelrahman-abied
+  version: "1.0.0"
+  suite: flutter-pro-skills
+---
+```
+
+There is no `allowed-tools` field (it's experimental and vendor-specific), and
+there is no `compatibility` field unless a skill really needs one.
+
+**Body:**
+- SKILL.md must be ≤500 lines, and ideally ≤~5000 tokens. References sit one
+  level deep. Any reference over 300 lines starts with a `## Contents` list.
+- **No vendor tool names.** Don't write "Skill tool", "Agent tool",
+  "Task tool", "Read/Edit/Write tool", "ToolSearch" or "PostToolUse" as
+  instructions. Say "read", "run", "spawn a sub-agent if your agent supports
+  it". You may mention a vendor *as an example* (e.g. "Claude Code's
+  Agent/Task tool, Codex sub-agents"), but always provide the fallback.
+- The project instructions file is "your agent's project instructions file
+  (`AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `.cursor/rules/…`, `.github/copilot-instructions.md`)".
+  Don't say only `CLAUDE.md`.
+- **Cross-skill references** use the skill name plus a relative path fallback.
+  For example: "load the `flutter-architecture` skill (if your agent doesn't
+  auto-load skills, read `../flutter-architecture/SKILL.md`)". Assume the
+  suite is installed as sibling folders. If a sibling is missing, degrade
+  gracefully and say so.
+- Paths inside a skill are relative to the skill root (`scripts/review.sh`,
+  `references/naming.md`). `<skill-dir>` means "the folder containing this SKILL.md".
+
+**Scripts:**
+- Use `bash` (must run on macOS bash 3.2 and Linux bash 5, with no GNU-only
+  flags) and `python3` (≥3.8, **stdlib only**).
+- Scripts are **read-only**: they never modify the analysed project.
+- Always run Python with `python3 -I` (isolated mode) when a script invokes it.
+- Exit codes: `0` means the report was produced (findings don't fail the run),
+  `2` means a usage or environment error. A future `--ci` flag may exit `1` on
+  High findings.
+
+**Writing style:** explain *why*, use the imperative, avoid all-caps MUSTs,
+match the voice of the existing references. Keep each rule at the strength of
+its source: **DO/DON'T** ≈ always, **PREFER/AVOID** = unless there's a good
+reason, **CONSIDER** = depends on context.
+
+---
+
+## 3. Shared vocabulary
+
+**Precedence when sources disagree** (all skills):
+1. The project's own decisions: its lint config, its project instructions
+   file, its declared architecture, and conventions used consistently in the
+   code.
+2. The pattern's own canonical source (MVN → the `mvn` spec by its author;
+   Bloc → bloclibrary.dev; Riverpod → riverpod.dev; MVVM → docs.flutter.dev
+   architecture guide).
+3. Effective Dart.
+4. Flutter team guidance for apps.
+5. The Flutter framework's internal style guide. Use it only where the project
+   already follows it.
+
+**Severity** (findings):
+
+| Severity | Meaning |
+|---|---|
+| High | A bug now or under ordinary use: crash, leak, lost error, wrong UI, or an architecture violation that defeats the pattern's core guarantee (e.g. I/O inside widgets, domain depending on data) |
+| Medium | Noticeably hurts maintainability, testability or performance, or is a costly API to change later |
+| Low | Idiom or consistency issue with an easy, local fix |
+| Info | Observations and trade-offs, not defects (e.g. "pass-through use cases add ceremony") |
+| Mechanical | Fully resolved by `dart fix --apply` / `dart format`. Always reported as **one** collapsed finding |
+
+---
+
+## 4. Finding format (every reviewer pass returns this)
+
+Reviewer passes (the parallel sub-agents in `dart-flutter-review`) return their
+findings as Markdown text in exactly this shape, so the lead can merge and
+dedupe them mechanically:
+
+```markdown
+### [HIGH] AnimationController never disposed
+- id: UI-lifecycle            # ARCH-0xx | AP-xxx | NAME-xxx | UI-xxx | ED-xxx | LINT:<code>  (slugs are lowercase)
+- where: lib/ui/home/home_screen.dart:31, lib/ui/cart/cart_screen.dart:12
+- evidence: `late final _c = AnimationController(vsync: this);` with no dispose() override
+- rule: Flutter: dispose what you create (flutter-ui-practices › flutter-ui.md §1)
+- why: keeps ticking and retains the State after pop → memory/CPU leak per visit
+- fix: |
+    @override
+    void dispose() { _c.dispose(); super.dispose(); }
+- confidence: confirmed       # confirmed (read the code) | likely (strong signal, not fully traced)
+```
+
+ID prefixes:
+- `ARCH-0xx`: import-graph rules (§6)
+- `ARCH-1xx`: code-pattern rules (§6)
+- `AP-<slug>`: documented anti-patterns with no automated check (in anti-patterns.md)
+- `NAME-<slug>`: naming
+- `UI-<slug>`: Flutter UI and lifecycle
+- `ED-<slug>`: an Effective Dart guideline
+- `LINT:<code>`: an analyzer diagnostic
+- `SEC-<slug>`: a security finding (optional pass that defers to the separate `flutter-security-audit` skill)
+
+Use free-form but stable slugs for NAME/UI/ED (e.g. `NAME-get-prefix`,
+`UI-context-after-await`, `ED-future-void`).
+
+---
+
+## 5. Architecture profile (output of `arch_check.py --json`)
+
+```json
+{
+  "schema": "flutter-pro-skills/arch-profile@1",
+  "root": "/abs/path", "package": "my_app",
+  "profile": {
+    "presentation": "mvn|mvvm|bloc|mvc|getx|provider|riverpod|setstate|unknown",
+    "clean_architecture": true,
+    "repository_pattern": true,
+    "use_cases": true,
+    "layout": "feature-first|layer-first|hybrid",
+    "state_management": ["riverpod"],
+    "di": ["riverpod", "get_it"],
+    "confidence": "high|medium|low",
+    "signals": ["dependency: flutter_riverpod, riverpod_annotation", "12 files under features/*/presentation/notifier/", "suffix *Notifier x14"]
+  },
+  "stats": {"files": 120, "by_layer": {"domain": 30, "data": 35, "presentation": 45, "core": 8, "app": 2}, "features": ["auth", "movie"]},
+  "violations": [
+    {"id": "ARCH-005", "name": "ui-depends-on-data-source", "severity": "high",
+     "file": "lib/features/movie/presentation/view/movie_view.dart", "line": 4,
+     "evidence": "import 'package:dio/dio.dart';",
+     "message": "A view imports a transport/data-source; route it through the notifier/view model.",
+     "note": ""}
+  ],
+  "suppressed": [{"id": "ARCH-001", "file": "lib/features/movie/domain/usecases/movie_usecase.dart", "line": 7, "reason": "MVN DI seam (use-case provider)"}]
+}
+```
+
+### Detection of `presentation` (most specific wins; the evidence goes in `signals`)
+
+| Value | Strong signals |
+|---|---|
+| `mvn` | Riverpod dependency **and** (`notifier/` folders under `presentation/`, **or** ≥3 `*Notifier` classes extending a generated `_$X`), **and** no `view_model(s)/` folders |
+| `mvvm` | `view_model(s)/` or `viewmodel(s)/` folders, or ≥3 `*ViewModel` classes (with any state solution: ChangeNotifier, Provider, Riverpod, stacked) |
+| `bloc` | `bloc` / `flutter_bloc` dependency, or `*_bloc.dart` / `*_cubit.dart` files |
+| `getx` | `get` dependency and `GetxController` subclasses |
+| `mvc` | `mvc_pattern` / `fluttery_framework` dependency, or `controller(s)/` folders with `*Controller` classes that aren't GetX and aren't Flutter's own controllers, plus `model(s)/` + `view(s)/` |
+| `provider` | `provider` dependency, ChangeNotifier models, and no view-model naming |
+| `riverpod` | Riverpod dependency without MVN folder or naming conventions |
+| `setstate` | No state-management dependency, mostly StatefulWidget plus setState |
+| `unknown` | Nothing conclusive |
+
+`clean_architecture`: there are `domain/` and `data/` directories (top-level
+or per feature), plus at least one of `usecases/`|`use_cases/` or `entities/`.
+`repository_pattern`: there are `*Repository` types.
+`layout`: `feature-first` if `lib/features/` (or `lib/modules/`, `lib/feature/`)
+holds ≥1 feature (see "As built"), `layer-first` if top-level `lib/{data,domain,presentation,ui,screens,models,services}`,
+and `hybrid` if both.
+The CLI's `--profile <value>` overrides the presentation detection (a
+declared architecture beats inference).
+
+### File classification (layers and roles)
+
+Path segments are matched case-insensitively. **Skip** generated files
+(`*.g.dart`, `*.freezed.dart`, `*.gr.dart`, `*.mocks.dart`, `*.config.dart`,
+`lib/generated/`, `l10n` output).
+
+- **Layer**, from the first match among these path segments:
+  - `domain`
+  - `data`
+  - `presentation`, `ui`, `view(s)`, `screens`, `pages`, `widgets`
+  - `core`, `shared`, `common`, `utils`
+  - `app`, `di`, `injection`, `router`, `routes`, or `lib/main*.dart`. This is the composition root, which may import anything.
+  - In layer-first projects: `models`, `services`, `repositories`, `api`, `datasources` count as **data**.
+- **Role**, from folder or suffix:
+  - `entity`
+  - `repository-contract` (domain/repositories, or an `abstract`/`interface` repository class)
+  - `repository-impl` (data/repositories, or `*_repository_impl.dart`)
+  - `usecase`
+  - `dto` (data/models, `*_dto.dart`, `*_request.dart`, `*_response.dart`)
+  - `source` (sources/, datasources/, data_sources/, api/, remote/, local/, `*_source.dart`, `*_api.dart`, `*_client.dart`)
+  - `service` (services/, `*_service.dart`)
+  - `logic` (notifier(s)/, view_model(s)/, viewmodel(s)/, bloc(s)/, cubit(s)/, controller(s)/, plus suffixes `_notifier`, `_view_model`, `_viewmodel`, `_bloc`, `_cubit`, `_controller`, `_store`)
+  - `state` (state/, `*_state.dart`)
+  - `view` (view(s)/, screens/, pages/, `*_screen.dart`, `*_page.dart`, `*_view.dart`)
+  - `widget` (widget(s)/, other presentation files)
+  - `other`
+- **Feature**: the path segment after `features/`, `feature/` or `modules/`.
+- **I/O packages** (transport/persistence): `dio`, `http`, `retrofit`,
+  `chopper`, `graphql`, `graphql_flutter`, `sqflite`, `drift`, `hive`,
+  `hive_flutter`, `isar`, `objectbox`, `shared_preferences`,
+  `flutter_secure_storage`, `cloud_firestore`, `firebase_database`,
+  `firebase_storage`, `firebase_auth`, `supabase_flutter`, `supabase`,
+  `web_socket_channel`, `grpc`, `path_provider`.
+
+Imports are resolved for relative paths and for `package:<own package>/…`
+(from pubspec `name:`). External packages are recorded by package name.
+`export` directives are treated like imports.
+
+---
+
+## 6. Architecture rule catalog
+
+Agent A documents **every** rule below in `anti-patterns.md`: the problem, why it
+matters, a bad/good Dart example, the fix, and its profile notes. Agent B
+implements every rule whose detection is `import` or `regex`, using exactly
+these IDs, names and default severities. "Profiles" says where a rule applies.
+`all` means every presentation profile, including unknown.
+
+### Import-graph rules
+
+| ID | name | default severity | profiles | rule |
+|---|---|---|---|---|
+| ARCH-001 | domain-depends-on-data | high | where a domain layer exists | A domain file imports a data-layer file. **MVN suppression:** a file under `domain/usecases/` containing `@riverpod`, importing a `repository-impl` file, goes to `suppressed` with the reason "MVN DI seam (use-case provider)" |
+| ARCH-002 | domain-depends-on-presentation | high | where a domain layer exists | A domain file imports a presentation file |
+| ARCH-003 | domain-depends-on-framework | medium | where a domain layer exists | A domain file imports `package:flutter/*` (except `foundation.dart`, which is **low**), any I/O package, `flutter_riverpod`/`hooks_riverpod`, `flutter_bloc`, `provider` or `get`. `riverpod_annotation`/`riverpod` are allowed in `domain/usecases/` under the mvn profile |
+| ARCH-004 | data-depends-on-presentation | high | all | A data file imports a presentation file |
+| ARCH-005 | ui-depends-on-data-source | high | all | A `view`/`widget` role file imports a `source`/`service`/`repository-impl` file or an I/O package |
+| ARCH-006 | ui-depends-on-dto | medium | clean_architecture=true, or the imported file is `*_dto/_request/_response.dart` | A presentation file imports a `dto` file |
+| ARCH-007 | logic-depends-on-concrete-data | medium | all | A `logic` file imports a `source`/`service`/`repository-impl` file or an I/O package. (Importing an abstract repository contract is fine) |
+| ARCH-008 | view-depends-on-repository | medium | mvvm, mvn, bloc, mvc, getx | A `view`/`widget` file imports a repository (contract or impl) or a use case. **Bloc exemption:** the file contains `BlocProvider(`, `RepositoryProvider(` or `MultiRepositoryProvider(` |
+| ARCH-009 | logic-depends-on-flutter-ui | medium | all (getx: low) | A `logic` file imports `package:flutter/material.dart`, `widgets.dart` or `cupertino.dart` (`foundation.dart` is OK) |
+| ARCH-010 | sibling-logic-dependency | medium | bloc (medium), mvvm/mvc/getx (low); **not** mvn/riverpod (the MVN spec sanctions `ref.watch(otherProvider)` in `build()`) | A `logic` file imports another `logic` file (excluding its own state/event `part`s) |
+| ARCH-011 | repository-depends-on-repository | medium | all | A repository file imports another repository file. **Exempt:** an impl importing its own contract (same stem with `_impl` removed) |
+| ARCH-012 | mvn-notifier-bypasses-usecase | medium | mvn only | A notifier imports a `repository-contract`, `repository-impl`, `source` or `service` file instead of a use case |
+| ARCH-013 | core-depends-on-feature | medium | feature-first, hybrid | A `core`/`shared`/`common` file imports a file under `features/` |
+| ARCH-014 | cross-feature-internal-import | low | feature-first, hybrid | `features/a/**` imports `features/b/(data|presentation)/**`. Importing `features/b/domain/**` is allowed |
+| ARCH-015 | feature-cycle | medium | feature-first, hybrid | There is a cycle in the feature→feature import graph. Report once per cycle, with the path `a → b → a` |
+
+### Code-pattern rules (regex/heuristic, per file; comments stripped)
+
+| ID | name | default severity | profiles | rule |
+|---|---|---|---|---|
+| ARCH-101 | io-in-widget | high | all | A widget/State file (`extends StatelessWidget|StatefulWidget|ConsumerWidget|ConsumerStatefulWidget|HookWidget|HookConsumerWidget` or `extends State<`) contains `http.(get|post|put|patch|delete)(`, `Dio(`, `dio.(get|post|put|patch|delete|request)(`, `SharedPreferences.getInstance(`, `FirebaseFirestore.instance`, `openDatabase(` or `jsonDecode(` |
+| ARCH-102 | context-in-logic | medium | all (not getx for `Get.` navigation) | A `logic` file has a `BuildContext` parameter or field, or calls `Navigator.of(`, `ScaffoldMessenger.of(`, `showDialog(`, `showModalBottomSheet(`, `context.go(`/`context.push(` |
+| ARCH-103 | god-file | medium | all | A non-generated file whose length exceeds its role's limit. The default limits are logic >400 lines, view/widget >500, and any file >800. Report the line count |
+| ARCH-104 | service-locator-in-ui | low | all except getx | A `view`/`widget` file uses `GetIt.I`, `GetIt.instance`, `getIt<`, `getIt(`, `sl<`, `locator<` or `Get.find<` |
+| ARCH-105 | global-mutable-state | medium | all | A top-level variable that isn't `final`/`const` in `lib/`, or a `static` field that isn't `final`/`const` in a class that isn't a Flutter `State` |
+| ARCH-106 | mutable-state-class | medium | mvn, bloc, riverpod, mvvm | A `state`-role file (not a Flutter `State<…>` subclass) declares an instance field that isn't `final` |
+| ARCH-107 | repository-leaks-transport | medium | repository_pattern=true | A repository file has a public method returning `Response<`, `http.Response`, `Map<String, dynamic>`, or a type ending in `Dto`/`Response`/`Request` |
+| ARCH-108 | concrete-repository-only | low | clean_architecture=true, mvn, mvvm | A `class XRepository` is concrete and no `abstract`/`interface`/`sealed` `XRepository` exists anywhere in `lib/` |
+| ARCH-109 | ephemeral-state-in-provider | low | riverpod, mvn, provider | A `logic` file, or a file declaring providers (`@riverpod`, `Provider(`, `NotifierProvider`, `ChangeNotifierProvider(`), constructs a `TextEditingController`, `ScrollController`, `FocusNode`, `PageController` or `TabController` |
+| ARCH-110 | provider-init-from-widget | low | riverpod, mvn | An `initState()` body contains `ref.read(` followed by a call on the result (e.g. `ref.read(p.notifier).load()` or `ref.read(p).init()`) |
+| ARCH-111 | event-flag-in-state | low | mvn, bloc, mvvm, riverpod | A `state`-role file declares a `bool` field named `show*`, `should*`, `navigate*`, `open*`, `pop*` or `is*Shown`, i.e. a one-time event modelled as persistent state |
+| ARCH-112 | mvn-forbidden-naming | low | mvn only | Class declarations ending in `ViewModel`, `VM` or `Controller` (except Flutter/animation controllers declared as fields), or `controller(s)/`/`view_model(s)/` folders |
+| ARCH-113 | getx-in-build | low | getx | `Get.put(` or `Get.find(` inside a `build(` method of a widget file |
+
+### Documented-only anti-patterns (agent judgment; Agent A defines them, no script)
+
+These use `AP-` slugs. The minimum set:
+
+- `AP-massive-view`: logic in widgets, or a "smart UI"
+- `AP-god-viewmodel`: also god notifier / god bloc
+- `AP-boolean-soup-state`: `isLoading` + `error` + `data` that can contradict each other
+- `AP-null-as-loading`
+- `AP-dto-as-ui-state`
+- `AP-leaky-repository`: exposes transport errors and types
+- `AP-two-sources-of-truth`
+- `AP-passthrough-usecase`: Info, and not flagged under mvn, where it is prescribed
+- `AP-premature-domain-layer`: over-architecting a small app
+- `AP-interface-for-everything`: when there is no second implementation or fake
+- `AP-exceptions-across-layers`: vs. a Result type (Flutter design-patterns/result)
+- `AP-stream-subscription-in-widget`
+- `AP-bloc-to-bloc`: the reading-level counterpart of ARCH-010
+- `AP-singleton-abuse`
+- `AP-context-passed-down-to-data`
+- `AP-hardcoded-config-in-sources`
+- `AP-navigation-in-logic`: and the sanctioned ways per pattern
+- `AP-shared-mutable-model`
+- `AP-feature-envy-across-features`
+- `AP-anemic-vs-fat-entity`: and when anemic entities are *fine* in Flutter
+- `AP-mvc-massive-controller`
+- `AP-getx-service-locator-everywhere`
+- `AP-riverpod-dynamic-providers`
+- `AP-riverpod-side-effects-in-provider-build`
+
+Added during the build (documented in anti-patterns.md):
+
+- `AP-viewmodel-exposes-repository` (low)
+- `AP-mvn-legacy-riverpod-syntax` (low, mvn only)
+- `AP-default-hides-missing-state` (low)
+- `AP-mixed-architecture` (medium, or info for a documented migration). Report it **once** per codebase, never per file.
+
+### As built (deviations recorded after the build; these win over the text above)
+
+- **Layer order:** domain → data → presentation → composition root → core. So
+  `lib/core/data/x` is data and `lib/core/router/` is the composition root.
+  ARCH-013 uses a separate "core area" test: under core/shared/common, outside
+  `features/`, and not the composition root.
+- **Composition root:** `lib/main*.dart`, files directly in `lib/app/`, and
+  `di/ injection/ router/ routes/ routing/` folders. `lib/app/<subfolder>/**`
+  is classified by its role folder (get_cli layouts).
+- **Features:** detected wherever `features/`, `feature/` or `modules/` appears.
+  **One** feature is enough for `feature-first` (`hybrid` if layer-first
+  top-level folders also exist).
+- **Fallbacks:**
+  - A file with no layer segment takes its layer from its role.
+  - `models/services/repositories/api/datasources` mean data in any layout.
+  - Role gating: no UI roles in domain or data, no data roles in domain or
+    presentation.
+  - An abstract `*Repository` under `data/repositories/` is a
+    repository-contract.
+  - Content decides the role last: `@riverpod class`, `extends _$`,
+    Cubit/Bloc/GetxController mean logic; Widget subclasses mean widget.
+- **New role `event`** (`*_event(s).dart`), so Bloc events aren't `logic`.
+- **Symbol usage** (ARCH-005/007/008/011/012, file targets): an import counts
+  only if the importer references a *primary* symbol of the target: a
+  contract, a `*Repository`/`*Source`/`*Service`/`*UseCase` class, a class
+  with async methods or `call()`, an implementor of one of those, or a
+  provider. Enums, exceptions, value classes and pure functions don't count.
+  I/O package imports always count. For ARCH-011 the symbol must be a
+  `*Repository` or a provider. The own-contract exemption also covers stem
+  prefixes (`auth_repository_remote` → `auth_repository`).
+- **Rule refinements:**
+  - ARCH-111 matches only event-like names (see anti-patterns.md).
+  - ARCH-101 counts hits only inside widget classes, and ARCH-109 only
+    outside them.
+  - ARCH-102 also matches `Navigator.push*/pop*`.
+  - ARCH-104 also matches `getIt.get<` and `sl()`.
+  - ARCH-113 also matches `Get.lazyPut` and `Get.find<T>`.
+  - ARCH-105 exempts `@visibleForTesting`.
+  - ARCH-112 exempts real `*Controller` supertypes, and reports a forbidden
+    folder once.
+  - ARCH-003 flags riverpod in domain except under mvn in `domain/usecases/`.
+  - ARCH-010 is low under provider, setstate and unknown.
+  - ARCH-015 reports at most 50 cycles of up to 8 features.
+- **Detection order:** mvn, getx, mvvm, bloc, mvc, provider, riverpod,
+  setstate. A `get` dependency alone means getx with low confidence. Under an
+  explicit non-mvn `--profile`, MVN allowances stop applying.
+- **Also skipped as generated:** `app_localizations*`, `messages_*`, the
+  `l10n.yaml` `output-dir`, `*.pb*.dart`, `*.chopper.dart`, and any file whose
+  header says "GENERATED CODE - DO NOT MODIFY".
+- **No `lib/`:** an empty report with exit 0.
+
+### Suppression
+
+Projects can silence a rule with comments, which `arch_check.py` honours:
+
+- `// arch-ignore: ARCH-005 <reason>` on the offending line or the line above it
+- `// arch-ignore-file: ARCH-005 <reason>` anywhere in the file
+
+Suppressed hits go to `suppressed` with the reason.
+
+---
+
+## 7. CLIs
+
+`skills/flutter-architecture/scripts/arch_check.py`:
+
+```
+python3 -I arch_check.py <project-root> [--json] [--files <file-with-relative-paths>]
+                         [--profile auto|mvn|mvvm|bloc|mvc|getx|provider|riverpod|setstate]
+                         [--max <n>]   # example locations per rule in text mode (default 5)
+```
+
+- The script builds the full graph over `lib/`. `--files` limits **reported
+  violations** to those files (for diff reviews).
+- Text output has two sections. `== ARCHITECTURE PROFILE` holds key: value
+  lines, and `== ARCHITECTURE VIOLATIONS` holds groups
+  `  [ARCH-005] ui-depends-on-data-source (high) x3 — <message>` followed by
+  `      <file>:<line>  <evidence>` lines and `      ... N more`. Suppressed
+  hits come last as `  suppressed: N (see --json)`.
+- Exit codes: 0 means report produced, 2 means usage error (e.g. no `pubspec.yaml`).
+
+`skills/dart-flutter-review/scripts/review.sh` (existing, extended by Agent D):
+
+```
+bash review.sh <project-root> [--diff <git-ref>] [--no-extra] [--no-arch] [--profile <p>] [--max n]
+```
+
+- It calls `../flutter-architecture/scripts/arch_check.py` when present (and
+  prints `== ARCHITECTURE (skipped: flutter-architecture skill not installed)`
+  otherwise), passing `--files` in diff mode.
+- It finds the stricter lint set at
+  `../dart-flutter-best-practices/assets/analysis_options.yaml`, and skips the
+  EXTRA LINTS section if that file is missing.
+
+---
+
+## 8. Tests
+
+- `tests/run_all.sh` runs `tests/validate_skills.py` and then every
+  `skills/*/tests/run.sh`. It exits non-zero on any failure.
+- A skill's `tests/run.sh` must:
+  - work without the Flutter SDK, skipping (not failing) the parts that need
+    `dart`
+  - print `PASS`/`FAIL` lines
+  - exit 1 on failure
+- Fixtures are tiny projects: a `pubspec.yaml` with `name:` and the
+  dependencies the profile needs, plus `lib/**`. **No `pub get` needed.**
+  arch_check is static.
+- CI: `.github/workflows/test.yml` runs `tests/run_all.sh` on ubuntu-latest
+  and macos-latest.
+
+---
+
+# Phase 2 contracts (v1.1)
+
+## 9. New skills and ownership
+
+| Owner | Files |
+|---|---|
+| Lead | `README.md`, `docs/CONTRACTS.md`, `install.sh`, `tests/`, `skills/dart-flutter-best-practices/SKILL.md` (routing table only), the final integration |
+| Agent E | `skills/flutter-testing/**` (new skill) |
+| Agent F | `skills/flutter-error-handling/**` (new skill) |
+| Agent G | `skills/flutter-feature-scaffold/**` (new skill) |
+| Agent H | `skills/flutter-architecture/scripts/**`, `skills/flutter-architecture/tests/**`, `skills/dart-flutter-review/**`, root `action.yml` |
+| Agent I | `docs/assets/**`, `docs/examples/**`, `docs/PUBLISHING.md`, `CONTRIBUTING.md`, `.github/ISSUE_TEMPLATE/**`, `.github/pull_request_template.md`, `.github/CODEOWNERS` |
+
+The rules in §2 (portability, frontmatter, ≤1024-char descriptions,
+python3 stdlib, bash 3.2, read-only analysis scripts) apply to every new
+skill. Each new skill ships a `tests/run.sh` (§8), which `tests/run_all.sh`
+picks up automatically. Use `metadata.suite: flutter-pro-skills` and
+`version: "1.1.0"`.
+
+New finding-ID prefixes (§4):
+- `TEST-<slug>`: testing.
+- `ERR-0xx` for rules found by a script, `ERR-<slug>` for findings from
+  reading the code: error handling.
+- Scaffold doesn't report findings.
+
+## 10. Per-file classification in the arch profile (Agent H adds; E, F and G consume)
+
+`arch_check.py --json` gains a top-level `"files"` array. The schema string
+stays `arch-profile@1`, because the change only adds keys:
+
+```json
+"files": [{"file": "lib/features/cart/presentation/notifier/cart_notifier.dart",
+           "layer": "presentation", "role": "logic", "feature": "cart",
+           "classes": ["CartNotifier"]}]
+```
+
+`classes` lists the top-level class, mixin and enum names declared in the
+file. Consumers find the checker at `../flutter-architecture/scripts/arch_check.py`
+(relative to their own skill root). If it is missing, they fall back to their
+own minimal classification and say so in their output. They must not import
+its Python internals; they only run it as a subprocess and read the JSON.
+
+## 11. CLIs
+
+`flutter-testing/scripts/test_gaps.py` (E). Read-only.
+```
+python3 -I test_gaps.py <project-root> [--json] [--profile <p>] [--max n]
+```
+- Maps each `lib/` unit (by role: repository-impl, usecase, logic, source,
+  service, view, widget) to its test files. The test file is found by mirrored
+  path (`test/<same path>_test.dart`), else by a name match, else by a test
+  importing the unit.
+- Reports **untested units, ranked by architecture priority**. The order is
+  repositories and use cases, then logic (notifier, view model, bloc), then
+  sources and services, then views.
+- Also reports test smells found by regex over `test/**`:
+  - tests with no `expect`/`verify`
+  - `sleep`/`Future.delayed` in tests
+  - real `http.Client()`/`Dio()` in unit tests
+  - `skip:` without a reason
+  - one test file over 800 lines
+  - mocks of the class under test
+- Text output follows the arch_check style: `== TEST GAPS` and
+  `== TEST SMELLS`, then groups `[TEST-<slug>] (sev) xN — message` with
+  example locations.
+
+`flutter-error-handling/scripts/check_errors.py` (F). Read-only.
+```
+python3 -I check_errors.py <project-root> [--json] [--files <list>] [--profile <p>] [--max n]
+```
+- Rules `ERR-001…` are defined by F and documented in its `references/`.
+  The minimum set:
+  - a swallowed catch
+  - a catch with no `on` in a data or domain layer that doesn't rethrow or map
+  - catching `Error`
+  - a repository letting transport exceptions escape (`DioException`,
+    `SocketException`, `http.ClientException`, `FormatException`) with no
+    mapping
+  - `throw` of a String or Map
+  - a domain or use-case layer that throws transport types
+  - `Future` APIs in repositories that return `null` on failure
+  - presentation showing `e.toString()` to the user
+  - mixing `Result` and throwing within one repository
+- Output style is the same as test_gaps.
+
+`flutter-feature-scaffold/scripts/scaffold.py` (G). This is the **only
+script in the suite that writes files**, and only with `--write`.
+```
+python3 -I scaffold.py <project-root> <feature_name> [--profile auto|mvn|mvvm|bloc|cubit|getx|provider|riverpod]
+                       [--clean] [--entity <Name>] [--write] [--force-dir]
+```
+- The default is a **dry run** that prints the files it would create and their
+  contents' outline.
+- `--write` creates the files, and **never overwrites** an existing file: it
+  skips it and reports the skip.
+- `auto` reads the profile with `arch_check --json` and copies the project's
+  existing conventions: feature-first vs layer-first, singular vs plural
+  folders (`notifier/` vs `notifiers/`), `Screen`/`Page`/`View`, and
+  `Impl`/`Remote` naming. If it can't infer them, it uses the pattern's
+  canonical layout from `flutter-architecture/references/<pattern>.md`.
+- Generated code must pass `dart analyze` with the project's dependencies (for
+  example, MVN output needs `riverpod_annotation` and build_runner). The
+  script prints the dependencies and the codegen command it needs. It doesn't
+  run them.
+
+CI mode (H), in `arch_check.py`:
+```
+--baseline <file>        report only violations not in the baseline
+--write-baseline <file>  write the current violations as a baseline, then exit 0
+--ci [--fail-on high|medium|low]   exit 1 if any reported violation is at or above fail-on (default high)
+```
+- The baseline file is JSON: `{"schema":"flutter-pro-skills/arch-baseline@1","entries":[{"id","file","key"}]}`.
+- `key` is a normalised evidence string with no line numbers, so harmless
+  edits don't invalidate the baseline. Entries are counted per (id, file, key),
+  so duplicates are tracked.
+- `review.sh` gains `--ci`, `--fail-on <sev>` and `--baseline <file>`. In CI
+  mode it exits 1 when the architecture violations at or above fail-on are new
+  versus the baseline, or when the analyzer reports errors. The run also
+  writes a Markdown summary to `$GITHUB_STEP_SUMMARY` when that variable is
+  set.
+- The root `action.yml` is a composite GitHub Action. Its inputs are:
+  - `path` (default `.`)
+  - `base-ref` (diff mode)
+  - `fail-on` (default `high`)
+  - `baseline` (optional)
+  - `flutter` (default `false`; when `true`, it installs Flutter via
+    subosito/flutter-action and runs the full review.sh, otherwise only
+    arch_check)
+
+  It must work as `uses: abdelrahman-abied/flutter-pro-skills@v1`.
+
+## 12. Review integration (H)
+
+`dart-flutter-review` adds optional reviewer passes:
+- **testing**, which loads `flutter-testing` and runs `test_gaps.py`
+- **errors**, which loads `flutter-error-handling` and runs `check_errors.py`
+
+`review.sh` prints `== TEST GAPS` and `== ERROR HANDLING` sections when the
+sibling scripts exist (`--no-tests` and `--no-errors` skip them), and it skips
+gracefully when they're missing.
+
+Agents E and F must keep their CLIs exactly as specified in §11, because H
+builds against them in parallel.
+
+## 13. Phase 2 as built (these entries win over §9–12)
+
+- **arch_check.py CI flags:**
+  - `--baseline <file>`, `--write-baseline <file>`, and `--ci [--fail-on high|medium|low]`.
+  - Text mode adds two lines: `summary: N new, M baselined` (plus how many
+    baseline entries no longer match) and `ci: pass|fail (N at or above <sev>)`.
+  - JSON adds `baseline` and `ci` objects.
+  - A bad or missing baseline exits 2.
+  - With `--ci`, the script exits 1 on failure, so §2's "future `--ci`" is now
+    real.
+  - Keys normalise whitespace. ARCH-103's key is "N lines", so a growing file
+    still matches its baseline entry.
+- **review.sh flags:** `--ci`, `--fail-on`, `--baseline`, `--no-tests`,
+  `--no-errors`. It adds three sections: `== TEST GAPS` / `== TEST SMELLS`
+  (printed by test_gaps.py), `== ERROR HANDLING` (printed by
+  check_errors.py), and `== CI RESULT`.
+  - **CI exit policy:** exit 1 on new architecture violations at or above
+    `--fail-on`, or on analyzer errors in scope. Analyzer errors only count
+    when `.dart_tool/package_config.json` exists. Test gaps, error-handling
+    findings and candidates never fail CI.
+  - When check_errors runs, the heuristic `swallowed-catch` line keeps only
+    its count and says "see ERROR HANDLING".
+  - The action's entry point is `skills/dart-flutter-review/scripts/ci_action.sh`.
+- **action.yml:**
+  - Inputs: `path`, `base-ref`, `fail-on`, `baseline`, `flutter`, `flutter-version`.
+  - Outputs: `new-violations`, `report-path`.
+  - `uses: …@v1` requires a moving `v1` tag.
+- **test_gaps.py:**
+  - JSON keys: `schema` (`flutter-pro-skills/test-gaps@1`), `profile`
+    (+`classifier`, `classifier_note`), `units`, `gaps`, `smells`, `stats`.
+  - Gap IDs are `TEST-untested-{repository,usecase,logic,source,service,view,widget}`.
+  - There's an extra info smell, `TEST-preview-only`, for screenshot tests that
+    save images without asserting.
+  - Only `test/` is credited to units.
+- **check_errors.py:**
+  - JSON keys: `schema` (`flutter-pro-skills/error-check@1`), `root`,
+    `package`, `profile`, `classification`, `stats`, `findings` (note: not
+    `violations`), `suppressed`.
+  - Severities include `info`.
+  - Rules:
+    - ERR-001 swallowed-catch (graded by context: high, medium, low or info)
+    - ERR-002 untyped-catch-unmapped
+    - ERR-003 catches-error
+    - ERR-004 repository-leaks-transport-exception (network transport only, reported per repository)
+    - ERR-005 throws-non-exception
+    - ERR-006 domain-throws-transport
+    - ERR-007 repository-null-on-failure
+    - ERR-008 raw-error-shown-to-user
+    - ERR-009 mixed-result-and-throw
+    - ERR-010 loading-without-error-path
+    - ERR-011 rethrow-loses-stack
+    - ERR-012 missing-global-error-handler (reported once per project)
+    - ERR-013 zone-mismatch
+  - `--files` accepts a list file or a comma-separated list.
+- **scaffold.py:**
+  - Profiles: mvn, mvvm, bloc, cubit, getx, provider, riverpod, each with
+    `--clean`, in both layouts.
+  - `--force-dir` is required to add files to an existing feature folder.
+  - It detects riverpod_generator ≥3 provider naming from pubspec.lock.
+  - On SDK ≥3.12 it uses private named initializing formals.
+  - Plain Riverpod gets a per-feature `di/<f>_providers.dart`.
+  - MVVM `--clean` puts the repository contract in `domain/`.
+  - `SCAFFOLD_SKIP_COMPILE=1` skips the real compile tests.
+- **Known limitation:** a plain-Riverpod app with ≥3 `*Notifier extends _$X`
+  classes is detected as `mvn`. Pass `--profile riverpod`.
+
+---
+
+# Phase 3 contracts (v1.0.0 public release)
+
+## 14. New skills, ownership, release version
+
+The first public release is **v1.0.0**. Every skill's `metadata.version`
+is `"1.0.0"`; the lead normalises existing skills at the end.
+
+| Owner (phase 3, wave 1) | Files |
+|---|---|
+| Agent S | `skills/flutter-architecture/references/**` and the references table in `skills/flutter-architecture/SKILL.md` |
+| Agent N1 | `skills/flutter-navigation/**` (new) |
+| Agent N2 | `skills/flutter-forms/**` (new) |
+| Agent N3 | `skills/flutter-i18n/**` (new) |
+| Agents K1–K3 | nothing in the repo: they **read only**, and clone public apps into their own scratch folders |
+
+The new skills follow §2: portability rules, frontmatter, descriptions of
+≤1024 characters (target ≤900), python3 stdlib, bash 3.2, read-only scripts,
+`tests/run.sh`, and `metadata.suite: flutter-pro-skills`.
+
+New finding-ID prefixes:
+- `NAV-0xx` (script) / `NAV-<slug>` (reading)
+- `FORM-0xx` / `FORM-<slug>`
+- `I18N-0xx` / `I18N-<slug>`
+
+**Optional script per new skill.** A skill may ship one read-only checker:
+
+```
+python3 -I scripts/<check_x>.py <project-root> [--json] [--files <list-file-or-comma-list>] [--profile <p>] [--max n]
+```
+
+- Text output starts with a single header line: `== NAVIGATION`, `== FORMS`
+  or `== I18N`.
+- Groups are `  [NAV-0xx] name (sev) xN — message`, followed by
+  `      file:line  evidence` lines.
+- JSON follows the schema `flutter-pro-skills/<skill>@1`, with the keys
+  `schema`, `root`, `package`, `profile`, `stats`, `findings` (each finding
+  has `id`, `name`, `severity`, `file`, `line`, `evidence`, `message`, `note`)
+  and `suppressed`.
+- Suppress with `// nav-ignore: NAV-0xx <reason>` (likewise `form-ignore`,
+  `i18n-ignore`), on the line or as `-file:` for the whole file.
+- For layer and role, read `../flutter-architecture/scripts/arch_check.py --json`
+  (its `files[]`), with a fallback.
+
+**No duplicate rules.** Before adding a rule, check whether the suite already
+covers it, and cross-reference instead of re-implementing:
+- ARCH-102 / AP-navigation-in-logic: navigation in logic
+- `use_build_context_synchronously` / UI-context-after-await: `context` after `await`
+- the `undisposed-resource` heuristic and UI-lifecycle: undisposed controllers
+- ARCH-109: ephemeral state in providers
+
+**Official recipes.** `flutter/agent-plugins` has
+`flutter-setup-declarative-routing` and `flutter-setup-localization`
+(BSD-3). Defer to them for step-by-step setup ("if installed"). Our skills
+add per-architecture placement, review checklists and checkers.
+
+## 15. Splitting anti-patterns.md (Agent S)
+
+- `references/anti-patterns.md` becomes the **index**:
+  - the Contents list
+  - the index table with every ID's severity, profiles and detection, plus a
+    link to the group file
+  - a one-paragraph summary per group
+- Entries move to `references/anti-patterns/<group>.md`, where `<group>` is
+  one of `dependency-rule`, `presentation`, `state`, `data-and-repositories`,
+  `di-and-globals`, `over-engineering` or `pattern-specific`. Each entry keeps
+  its `### <ID> <name>` heading verbatim, so `grep -rn '^### ARCH-005'
+  references/` still finds it.
+- This is a deliberate exception to "references one level deep". The index
+  is the one level the agent reads first, and it links each group file.
+- Update every in-repo link that points to `anti-patterns.md#…` or says
+  "anti-patterns.md § ID" (grep across `skills/`) so it still resolves. Edit
+  other skills' files **only** for those link fixes.
+
+## 16. Calibration reports (K1–K3 → wave-2 fixers)
+
+Each calibration agent returns, as text in its final message, one section per
+tool (arch_check, check_errors, test_gaps, review.sh heuristics). Each
+section holds:
+- the app, its commit and its detected profile
+- per-rule hit counts, with TP/FP judged by reading the code
+- for every FP **cause** (not every hit):
+  - the rule
+  - a minimal Dart repro (≤25 lines)
+  - why it's a false positive under that pattern's own rules (cite the
+    canonical source: the Flutter guide, bloclibrary, riverpod.dev, the MVN
+    spec)
+  - the suggested fix
+- false negatives it noticed: real anti-patterns the tools missed
+
+The scratch paths of the clones are kept, so fixers can re-run the tools.
+
+## 17. Clean and secure by default (suite positioning)
+
+The suite's promise is that **code an agent writes with these skills is clean
+and secure by default**: correct for the app's architecture *and* safe without
+a later hardening pass.
+
+- New skill **`flutter-secure-defaults`** (Agent N4) owns `skills/flutter-secure-defaults/**`.
+  - **What it covers:** write-time security defaults, placed per layer and per
+    architecture. That means where tokens and credentials live (the data
+    layer, platform secure storage), no secrets in source or `--dart-define`
+    defaults, HTTPS only, auth interceptors in services, no PII or tokens in
+    logs, error messages, analytics or crash reports, input validation at
+    boundaries, deep-link and URL validation, safe WebView defaults, minimal
+    permissions, and release-build flags.
+  - **Its checker:** `scripts/check_secure_defaults.py`, with the §14 CLI and a
+    `== SECURITY DEFAULTS` header. IDs are `SEC-0xx` for checker rules and
+    `SEC-<slug>` for findings from reading the code.
+  - **Defers to `flutter-security-audit`.** That's a separate, existing skill by
+    the same author, covering RASP, obfuscation, pinning, attestation and
+    build hardening, with MASVS/CWE tags. Load it if it's installed and run
+    its `scan.sh` for deep audits. Don't duplicate its checks; cross-reference
+    them.
+- **Every other skill keeps security in scope where it naturally belongs:**
+  - navigation: deep-link validation and auth guards
+  - forms: `obscureText`, autofill hints, no logging of field values, server-side
+    validation reminders
+  - error handling: no secrets or PII in error text (already ERR-008)
+  - scaffold: secure templates, wave 2
+  - review: a security pass, wave 2
+
+## 18. Calibration fixes (phase 3, wave 2): shared decisions
+
+Fixers work from the calibration reports K1–K3 (kept outside the repo; the clones of the public apps sit next to them).
+The rule is that the canonical reference apps must come out clean:
+- flutter/samples compass_app (MVVM)
+- the felangel/bloc examples
+- the rrousselGit/riverpod examples
+
+| Owner (wave 2) | Files |
+|---|---|
+| FX-A | `skills/flutter-architecture/**` (scripts, tests, and the FP or semantics notes in references) |
+| FX-E | `skills/flutter-error-handling/**` |
+| FX-T | `skills/flutter-testing/**` |
+| FX-R | `skills/dart-flutter-review/**` |
+
+**New `files[].role` values** (FX-A adds them; every consumer must also accept unknown roles):
+- `repository`: a concrete `*Repository` with no contract anywhere. Consumers treat it like `repository-impl` for gaps and ERR-004/007/009.
+- `barrel`: only directives, no declarations. Consumers skip it.
+- `di`: top-level providers only, or a `*Factory`/`*Module`/`*Locator` that only constructs objects. Consumers treat it like the composition root and skip it.
+- ChangeNotifier subclasses that aren't `*Repository` or `Command*`, and classic Riverpod notifiers (`StateNotifier`, `Notifier`, `AsyncNotifier`), are `logic` in every profile.
+
+**MVN detection** follows K3's rule: use cases are required (`presentation/notifier(s)/` plus use cases means high). The profile signals add `use cases: N files`.
+
+**Generated-file detection lives in arch_check only.** `files[]` is the source of truth for scope. review.sh, check_errors and test_gaps should use it when it's present. The new skills' checkers already read it.
+
+**One report per import.** When ARCH-005 and ARCH-008, or ARCH-007 and ARCH-012, fire on the same import line, arch_check keeps the more specific or higher-severity one and notes the other ID in `note`.
+
+Every fix lands with a regression fixture built from the report's minimal repro, plus a test asserting the FP no longer fires. Where the report shows a true positive, add a test asserting it still fires.
+
+## 19. Phase 3 as built (these entries win over §14–18)
+
+- **New checkers.** These are their JSON schemas. Each adds a
+  `classification` key to the §14 keys.
+  - `flutter-navigation@1`: NAV-001…012, plus a `rules.md` reference
+  - `forms@1`: FORM-001…008
+  - `i18n@1`: I18N-001…006, 010…018. It also reads easy_localization and slang
+    catalogs, and suppression inside a catalog uses the `"@@x-i18n-ignore"` key.
+  - `flutter-secure-defaults@1`: SEC-001…012, plus a `deep_audit` key
+- **Ownership dedupe:**
+  - NAV-005/006 own the url_launcher allow-list and PII in URLs. SEC doesn't
+    re-implement them.
+  - FORM-004 owns the logging of form-field values. SEC-004 skips those.
+  - When check_i18n ran, I18N-010 replaces UI-l10n and I18N-012 replaces UI-rtl.
+- **ID collision note:** flutter-security-audit's scan.sh uses `SEC-HARDCODED`
+  and `SEC-CLOUDKEY` (uppercase words). Our script IDs are always numeric
+  (`SEC-0xx`), and our reading IDs are lowercase slugs (`SEC-no-logout-wipe`).
+  Keep scan.sh IDs verbatim when merging, and dedupe by file:line.
+- **check_errors:**
+  - New rule **ERR-014 unguarded-io-in-ui** (medium).
+  - ERR-010 now covers State classes too, and `finally` resets plus Result typedefs count as handled.
+  - New stats keys: `skipped_roles`, `skipped_out_of_scope`.
+- **test_gaps:**
+  - New smell `TEST-tests-the-mock` (medium).
+  - New stats keys: `skipped`, `path_packages`.
+  - New text lines: `not units:` and `path packages …`.
+- **review.sh:**
+  - New sections:
+    - `== SECURITY DEFAULTS`
+    - `== SECURITY AUDIT` (runs scan.sh when the sibling skill or `$FLUTTER_SECURITY_AUDIT_SCAN` is present; it is informational and never fails CI)
+    - `== NAVIGATION`, `== FORMS`, `== I18N`
+  - New flags: `--no-security`, `--no-audit`, `--no-nav`, `--no-forms`, `--no-i18n`, and a generic `--skip <list>`.
+  - Environment handling:
+    - pub workspace detection: walks up to the package_config that lists the package
+    - codegen-cascade collapse: cascade errors are excluded from CI
+    - SDK-constraint skip
+    - analyzer-crash status line
+  - Scope comes from arch_check `files[]`.
+
+## 20. Release v1.0.0 as built
+
+- **Every skill is versioned 1.0.0.** `tests/validate_skills.py` also rejects
+  descriptions that aren't valid strict YAML (an unquoted `: ` or ` #`),
+  because strict parsers in some agents would refuse the skill.
+- **Descriptions were tuned for routing between siblings** (scratch eval set,
+  D1). Each says when to load a sibling instead, which reduces misroutes such
+  as "review my tests" going to review instead of testing.
+- **Scaffold** writes app-wide `lib/core/error/failure.dart` and
+  `lib/core/network/http_client.dart` (GetX: `api_client.dart` on an injected
+  `GetConnect`) once, and reuses them. Generated code gets 0 findings from the
+  security, architecture, error and forms checkers, enforced in tests.
+- **arch_check, after the benchmark:**
+  - It no longer reports `material` imports used only for value types
+    (`Color`, `DateTimeRange`…).
+  - A view importing another feature's view (navigation) is never ARCH-014.
+  - Under bloc, a view importing another feature's bloc, cubit, state or
+    event is not ARCH-014 (bloclibrary connects blocs through the UI).
+  - Under bloc, navigation-only feature cycles are not ARCH-015.
+  - The regression fixture is `calib_bloc_weather`.
+- **`FPS_ARCH_JSON`:** review.sh runs `arch_check --json` once and exports the
+  path. Every sibling checker reuses it when the `root` matches and the forced
+  profile, if any, matches.
+- **`bench/`** holds a reproducible with/without-skills harness. See
+  `bench/README.md` for the results and limitations.

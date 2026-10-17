@@ -1,0 +1,8 @@
+{
+  "@@locale": "ar",
+  "cartTitle": "سلة التسوق",
+  "total": "Ø§Ù„Ù…Ø¬Ù…ÙˆØ¹",
+  "hello": "مرحبًا {الاسم}",
+  "itemsInCart": "{count, plural, =0{لا توجد عناصر} =1{عنصر واحد} =2{عنصران} other{{count} عنصر}}",
+  "mapsKey": "AIzaSyD4x9Q2mN7pL0kT3vR8wZ5yB6cE1fH2jK9"
+}

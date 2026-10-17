@@ -1,0 +1,18 @@
+name: clean_shop
+description: Fixture that follows every secure default. Expect zero findings.
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.0
+  riverpod_annotation: ^2.3.0
+  dio: ^5.4.0
+  flutter_secure_storage: ^9.2.0
+  shared_preferences: ^2.2.0
+  webview_flutter: ^4.7.0
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/

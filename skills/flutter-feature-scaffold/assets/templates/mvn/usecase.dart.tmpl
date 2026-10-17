@@ -1,0 +1,19 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '{{import:entity}}';
+import '{{import:repository}}';
+// DI seam: the use-case PROVIDER may reference the data provider; the class stays pure.
+import '{{import:repository_impl}}';
+
+part '{{self}}.g.dart';
+
+class {{UseCase}} {
+  final {{Repository}} _repository;
+  const {{UseCase}}(this._repository);
+
+  Future<List<{{Entity}}>> call() => _repository.fetch{{Feature}}List();
+}
+
+@riverpod
+{{UseCase}} {{useCase}}(Ref ref) =>
+    {{UseCase}}(ref.watch({{featureCamel}}RepositoryProvider));

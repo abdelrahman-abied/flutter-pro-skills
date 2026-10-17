@@ -1,0 +1,27 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:entity}}';
+import '{{import:result}}';
+import '{{import:repository}}';
+{{#clean}}import '{{import:usecase}}';
+{{/clean}}import '{{import:logic}}';
+import '{{import:view}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  @override
+  Future<Result<List<{{Entity}}>>> fetch{{Feature}}List() async =>
+      const Result.ok([{{Entity}}(id: '1', title: 'First')]);
+}
+
+void main() {
+  testWidgets('{{View}} renders the loaded items', (tester) async {
+    final viewModel = {{Logic}}({{dep}}: {{fakeDep}});
+    addTearDown(viewModel.dispose);
+
+    await tester.pumpWidget(MaterialApp(home: {{View}}(viewModel: viewModel)));
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsOneWidget);
+  });
+}

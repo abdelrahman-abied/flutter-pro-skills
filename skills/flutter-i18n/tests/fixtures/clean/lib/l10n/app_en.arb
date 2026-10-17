@@ -1,0 +1,15 @@
+{
+  "@@locale": "en",
+  "cartTitle": "Your cart",
+  "@cartTitle": {"description": "Title of the cart screen"},
+  "cartEmpty": "Your cart is empty",
+  "@cartEmpty": {"description": "Shown when the cart has no items"},
+  "hello": "Hello {name}",
+  "@hello": {"description": "Greeting on the cart screen", "placeholders": {"name": {"type": "String", "example": "Sara"}}},
+  "itemsInCart": "{count, plural, =0{No items} =1{One item} other{{count} items}}",
+  "@itemsInCart": {"description": "Number of items in the cart", "placeholders": {"count": {"type": "int"}}},
+  "totalLabel": "Total: {amount}",
+  "@totalLabel": {"description": "Cart total with a formatted price", "placeholders": {"amount": {"type": "String"}}},
+  "errorNetwork": "No connection. Try again.",
+  "@errorNetwork": {"description": "Network failure message"}
+}

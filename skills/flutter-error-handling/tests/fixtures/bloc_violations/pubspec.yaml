@@ -1,0 +1,8 @@
+name: err_bloc_violations
+description: Bloc/Cubit fixture for ERR-010 (stuck loading) and a wired global handler.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.0

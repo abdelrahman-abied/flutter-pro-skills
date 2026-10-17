@@ -1,0 +1,60 @@
+{{#dio}}import 'package:dio/dio.dart';
+{{/dio}}import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:dto}}';
+import '{{import:repository_impl}}';
+import '{{import:source}}';
+
+class Fake{{Source}} implements {{Source}} {
+  Fake{{Source}}([this._error]);
+
+  final Exception? _error;
+
+  @override
+  Future<List<{{Feature}}Dto>> fetch{{Feature}}List() async {
+    if (_error case final error?) throw error;
+    return const [{{Feature}}Dto(id: '1', title: 'First')];
+  }
+}
+
+void main() {
+  test('{{RepositoryImpl}} maps DTOs to entities', () async {
+    final repository = {{RepositoryImpl}}(Fake{{Source}}());
+
+    final items = await repository.fetch{{Feature}}List();
+
+    expect(items, const [{{Entity}}(id: '1', title: 'First')]);
+  });
+
+  test('{{RepositoryImpl}} turns a transport error into a typed failure', () async {
+{{#dio}}    final source = Fake{{Source}}(
+      DioException(
+        requestOptions: RequestOptions(path: '/{{feature}}'),
+        type: DioExceptionType.connectionError,
+      ),
+    );
+{{/dio}}{{#getconnect}}    // The source turns an error Response into a Failure (failureFromResponse).
+    final source = Fake{{Source}}(const NetworkFailure());
+{{/getconnect}}
+    await expectLater(
+      {{RepositoryImpl}}(source).fetch{{Feature}}List(),
+      throwsA(isA<NetworkFailure>()),
+    );
+  });
+
+  test('{{RepositoryImpl}} maps a malformed payload to ParseFailure', () async {
+    final source = Fake{{Source}}(const FormatException('bad shape'));
+
+    await expectLater(
+      {{RepositoryImpl}}(source).fetch{{Feature}}List(),
+      throwsA(isA<ParseFailure>()),
+    );
+  });
+
+  test('{{Feature}}Dto.fromJson rejects a malformed payload', () {
+    expect(() => {{Feature}}Dto.fromJson({'id': 1}), throwsFormatException);
+    expect(() => {{Feature}}Dto.fromJson(null), throwsFormatException);
+  });
+}

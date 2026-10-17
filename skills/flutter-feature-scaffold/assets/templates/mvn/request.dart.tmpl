@@ -1,0 +1,10 @@
+import 'package:meta/meta.dart';
+
+// TODO: outbound DTO; replace the placeholder field with the real request payload.
+@immutable
+class {{Feature}}Request {
+  final String query;
+  const {{Feature}}Request({required this.query});
+
+  Map<String, dynamic> toJson() => {'query': query};
+}

@@ -1,0 +1,8 @@
+name: build
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      # sec-ignore: SEC-012 the release template appends --obfuscate via FLUTTER_FLAGS
+      - run: flutter build apk --release $FLUTTER_FLAGS

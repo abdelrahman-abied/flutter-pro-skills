@@ -1,0 +1,8 @@
+name: calib_setstate
+description: Calibration regressions (K3 FN, flutter/samples form_app) for check_errors.py.
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  http: ^1.2.0

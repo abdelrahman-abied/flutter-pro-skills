@@ -1,0 +1,77 @@
+name: New rule
+description: Propose a new architecture, UI, naming, error-handling or testing rule.
+title: "[rule] "
+labels: ["new-rule", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Agree on the ID and scope here before opening the PR. See CONTRIBUTING.md › "Propose a new rule".
+  - type: input
+    id: id
+    attributes:
+      label: Proposed ID and name
+      description: "ARCH-0xx (import graph), ARCH-1xx (code pattern), AP-<slug> (judgment), ERR-, TEST-, UI-, NAME-, ED-<slug>"
+      placeholder: "ARCH-1xx notifier-holds-build-context"
+    validations:
+      required: true
+  - type: dropdown
+    id: severity
+    attributes:
+      label: Default severity
+      options: [High, Medium, Low, Info]
+    validations:
+      required: true
+  - type: checkboxes
+    id: profiles
+    attributes:
+      label: Profiles it applies to
+      description: The patterns disagree, so pick only the ones whose own rules forbid this.
+      options:
+        - label: mvvm
+        - label: mvn
+        - label: bloc
+        - label: mvc
+        - label: getx
+        - label: provider
+        - label: riverpod
+        - label: setstate
+  - type: textarea
+    id: problem
+    attributes:
+      label: The problem and why it matters
+      description: What goes wrong in a real app (bug, leak, untestable code, …).
+    validations:
+      required: true
+  - type: textarea
+    id: bad
+    attributes:
+      label: Code that should trigger it
+      render: dart
+    validations:
+      required: true
+  - type: textarea
+    id: good
+    attributes:
+      label: The nearest code that must NOT trigger it
+      description: This becomes the clean fixture, and it's what prevents false positives.
+      render: dart
+    validations:
+      required: true
+  - type: dropdown
+    id: detect
+    attributes:
+      label: Detection
+      options:
+        - import (arch_check import graph)
+        - regex / heuristic (script)
+        - reading only (agent judgment)
+    validations:
+      required: true
+  - type: textarea
+    id: source
+    attributes:
+      label: Source
+      description: Effective Dart, docs.flutter.dev, bloclibrary.dev, riverpod.dev, the MVN spec, … with a link and the rule's strength (DO / PREFER / CONSIDER).
+    validations:
+      required: true

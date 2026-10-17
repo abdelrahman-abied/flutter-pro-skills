@@ -1,0 +1,66 @@
+name: Bug report
+description: A script crashed, gave wrong output, or a skill didn't behave as documented.
+title: "[bug] "
+labels: ["bug", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        For a rule that fired on correct code, please use the **False positive** form instead.
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - review.sh / heuristics.py (dart-flutter-review)
+        - arch_check.py (flutter-architecture)
+        - install.sh
+        - A SKILL.md or reference (wrong or unclear guidance)
+        - Another skill or script
+    validations:
+      required: true
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened?
+      description: What you ran, what you expected, and what you got.
+    validations:
+      required: true
+  - type: textarea
+    id: command
+    attributes:
+      label: Command and output
+      description: The exact command and its full output (replace private paths with path/to/app).
+      render: text
+    validations:
+      required: true
+  - type: dropdown
+    id: agent
+    attributes:
+      label: Agent
+      options:
+        - None (ran the script directly)
+        - Claude Code
+        - Codex
+        - Cursor
+        - GitHub Copilot
+        - Gemini CLI
+        - OpenCode
+        - Antigravity
+        - Other
+    validations:
+      required: true
+  - type: input
+    id: env
+    attributes:
+      label: Environment
+      description: "OS, `bash --version` (first line), `python3 --version`, `dart --version`"
+      placeholder: "macOS 15, bash 3.2.57, Python 3.12.4, Dart 3.9.0"
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: flutter-pro-skills version
+      description: The tag or commit, or `metadata.version` from the SKILL.md.
+      placeholder: v1.0.0

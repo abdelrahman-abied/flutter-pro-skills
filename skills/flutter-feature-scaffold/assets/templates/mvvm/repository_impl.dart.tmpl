@@ -1,0 +1,23 @@
+import '{{import:entity}}';
+import '{{import:result}}';
+import '{{import:repository}}';
+import '{{import:source}}';
+
+final class {{RepositoryImpl}} implements {{Repository}} {
+{{#privnamed}}  {{RepositoryImpl}}({required this._apiClient});
+{{/privnamed}}{{^privnamed}}  {{RepositoryImpl}}({required {{Source}} apiClient}) : _apiClient = apiClient;
+{{/privnamed}}
+  // Private, so the UI can't bypass the repository.
+  final {{Source}} _apiClient;
+
+  @override
+  Future<Result<List<{{Entity}}>>> fetch{{Feature}}List() async {
+    // TODO: add caching and retry here when the data needs them; never log request or response bodies.
+    return switch (await _apiClient.fetch{{Feature}}List()) {
+      Ok(:final value) => Result.ok([
+          for (final model in value) {{Entity}}(id: model.id, title: model.title),
+        ]),
+      Error(:final error) => Result.error(error),
+    };
+  }
+}

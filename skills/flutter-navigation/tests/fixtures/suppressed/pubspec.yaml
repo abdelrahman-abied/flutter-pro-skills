@@ -1,0 +1,7 @@
+name: nav_suppressed
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  go_router: ^16.0.0

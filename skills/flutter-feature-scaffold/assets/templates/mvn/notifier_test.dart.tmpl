@@ -1,0 +1,56 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:repository}}';
+import '{{import:usecase}}';
+import '{{import:notifier}}';
+import '{{import:state}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  Fake{{Repository}}([this._failure]);
+
+  final Failure? _failure;
+
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async {
+    if (_failure case final failure?) throw failure;
+    return const [{{Entity}}(id: '1', title: 'First')];
+  }
+}
+
+ProviderContainer _container(Fake{{Repository}} repository) {
+  final container = ProviderContainer(
+    overrides: [
+      {{useCase}}Provider.overrideWithValue({{UseCase}}(repository)),
+    ],
+  );
+  addTearDown(container.dispose);
+  final subscription = container.listen({{logicProvider}}, (previous, next) {});
+  addTearDown(subscription.close);
+  return container;
+}
+
+void main() {
+  test('load() moves to {{Feature}}Success with the use-case items', () async {
+    final container = _container(Fake{{Repository}}());
+
+    expect(container.read({{logicProvider}}), isA<{{Feature}}Initial>());
+    await container.read({{logicProvider}}.notifier).load();
+
+    final state = container.read({{logicProvider}});
+    expect(state, isA<{{Feature}}Success>());
+    expect((state as {{Feature}}Success).items.single.title, 'First');
+  });
+
+  test('load() moves to {{Feature}}Error with the typed failure', () async {
+    final container = _container(Fake{{Repository}}(const NetworkFailure()));
+
+    await container.read({{logicProvider}}.notifier).load();
+
+    final state = container.read({{logicProvider}});
+    expect(state, isA<{{Feature}}Error>());
+    expect((state as {{Feature}}Error).failure, isA<NetworkFailure>());
+  });
+}

@@ -1,0 +1,9 @@
+name: ws_app
+publish_to: none
+resolution: workspace
+environment:
+  sdk: ^3.4.0-0
+  flutter: ">=3.22.0"
+dependencies:
+  flutter:
+    sdk: flutter

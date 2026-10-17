@@ -1,0 +1,21 @@
+import 'package:get/get.dart';
+
+import '{{import:failure}}';
+
+/// The app's one configured HTTP client. Remote providers receive it, so the
+/// base URL, timeout and auth are set here once, never in a module. Register
+/// it once at startup: `Get.put(ApiClient(), permanent: true)`.
+final class ApiClient extends GetConnect {
+  ApiClient() : super(timeout: const Duration(seconds: 20)) {
+    // TODO: read the base URL from AppConfig or the flavor; keep it https://.
+    baseUrl = 'https://api.example.com';
+    // TODO: add auth with httpClient.addRequestModifier here; providers never set auth headers.
+  }
+}
+
+/// Maps an error [Response] to a [Failure] that carries no URL, headers or body.
+Failure failureFromResponse(Response<Object?> response) =>
+    switch (response.statusCode) {
+      null => const NetworkFailure(),
+      final code => ServerFailure(code),
+    };

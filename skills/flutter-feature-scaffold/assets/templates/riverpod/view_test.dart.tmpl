@@ -1,0 +1,31 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:entity}}';
+import '{{import:repository}}';
+import '{{import:di}}';
+import '{{import:view}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async =>
+      const [{{Entity}}(id: '1', title: 'First')];
+}
+
+void main() {
+  testWidgets('{{View}} renders the loaded items', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          {{featureCamel}}RepositoryProvider.overrideWithValue(Fake{{Repository}}()),
+        ],
+        child: const MaterialApp(home: {{View}}()),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsOneWidget);
+  });
+}

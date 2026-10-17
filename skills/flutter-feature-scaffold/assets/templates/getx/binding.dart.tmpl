@@ -1,0 +1,19 @@
+import 'package:get/get.dart';
+
+import '{{import:http_client}}';
+import '{{import:source}}';
+import '{{import:repository}}';
+import '{{import:repository_impl}}';
+{{#clean}}import '{{import:usecase}}';
+{{/clean}}import '{{import:logic}}';
+
+/// Registers the {{title_lc}} dependencies. Attach it to the route's `GetPage`.
+class {{Feature}}Binding extends Bindings {
+  @override
+  void dependencies() {
+    Get.lazyPut<{{Source}}>(() => {{SourceImpl}}(Get.find<ApiClient>()));
+    Get.lazyPut<{{Repository}}>(() => {{RepositoryImpl}}(Get.find()));
+{{#clean}}    Get.lazyPut(() => {{UseCase}}(Get.find()));
+{{/clean}}    Get.lazyPut(() => {{Logic}}({{dep}}: Get.find()));
+  }
+}

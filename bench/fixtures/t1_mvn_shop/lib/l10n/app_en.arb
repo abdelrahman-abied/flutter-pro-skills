@@ -1,0 +1,29 @@
+{
+  "@@locale": "en",
+  "appTitle": "Shop",
+  "loginTitle": "Sign in",
+  "emailLabel": "Email",
+  "passwordLabel": "Password",
+  "loginButton": "Sign in",
+  "productsTitle": "Products",
+  "searchHint": "Search products",
+  "addToCart": "Add to cart",
+  "cartTitle": "Cart",
+  "cartEmpty": "Your cart is empty",
+  "ordersTitle": "Orders",
+  "profileTitle": "Profile",
+  "saveButton": "Save",
+  "nameLabel": "Name",
+  "versionLabel": "Version {version}",
+  "@versionLabel": {
+    "placeholders": {
+      "version": {
+        "type": "String"
+      }
+    }
+  },
+  "genericError": "Something went wrong. Please try again.",
+  "retry": "Retry",
+  "invalidEmail": "Enter a valid email address",
+  "passwordRequired": "Enter your password"
+}

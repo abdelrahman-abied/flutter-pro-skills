@@ -1,0 +1,20 @@
+import 'package:flutter/foundation.dart';
+
+/// Wire format of a {{title_lc}} item, as the API returns it. Stays in `data/`.
+// TODO: mirror the real payload.
+@immutable
+final class {{Feature}}ApiModel {
+  const {{Feature}}ApiModel({required this.id, required this.title});
+
+  // TODO: validate the JSON shape here; throw FormatException on a mismatch.
+  factory {{Feature}}ApiModel.fromJson(Object? json) => switch (json) {
+        {'id': final String id, 'title': final String title} =>
+          {{Feature}}ApiModel(id: id, title: title),
+        _ => throw const FormatException('Unexpected {{title_lc}} payload'),
+      };
+
+  final String id;
+  final String title;
+
+  Map<String, dynamic> toJson() => {'id': id, 'title': title};
+}

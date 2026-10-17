@@ -1,0 +1,516 @@
+{
+ "_doc": "Ground truth for T1 and T2. Anchors are (file, exact substring) pairs; grade.py resolves them to line numbers against the pristine fixture at grade time, so editing a fixture never silently shifts the truth. 'cats' = categories a claim may be filed under and still count (see CATEGORY_KEYWORDS in grade.py). 'kw' = an optional extra regex the claim text must match. Decoys are code that looks wrong but is correct for the fixture's declared architecture. Neutral items were pre-registered BEFORE any run: true-but-out-of-scope remarks that are neither credited nor counted as false claims.",
+ "t1": {
+  "fixture": "fixtures/t1_mvn_shop",
+  "issues": [
+   {
+    "id": "A1",
+    "cats": [
+     "architecture"
+    ],
+    "severity": "high",
+    "title": "View imports and calls a data source (bypasses notifier/use case/repository)",
+    "anchors": [
+     [
+      "lib/features/product/presentation/view/product_list_view.dart",
+      "import '../../data/sources/product_remote_source.dart';"
+     ],
+     [
+      "lib/features/product/presentation/view/product_list_view.dart",
+      "ref.read(productRemoteSourceProvider).fetchProducts()"
+     ]
+    ]
+   },
+   {
+    "id": "A2",
+    "cats": [
+     "architecture"
+    ],
+    "severity": "medium",
+    "title": "Notifier bypasses the use case and calls the repository",
+    "anchors": [
+     [
+      "lib/features/profile/presentation/notifier/profile_notifier.dart",
+      "import '../../data/repositories/profile_repository_impl.dart';"
+     ],
+     [
+      "lib/features/profile/presentation/notifier/profile_notifier.dart",
+      "await ref.read(profileRepositoryProvider).updateName(name);"
+     ]
+    ]
+   },
+   {
+    "id": "E1",
+    "cats": [
+     "error"
+    ],
+    "severity": "high",
+    "title": "Swallowed catch in CartNotifier.addItem",
+    "anchors": [
+     [
+      "lib/features/cart/presentation/notifier/cart_notifier.dart",
+      "} catch (_) {}"
+     ]
+    ]
+   },
+   {
+    "id": "E2",
+    "cats": [
+     "error",
+     "ui"
+    ],
+    "severity": "high",
+    "title": "Loading state with no error path (spinner forever)",
+    "anchors": [
+     [
+      "lib/features/order/presentation/notifier/order_history_notifier.dart",
+      "Future.microtask(load);"
+     ],
+     [
+      "lib/features/order/presentation/notifier/order_history_notifier.dart",
+      "    state = const OrderHistoryLoading();"
+     ],
+     [
+      "lib/features/order/presentation/notifier/order_history_notifier.dart",
+      "final orders = await ref.read(fetchOrdersProvider)();"
+     ]
+    ]
+   },
+   {
+    "id": "S1",
+    "cats": [
+     "security"
+    ],
+    "severity": "high",
+    "title": "Auth token stored in SharedPreferences",
+    "anchors": [
+     [
+      "lib/features/auth/data/sources/auth_local_source.dart",
+      "static const _tokenKey = 'auth_token';"
+     ],
+     [
+      "lib/features/auth/data/sources/auth_local_source.dart",
+      "await prefs.setString(_tokenKey, token);"
+     ]
+    ]
+   },
+   {
+    "id": "S2",
+    "cats": [
+     "security"
+    ],
+    "severity": "high",
+    "title": "Token written to the log",
+    "anchors": [
+     [
+      "lib/features/auth/data/repositories/auth_repository_impl.dart",
+      "debugPrint('Login succeeded for $email, token: ${response.token}');"
+     ]
+    ]
+   },
+   {
+    "id": "S3",
+    "cats": [
+     "security"
+    ],
+    "severity": "high",
+    "title": "badCertificateCallback returns true (accepts any TLS certificate)",
+    "anchors": [
+     [
+      "lib/core/network/api_client.dart",
+      "client.badCertificateCallback = (cert, host, port) => true;"
+     ]
+    ]
+   },
+   {
+    "id": "N1",
+    "cats": [
+     "navigation",
+     "error",
+     "security"
+    ],
+    "severity": "medium",
+    "title": "Unvalidated int.parse of a path parameter",
+    "anchors": [
+     [
+      "lib/core/router/app_router.dart",
+      "final id = int.parse(state.pathParameters['id']!);"
+     ]
+    ]
+   },
+   {
+    "id": "F1",
+    "cats": [
+     "forms",
+     "security"
+    ],
+    "severity": "medium",
+    "title": "Password field without obscureText",
+    "anchors": [
+     [
+      "lib/features/auth/presentation/view/login_view.dart",
+      "controller: _passwordController,"
+     ]
+    ]
+   },
+   {
+    "id": "I1",
+    "cats": [
+     "i18n"
+    ],
+    "severity": "low",
+    "title": "Hardcoded user-facing string in a localised app",
+    "anchors": [
+     [
+      "lib/features/profile/presentation/view/profile_view.dart",
+      "const Text('Edit profile'),"
+     ]
+    ]
+   },
+   {
+    "id": "U1",
+    "cats": [
+     "ui"
+    ],
+    "severity": "medium",
+    "title": "TextEditingController never disposed",
+    "anchors": [
+     [
+      "lib/features/product/presentation/widget/product_search_bar.dart",
+      "final _controller = TextEditingController();"
+     ],
+     [
+      "lib/features/product/presentation/widget/product_search_bar.dart",
+      "class _ProductSearchBarState extends State<ProductSearchBar> {"
+     ]
+    ]
+   },
+   {
+    "id": "U2",
+    "cats": [
+     "ui"
+    ],
+    "severity": "medium",
+    "title": "Future created in build (FutureBuilder refires on every rebuild)",
+    "anchors": [
+     [
+      "lib/features/profile/presentation/view/profile_view.dart",
+      "future: PackageInfo.fromPlatform(),"
+     ]
+    ]
+   }
+  ],
+  "decoys": [
+   {
+    "id": "D3",
+    "title": "Pass-through use case (prescribed structure in MVN, not ceremony)",
+    "kw": "pass-?through|just (forwards?|delegates?|calls|wraps)|only (forwards?|delegates?|calls|wraps)|unnecessary|boilerplate|thin wrapper|no (real )?(value|logic)|adds? nothing|redundant|overkill|over-?engineer|trivial",
+    "anchors": [
+     [
+      "lib/features/profile/domain/usecases/profile_usecase.dart",
+      "Future<ProfileEntity> call() => _repository.fetchProfile();"
+     ],
+     [
+      "lib/features/profile/domain/usecases/profile_usecase.dart",
+      "Future<ProfileEntity> call(String name) => _repository.updateName(name);"
+     ],
+     [
+      "lib/features/product/domain/usecases/product_usecase.dart",
+      "Future<ProductEntity> call(int id) => _repository.fetchProduct(id);"
+     ],
+     [
+      "lib/features/product/domain/usecases/product_usecase.dart",
+      "_repository.fetchProducts(query: query);"
+     ],
+     [
+      "lib/features/order/domain/usecases/order_usecase.dart",
+      "Future<List<OrderEntity>> call() => _repository.fetchOrders();"
+     ],
+     [
+      "lib/features/cart/domain/usecases/cart_usecase.dart",
+      "_repository.addItem(productId: productId, title: title);"
+     ],
+     [
+      "lib/features/auth/domain/usecases/login_usecase.dart",
+      "_repository.login(email: email, password: password);"
+     ]
+    ]
+   },
+   {
+    "id": "D1",
+    "title": "Use-case provider imports the repository-impl provider (the MVN DI seam); riverpod_annotation in domain/usecases",
+    "kw": "import|data|layer|depend|impl|provider|riverpod|annotation|domain|clean|seam|inject|\\bDI\\b|couple|violat",
+    "anchors": [
+     [
+      "lib/features/product/domain/usecases/product_usecase.dart",
+      "import '../../data/repositories/product_repository_impl.dart';"
+     ],
+     [
+      "lib/features/product/domain/usecases/product_usecase.dart",
+      "FetchProducts(ref.watch(productRepositoryProvider));"
+     ],
+     [
+      "lib/features/profile/domain/usecases/profile_usecase.dart",
+      "import '../../data/repositories/profile_repository_impl.dart';"
+     ],
+     [
+      "lib/features/profile/domain/usecases/profile_usecase.dart",
+      "FetchProfile(ref.watch(profileRepositoryProvider));"
+     ],
+     [
+      "lib/features/order/domain/usecases/order_usecase.dart",
+      "import '../../data/repositories/order_repository_impl.dart';"
+     ],
+     [
+      "lib/features/order/domain/usecases/order_usecase.dart",
+      "FetchOrders(ref.watch(orderRepositoryProvider));"
+     ],
+     [
+      "lib/features/cart/domain/usecases/cart_usecase.dart",
+      "import '../../data/repositories/cart_repository_impl.dart';"
+     ],
+     [
+      "lib/features/cart/domain/usecases/cart_usecase.dart",
+      "AddToCart addToCart(Ref ref) => AddToCart(ref.watch(cartRepositoryProvider));"
+     ],
+     [
+      "lib/features/auth/domain/usecases/login_usecase.dart",
+      "import '../../data/repositories/auth_repository_impl.dart';"
+     ],
+     [
+      "lib/features/auth/domain/usecases/login_usecase.dart",
+      "Login login(Ref ref) => Login(ref.watch(authRepositoryProvider));"
+     ]
+    ]
+   },
+   {
+    "id": "D2",
+    "title": "Notifier watches another notifier with ref.watch inside build() (sanctioned in MVN)",
+    "kw": "ref\\.watch|watch(es|ing)?\\b|productQuery|query ?provider|notifier.{0,40}(depend|coupl|another|other)|(depend|coupl).{0,40}notifier|notifier-to-notifier|cross-notifier",
+    "anchors": [
+     [
+      "lib/features/product/presentation/notifier/product_list_notifier.dart",
+      "final query = ref.watch(productQueryProvider);"
+     ],
+     [
+      "lib/features/product/presentation/notifier/product_list_notifier.dart",
+      "import 'product_query_notifier.dart';"
+     ]
+    ]
+   }
+  ],
+  "neutral": [
+   {
+    "id": "no-tests",
+    "kw": "\\btests?\\b.{0,40}(missing|absent|lack|none|no )|(no|missing|lack of|without) (any )?(unit |widget |integration )?tests?\\b|test coverage"
+   },
+   {
+    "id": "arb-descriptions",
+    "kw": "@?description|\\.arb\\b.{0,60}(context|metadata)"
+   },
+   {
+    "id": "null-assertion-response-data",
+    "kw": "response\\.data!|data!|null[- ]?(assertion|check|bang)|force[- ]?unwrap|bang operator"
+   },
+   {
+    "id": "only-AppException-caught",
+    "kw": "on AppException|only (catch|catches|handles?) AppException|TypeError|FormatException|parse (error|failure)|other (exceptions|errors)|non-?(Dio|App)"
+   },
+   {
+    "id": "microtask-in-build",
+    "kw": "microtask|side[- ]?effect.{0,40}build|build\\(\\).{0,60}(load|fetch|network)"
+   },
+   {
+    "id": "image-network",
+    "kw": "Image\\.network|errorBuilder|loadingBuilder|cached_network_image|image (cach|error)"
+   },
+   {
+    "id": "no-pinning",
+    "kw": "pinning|pin(ned)? cert|certificate pin"
+   },
+   {
+    "id": "token-not-attached-or-logout",
+    "kw": "interceptor|authorization header|attach(ed|es)? (the )?token|bearer|logout|log out|sign out"
+   },
+   {
+    "id": "config-base-url",
+    "kw": "base ?url|hard-?coded (api|url|endpoint)|environment|flavou?r|dart-define"
+   },
+   {
+    "id": "a11y",
+    "kw": "semantic|accessib|screen reader"
+   },
+   {
+    "id": "generated-code",
+    "kw": "\\.g\\.dart|build_runner|generated"
+   },
+   {
+    "id": "weak-email-validation",
+    "kw": "email valid|contains\\('@'\\)|email regex|validat(e|ion) (of )?(the )?email"
+   },
+   {
+    "id": "json-casts",
+    "kw": "\\bas int\\b|\\bas String\\b|json\\[|fromJson|unsafe cast|type cast|\\bcast\\b"
+   },
+   {
+    "id": "error-state-has-no-message",
+    "kw": "generic error|no (error )?(message|details)|error message"
+   },
+   {
+    "id": "pubspec-any-constraint",
+    "kw": "\\bany\\b.{0,30}(version|constraint)|version constraint|pubspec"
+   }
+  ]
+ },
+ "t2": {
+  "fixture": "fixtures/t2_bloc_weather",
+  "issues": [
+   {
+    "id": "V1",
+    "cats": [
+     "architecture"
+    ],
+    "severity": "high",
+    "title": "Bloc-to-bloc dependency: ThemeCubit takes WeatherBloc and subscribes to its stream",
+    "kw": "bloc.{0,40}(bloc|cubit)|cubit.{0,40}(bloc|cubit)|another (bloc|cubit)|other (bloc|cubit)|sibling|weatherBloc|stream\\.listen|subscri|coupl|depend",
+    "alias": "ThemeCubit|theme_cubit",
+    "anchors": [
+     [
+      "lib/theme/cubit/theme_cubit.dart",
+      "import '../../weather/bloc/weather_bloc.dart';"
+     ],
+     [
+      "lib/theme/cubit/theme_cubit.dart",
+      "ThemeCubit({required WeatherBloc weatherBloc}) : super(defaultColor) {"
+     ],
+     [
+      "lib/theme/cubit/theme_cubit.dart",
+      "_weatherSubscription = weatherBloc.stream.listen((weatherState) {"
+     ],
+     [
+      "lib/weather/view/weather_page.dart",
+      "ThemeCubit(weatherBloc: context.read<WeatherBloc>()),"
+     ]
+    ]
+   },
+   {
+    "id": "V2",
+    "cats": [
+     "architecture"
+    ],
+    "severity": "high",
+    "title": "SearchPage calls the data provider (OpenMeteoApiClient) directly, bypassing repository and bloc",
+    "kw": "OpenMeteoApiClient|api ?client|data ?provider|data layer|direct(ly)?|bypass|repository|http|network|I/O",
+    "alias": "SearchPage|search_page|search page",
+    "anchors": [
+     [
+      "lib/search/view/search_page.dart",
+      "import '../../data/open_meteo_api_client.dart';"
+     ],
+     [
+      "lib/search/view/search_page.dart",
+      "final OpenMeteoApiClient _apiClient = OpenMeteoApiClient();"
+     ],
+     [
+      "lib/search/view/search_page.dart",
+      "final results = await _apiClient.locationSearch(query, count: 5);"
+     ]
+    ]
+   }
+  ],
+  "decoys": [
+   {
+    "id": "TD1",
+    "title": "Concrete repository class with no abstract interface (bloclibrary's own convention)",
+    "unlocated": true,
+    "kw": "abstract (class|interface|repositor)|(an|no|missing) (abstract(ion)?|interface)|interface for|concrete (class|repository|implementation)|dependency inversion|\\bDIP\\b|program to an interface",
+    "anchors": [
+     [
+      "lib/repository/weather_repository.dart",
+      "class WeatherRepository {"
+     ],
+     [
+      "lib/weather/bloc/weather_bloc.dart",
+      "final WeatherRepository _weatherRepository;"
+     ]
+    ]
+   },
+   {
+    "id": "TD2",
+    "title": "Bloc calls the repository directly with no use-case / domain layer (bloclibrary has none)",
+    "unlocated": true,
+    "kw": "use ?cases?|interactor|domain layer|no domain|missing domain|clean architecture",
+    "anchors": [
+     [
+      "lib/weather/bloc/weather_bloc.dart",
+      "final weather = await _weatherRepository.getWeather(event.city);"
+     ]
+    ]
+   },
+   {
+    "id": "TD3",
+    "title": "BlocProvider created in the page, repository read with context.read (canonical bloclibrary DI)",
+    "unlocated": false,
+    "kw": "BlocProvider|context\\.read|service locator|get_?it|injectable|dependency injection|\\bDI\\b|created in (the )?(page|widget|build)|provid(ed|er) (in|inside|at) (the )?(page|widget)",
+    "anchors": [
+     [
+      "lib/weather/view/weather_page.dart",
+      "create: (context) => WeatherBloc(context.read<WeatherRepository>()),"
+     ]
+    ]
+   },
+   {
+    "id": "TD4",
+    "title": "Feature pages import each other / settings imports the weather bloc (the canonical flutter_weather example does exactly this)",
+    "unlocated": false,
+    "kw": "cross-?feature|cycle|circular|feature.{0,30}import|import.{0,30}feature|coupl|ARCH-014|ARCH-015",
+    "anchors": [
+     [
+      "lib/settings/view/settings_page.dart",
+      "import '../../weather/bloc/weather_bloc.dart';"
+     ],
+     [
+      "lib/settings/view/settings_page.dart",
+      "static Route<void> route(WeatherBloc weatherBloc) {"
+     ],
+     [
+      "lib/weather/view/weather_page.dart",
+      "import '../../search/view/search_page.dart';"
+     ],
+     [
+      "lib/weather/view/weather_page.dart",
+      "import '../../settings/view/settings_page.dart';"
+     ]
+    ]
+   },
+   {
+    "id": "TD5",
+    "title": "ThemeCubit imports flutter/material for Color (the canonical example's ThemeCubit<Color> does too)",
+    "unlocated": false,
+    "kw": "material|flutter/|\\bColor\\b|ui (library|import|type)|framework|ARCH-009",
+    "anchors": [
+     [
+      "lib/theme/cubit/theme_cubit.dart",
+      "import 'package:flutter/material.dart';"
+     ]
+    ]
+   },
+   {
+    "id": "TD6",
+    "title": "RepositoryProvider.value at the app root; repository constructed in main()",
+    "unlocated": false,
+    "kw": "RepositoryProvider|main\\(\\)|created in main|instantiat|singleton|global",
+    "anchors": [
+     [
+      "lib/app.dart",
+      "return RepositoryProvider.value("
+     ],
+     [
+      "lib/main.dart",
+      "runApp(WeatherApp(weatherRepository: WeatherRepository()));"
+     ]
+    ]
+   }
+  ]
+ }
+}

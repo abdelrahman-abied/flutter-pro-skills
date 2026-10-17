@@ -1,0 +1,58 @@
+import 'package:dio/dio.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:failure}}';
+import '{{import:response}}';
+import '{{import:repository_impl}}';
+import '{{import:source}}';
+
+class Fake{{Source}} implements {{Source}} {
+  Fake{{Source}}([this._error]);
+
+  final Exception? _error;
+
+  @override
+  Future<List<{{Feature}}Response>> get{{Feature}}List() async {
+    if (_error case final error?) throw error;
+    return const [{{Feature}}Response(id: '1', title: 'First')];
+  }
+}
+
+void main() {
+  test('{{RepositoryImpl}} maps responses to entities', () async {
+    final repository = {{RepositoryImpl}}(Fake{{Source}}());
+
+    final items = await repository.fetch{{Feature}}List();
+
+    expect(items.single.id, '1');
+    expect(items.single.title, 'First');
+  });
+
+  test('{{RepositoryImpl}} maps a transport error to a typed failure', () async {
+    final source = Fake{{Source}}(
+      DioException(
+        requestOptions: RequestOptions(path: '/{{feature}}'),
+        type: DioExceptionType.connectionError,
+      ),
+    );
+
+    await expectLater(
+      {{RepositoryImpl}}(source).fetch{{Feature}}List(),
+      throwsA(isA<NetworkFailure>()),
+    );
+  });
+
+  test('{{RepositoryImpl}} maps a malformed payload to ParseFailure', () async {
+    final source = Fake{{Source}}(const FormatException('bad shape'));
+
+    await expectLater(
+      {{RepositoryImpl}}(source).fetch{{Feature}}List(),
+      throwsA(isA<ParseFailure>()),
+    );
+  });
+
+  test('{{Feature}}Response.fromJson rejects a malformed payload', () {
+    expect(() => {{Feature}}Response.fromJson({'id': 1}), throwsFormatException);
+    expect(() => {{Feature}}Response.fromJson(null), throwsFormatException);
+  });
+}

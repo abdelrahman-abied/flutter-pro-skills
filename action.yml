@@ -1,0 +1,83 @@
+name: flutter-pro-skills review
+description: >-
+  Architecture checks for Dart & Flutter projects (import-graph and pattern rules, with a
+  baseline so CI fails only on new violations), optionally the full mechanical review:
+  format, analyzer, dart fix, test gaps and error handling.
+author: abdelrahman-abied
+branding:
+  icon: check-circle
+  color: blue
+
+inputs:
+  path:
+    description: Project root (the folder with pubspec.yaml), relative to the repository root.
+    required: false
+    default: "."
+  base-ref:
+    description: >-
+      Git ref to diff against (e.g. origin/main; on pull requests pass origin/ plus the base branch).
+      Only changed .dart files are reported. Empty = whole project. Check out with fetch-depth: 0.
+    required: false
+    default: ""
+  fail-on:
+    description: Lowest architecture severity that fails the job (high, medium or low).
+    required: false
+    default: high
+  baseline:
+    description: >-
+      arch-baseline@1 file written by arch_check.py --write-baseline, relative to the repository
+      root. Violations recorded in it are reported as baselined and never fail the job.
+    required: false
+    default: ""
+  flutter:
+    description: >-
+      true = install Flutter, run flutter pub get and the full review.sh --ci (analyzer errors fail
+      too). false = architecture check only (needs nothing but python3).
+    required: false
+    default: "false"
+  flutter-version:
+    description: Flutter channel (stable, beta, master) or version (e.g. 3.24.x) when flutter is true.
+    required: false
+    default: stable
+
+outputs:
+  new-violations:
+    description: Number of architecture violations that are not in the baseline.
+    value: ${{ steps.review.outputs.new-violations }}
+  report-path:
+    description: Path of the plain-text report on the runner.
+    value: ${{ steps.review.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up Flutter (channel)
+      if: ${{ inputs.flutter == 'true' && contains(fromJSON('["stable","beta","master"]'), inputs.flutter-version) }}
+      uses: subosito/flutter-action@v2
+      with:
+        channel: ${{ inputs.flutter-version }}
+        cache: true
+
+    - name: Set up Flutter (version)
+      if: ${{ inputs.flutter == 'true' && !contains(fromJSON('["stable","beta","master"]'), inputs.flutter-version) }}
+      uses: subosito/flutter-action@v2
+      with:
+        flutter-version: ${{ inputs.flutter-version }}
+        cache: true
+
+    - name: flutter pub get
+      if: ${{ inputs.flutter == 'true' }}
+      shell: bash
+      working-directory: ${{ inputs.path }}
+      run: flutter pub get
+
+    - name: Review
+      id: review
+      shell: bash
+      env:
+        INPUT_PATH: ${{ inputs.path }}
+        INPUT_BASE_REF: ${{ inputs.base-ref }}
+        INPUT_FAIL_ON: ${{ inputs.fail-on }}
+        INPUT_BASELINE: ${{ inputs.baseline }}
+        INPUT_FLUTTER: ${{ inputs.flutter }}
+      run: bash "${{ github.action_path }}/skills/dart-flutter-review/scripts/ci_action.sh"

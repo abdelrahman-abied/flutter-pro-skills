@@ -1,0 +1,3 @@
+name: calib_getx_ui
+dependencies:
+  get: ^4.6.0

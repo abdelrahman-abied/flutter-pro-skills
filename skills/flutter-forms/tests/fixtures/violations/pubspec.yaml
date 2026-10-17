@@ -1,0 +1,9 @@
+name: forms_violations
+description: Fixture where every FORM rule fires at a known line.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  riverpod_annotation: ^2.6.0

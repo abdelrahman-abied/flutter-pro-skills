@@ -1,0 +1,9 @@
+{
+  "@@locale": "ar",
+  "cartTitle": "سلة التسوق",
+  "cartEmpty": "سلتك فارغة",
+  "hello": "مرحبًا {name}",
+  "itemsInCart": "{count, plural, zero{لا توجد عناصر} one{عنصر واحد} two{عنصران} few{{count} عناصر} many{{count} عنصرًا} other{{count} عنصر}}",
+  "totalLabel": "الإجمالي: {amount}",
+  "errorNetwork": "لا يوجد اتصال. حاول مرة أخرى."
+}

@@ -1,0 +1,14 @@
+name: shop_app
+description: i18n checker fixture (violations)
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+flutter:
+  generate: true

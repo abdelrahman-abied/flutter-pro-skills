@@ -1,0 +1,64 @@
+import 'dart:async';
+
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:command}}';
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:result}}';
+import '{{import:repository}}';
+{{#clean}}import '{{import:usecase}}';
+{{/clean}}import '{{import:logic}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  Fake{{Repository}}([this._failure]);
+
+  final Failure? _failure;
+
+  @override
+  Future<Result<List<{{Entity}}>>> fetch{{Feature}}List() async =>
+      switch (_failure) {
+        final failure? => Result.error(failure),
+        null => const Result.ok([{{Entity}}(id: '1', title: 'First')]),
+      };
+}
+
+/// Completes when [command] finishes its current run.
+Future<void> settled(Command<Object?> command) {
+  if (!command.running) return Future.value();
+  final done = Completer<void>();
+  void listener() {
+    if (!command.running) {
+      command.removeListener(listener);
+      done.complete();
+    }
+  }
+
+  command.addListener(listener);
+  return done.future;
+}
+
+void main() {
+  test('load runs on creation and exposes the items', () async {
+    final viewModel = {{Logic}}({{dep}}: {{fakeDep}});
+    addTearDown(viewModel.dispose);
+
+    await settled(viewModel.load);
+
+    expect(viewModel.load.completed, isTrue);
+    expect(viewModel.items, const [{{Entity}}(id: '1', title: 'First')]);
+  });
+
+  test('load exposes a typed failure and keeps no items', () async {
+    final viewModel = {{Logic}}({{dep}}: {{failingDep}});
+    addTearDown(viewModel.dispose);
+
+    await settled(viewModel.load);
+
+    expect(
+      viewModel.load.result,
+      isA<Error<void>>().having((r) => r.error, 'error', isA<NetworkFailure>()),
+    );
+    expect(viewModel.items, isEmpty);
+  });
+}

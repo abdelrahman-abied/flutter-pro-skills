@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Contributing guide
+    url: https://github.com/abdelrahman-abied/flutter-pro-skills/blob/main/CONTRIBUTING.md
+    about: How to run the tests, propose a rule and report a false positive.

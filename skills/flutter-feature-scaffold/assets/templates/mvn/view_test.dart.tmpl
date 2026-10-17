@@ -1,0 +1,34 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:entity}}';
+import '{{import:repository}}';
+import '{{import:usecase}}';
+import '{{import:view}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async =>
+      const [{{Entity}}(id: '1', title: 'First')];
+}
+
+void main() {
+  testWidgets('{{View}} shows the items after Load is tapped', (tester) async {
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          {{useCase}}Provider.overrideWithValue(
+            {{UseCase}}(Fake{{Repository}}()),
+          ),
+        ],
+        child: const MaterialApp(home: {{View}}()),
+      ),
+    );
+
+    await tester.tap(find.text('Load'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('First'), findsOneWidget);
+  });
+}

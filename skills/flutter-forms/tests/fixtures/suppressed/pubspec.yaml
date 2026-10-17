@@ -1,0 +1,7 @@
+name: forms_suppressed
+description: Fixture for form-ignore comments.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter

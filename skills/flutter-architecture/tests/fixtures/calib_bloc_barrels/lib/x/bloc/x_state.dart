@@ -1,0 +1,3 @@
+class XState {
+  const XState();
+}

@@ -1,0 +1,22 @@
+{
+  "@@locale": "ar",
+  "appTitle": "المتجر",
+  "loginTitle": "تسجيل الدخول",
+  "emailLabel": "البريد الإلكتروني",
+  "passwordLabel": "كلمة المرور",
+  "loginButton": "دخول",
+  "productsTitle": "المنتجات",
+  "searchHint": "ابحث عن منتج",
+  "addToCart": "أضف إلى السلة",
+  "cartTitle": "السلة",
+  "cartEmpty": "سلتك فارغة",
+  "ordersTitle": "الطلبات",
+  "profileTitle": "الملف الشخصي",
+  "saveButton": "حفظ",
+  "nameLabel": "الاسم",
+  "versionLabel": "الإصدار {version}",
+  "genericError": "حدث خطأ ما. حاول مرة أخرى.",
+  "retry": "إعادة المحاولة",
+  "invalidEmail": "أدخل بريدًا إلكترونيًا صحيحًا",
+  "passwordRequired": "أدخل كلمة المرور"
+}

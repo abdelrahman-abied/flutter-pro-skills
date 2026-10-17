@@ -1,0 +1,10 @@
+name: mvvm_violations
+publish_to: 'none'
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.0
+  get_it: ^7.6.0
+  http: ^1.2.0

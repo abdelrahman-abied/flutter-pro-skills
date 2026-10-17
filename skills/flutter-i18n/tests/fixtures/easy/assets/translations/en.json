@@ -1,0 +1,12 @@
+{
+  "home": {
+    "title": "Home",
+    "welcome": "Welcome, {name}"
+  },
+  "items": {
+    "zero": "No items",
+    "one": "{} item",
+    "other": "{} items"
+  },
+  "logout": "Log out"
+}

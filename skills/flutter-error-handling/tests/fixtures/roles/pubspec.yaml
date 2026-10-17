@@ -1,0 +1,6 @@
+name: roles
+description: files[] roles from arch_check phase 3 (repository, barrel, di, unknown) and files[] as scope. Run with tests/stub_arch_check.py.
+environment:
+  sdk: ^3.5.0
+dependencies:
+  dio: ^5.7.0

@@ -1,0 +1,19 @@
+import 'package:flutter/material.dart';
+
+import '{{import:entity}}';
+
+// TODO: rename descriptively (e.g. {{feature}}_list.dart) and add more widgets here as the UI grows.
+class {{ListWidget}} extends StatelessWidget {
+  final List<{{Entity}}> items;
+  const {{ListWidget}}({required this.items, super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) => ListTile(
+        title: Text(items[index].title),
+      ),
+    );
+  }
+}

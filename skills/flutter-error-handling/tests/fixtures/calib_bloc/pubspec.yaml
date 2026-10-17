@@ -1,0 +1,10 @@
+name: calib_bloc
+description: Calibration regressions (K2, bloclibrary and Clean+Cubit shapes) for check_errors.py.
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.0.0
+  bloc: ^9.0.0
+  http: ^1.2.0

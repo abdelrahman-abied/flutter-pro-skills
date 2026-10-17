@@ -1,0 +1,24 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '{{import:http_client}}';
+import '{{import:repository}}';
+import '{{import:repository_impl}}';
+import '{{import:source}}';
+{{#clean}}import '{{import:usecase}}';
+{{/clean}}
+part '{{self}}.g.dart';
+
+// Composition root of the {{title_lc}} feature: the only place where an
+// implementation is bound to its contract. Tests override these providers.
+
+@riverpod
+{{Source}} {{sourceFn}}(Ref ref) => {{SourceImpl}}(ref.watch(httpClientProvider));
+
+@riverpod
+{{Repository}} {{featureCamel}}Repository(Ref ref) =>
+    {{RepositoryImpl}}(ref.watch({{sourceFn}}Provider));
+{{#clean}}
+@riverpod
+{{UseCase}} {{useCase}}(Ref ref) =>
+    {{UseCase}}(ref.watch({{featureCamel}}RepositoryProvider));
+{{/clean}}

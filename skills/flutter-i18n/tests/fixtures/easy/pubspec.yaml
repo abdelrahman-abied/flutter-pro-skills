@@ -1,0 +1,10 @@
+name: easy_app
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  easy_localization: ^3.0.7
+flutter:
+  assets:
+    - assets/translations/

@@ -1,0 +1,7 @@
+import '{{import:entity}}';
+import '{{import:result}}';
+
+/// Source of truth for {{title_lc}} data. View models depend on this contract.
+abstract interface class {{Repository}} {
+  Future<Result<List<{{Entity}}>>> fetch{{Feature}}List();
+}

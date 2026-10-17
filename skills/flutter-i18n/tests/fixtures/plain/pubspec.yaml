@@ -1,0 +1,6 @@
+name: plain_app
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter

@@ -1,0 +1,29 @@
+import 'package:equatable/equatable.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:dep}}';
+
+part '{{feature}}_state.dart';
+
+/// Loads the {{title_lc}} list. Methods are commands, so they're imperative verbs.
+class {{Logic}} extends Cubit<{{State}}> {
+{{#privnamed}}  {{Logic}}({required this._{{dep}}}) : super(const {{Feature}}Initial()){{/privnamed}}{{^privnamed}}  {{Logic}}({required {{Dep}} {{dep}}})
+      : _{{dep}} = {{dep}},
+        super(const {{Feature}}Initial()){{/privnamed}};
+
+  final {{Dep}} _{{dep}};
+
+  Future<void> load() async {
+    emit(const {{Feature}}LoadInProgress());
+    try {
+      final List<{{Entity}}> items = await {{depCall}};
+      if (isClosed) return;
+      emit({{Feature}}LoadSuccess(items));
+    } on Failure catch (failure) {
+      if (isClosed) return;
+      emit({{Feature}}LoadFailure(failure));
+    }
+  }
+}

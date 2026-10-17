@@ -1,0 +1,11 @@
+name: calib_riverpod
+description: Calibration regressions (K3, plain Riverpod shapes such as lichess and the riverpod examples) for check_errors.py.
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  riverpod_annotation: ^2.6.0
+  dio: ^5.7.0
+  logging: ^1.2.0

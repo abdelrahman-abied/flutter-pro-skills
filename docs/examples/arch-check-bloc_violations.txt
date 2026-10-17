@@ -1,0 +1,31 @@
+$ python3 -I skills/flutter-architecture/scripts/arch_check.py path/to/app   # fixture: bloc_violations
+
+== ARCHITECTURE PROFILE
+  root: path/to/app
+  package: bloc_violations
+  presentation: bloc
+  confidence: high
+  clean_architecture: false
+  repository_pattern: true
+  use_cases: false
+  layout: layer-first
+  state_management: bloc
+  di: bloc
+  files: 6 (data 1, presentation 4, app 1)
+  features: none
+  signals: dependency: flutter_bloc; 2 *_bloc/_cubit.dart files
+
+== ARCHITECTURE VIOLATIONS
+  [ARCH-008] view-depends-on-repository (medium) x1 — A view imports a repository or a use case; go through the notifier/view model/bloc.
+      lib/screens/cart_screen.dart:3  import '../repositories/cart_repository.dart';
+  [ARCH-009] logic-depends-on-flutter-ui (medium) x1 — Logic imports Flutter UI libraries; keep it testable without widgets (foundation.dart is fine).
+      lib/bloc/cart_bloc.dart:1  import 'package:flutter/material.dart';
+  [ARCH-010] sibling-logic-dependency (medium) x1 — Logic depends on another logic class; share a repository/stream or compose in the UI instead.
+      lib/bloc/cart_bloc.dart:5  import 'catalog_bloc.dart';
+  [ARCH-102] context-in-logic (medium) x2 — Logic uses BuildContext, navigation or dialogs; expose state/events and let the view react.
+      lib/bloc/cart_bloc.dart:11  void checkout(BuildContext context) {
+      lib/bloc/cart_bloc.dart:12  showDialog<void>(context: context, builder: (_) => const Text('Done'));
+  [ARCH-106] mutable-state-class (medium) x1 — A state class has a mutable field; make state immutable and copy on change.
+      lib/bloc/cart_state.dart:3  List<String> items; // ARCH-106
+  [ARCH-111] event-flag-in-state (low) x1 — A one-time event is modelled as a persistent bool in state; use ref.listen / a side-effect stream.
+      lib/bloc/cart_state.dart:4  final bool shouldNavigateToCheckout = false; // ARCH-111

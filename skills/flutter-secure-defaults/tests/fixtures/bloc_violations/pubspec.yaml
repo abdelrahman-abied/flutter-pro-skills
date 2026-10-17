@@ -1,0 +1,15 @@
+name: bank_app
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.0
+  hydrated_bloc: ^9.1.0
+  dio: ^5.4.0
+  pretty_dio_logger: ^1.4.0
+  sqflite: ^2.3.0
+  get_storage: ^2.1.1
+  flutter_inappwebview: ^6.0.0
+  firebase_crashlytics: ^4.0.0
+  envied: ^1.0.0

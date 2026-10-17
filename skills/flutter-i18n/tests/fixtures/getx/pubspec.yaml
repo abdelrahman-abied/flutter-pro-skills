@@ -1,0 +1,7 @@
+name: getx_app
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  get: ^4.6.6

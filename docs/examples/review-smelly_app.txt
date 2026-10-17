@@ -1,0 +1,94 @@
+$ flutter pub get --offline   # in a copy of skills/dart-flutter-review/tests/fixtures/smelly_app
+$ bash skills/dart-flutter-review/scripts/review.sh path/to/app --max 3
+
+== CONTEXT
+project:        path/to/app
+type:           Flutter app/package
+dart sdk:       3.13.5   pubspec constraint:   sdk: ^3.5.0
+lint include:    package:flutter_lints/flutter.yaml
+scope:          whole project — 10 non-generated .dart files
+
+== FORMAT (dart format, check only)
+  all formatted
+
+== ANALYZER (project's own analysis_options)
+  1 warning, 2 info
+  WARNING unused_field  x1
+      lib/features/cart/presentation/view/cart_view.dart:21  The value of the field '_poll' isn't used.
+  INFO    curly_braces_in_flow_control_structures  x1
+      lib/features/cart/presentation/view/checkout_form.dart:25  Statements in a for should be enclosed in a block.
+  INFO    empty_catches  x1
+      lib/features/cart/data/sources/cart_api.dart:31  Empty catch block.
+
+== AUTO-FIXABLE (dart fix --dry-run; nothing applied)
+  1 fix(es) in 1 file(s) -> one collapsed 'Mechanical' finding: dart fix --apply
+    curly_braces_in_flow_control_structures       x1
+
+== EXTRA LINTS (Effective Dart set from dart-flutter-best-practices/assets/analysis_options.yaml — informational, project has NOT opted in)
+  1 additional issue(s) the stricter set would flag (suggest adopting rules, don't report as violations):
+  INFO    unnecessary_lambdas  x1
+      lib/features/cart/presentation/view/cart_view.dart:60  Closure should be a tearoff.
+
+== ARCHITECTURE PROFILE
+  root: path/to/app
+  package: smelly_app
+  presentation: mvn
+  confidence: medium
+  clean_architecture: false
+  repository_pattern: true
+  use_cases: false
+  layout: feature-first
+  state_management: riverpod
+  di: riverpod
+  files: 10 (domain 1, data 2, presentation 4, core 1, app 2)
+  features: cart
+  signals: dependency: flutter_riverpod; 1 files under */presentation/notifier/
+
+== ARCHITECTURE VIOLATIONS
+  [ARCH-005] ui-depends-on-data-source (high) x1 — A view imports a transport/data-source; route it through the notifier/view model.
+      lib/features/cart/presentation/view/cart_view.dart:7  import 'package:dio/dio.dart';
+  [ARCH-101] io-in-widget (high) x1 — A widget does I/O; move it behind a repository/source and the notifier/view model.
+      lib/features/cart/presentation/view/cart_view.dart:35  final response = await Dio().get<int>('https://example.com/cart/count');
+
+== CANDIDATES (heuristic — confirm each by reading the code before reporting)
+  [CANDIDATE] undisposed-resource (high) x2 — Disposable created but not disposed/cancelled in the same file (Flutter: dispose what you create). False positive if ownership is handed elsewhere.
+      lib/features/cart/presentation/view/cart_view.dart:20  `_scroll` created, no dispose()/close() found in file
+      lib/features/cart/presentation/view/cart_view.dart:27  `_poll` (subscription/timer) never cancelled in file
+  [CANDIDATE] swallowed-catch (high) x2 — catch block that is empty or only returns a default — Effective Dart: DON'T discard errors; log, report, rethrow, or map to a typed failure.
+      lib/features/cart/data/sources/cart_api.dart:23  catch (e) { return const []; }
+      lib/features/cart/data/sources/cart_api.dart:31  catch (e) {}
+  [CANDIDATE] get-prefixed-method (low) x2 — Method named get*() — Effective Dart: AVOID starting a method name with `get`; make it a getter if cheap, else name the work (fetch/load/calculate).
+      lib/features/cart/data/sources/cart_api.dart:6  Future<List<String>> getItems();
+      lib/features/cart/data/sources/cart_api.dart:19  Future<List<String>> getItems() async {
+  [CANDIDATE] async-suffix (low) x1 — `Async` suffix — the Future return type already says it; drop the suffix.
+      lib/features/cart/data/sources/cart_api.dart:28  Future<void> syncAsync() async {
+  [CANDIDATE] k-or-hungarian-prefix (low) x1 — Prefix-letter name (kFoo / mFoo / strFoo) — Effective Dart: DON'T use prefix letters. Skip if the project consistently uses k-constants.
+      lib/core/utils.dart:2  const kDefaultTimeout = Duration(seconds: 5);
+  [CANDIDATE] i-prefixed-interface (low) x1 — I-prefixed type (IFoo) — every Dart class is an interface; name it for its role.
+      lib/features/cart/data/sources/cart_api.dart:5  abstract class ICartApi {
+  [CANDIDATE] noise-word-type (low) x1 — Noise-word type name (Manager/Helper/Util/Utils/Info/Data) — prefer a precise role name; static-only Utils classes violate avoid_classes_with_only_static_members. (`*Impl` is deliberately not flagged: Clean Architecture/MVN prescribe it.)
+      lib/features/cart/data/sources/cart_api.dart:9  class CartManager {
+  [CANDIDATE] negative-boolean (low) x1 — Negatively named boolean — Effective Dart: PREFER the positive name (isEnabled over isDisabled).
+      lib/features/cart/presentation/view/cart_view.dart:22  bool isDisabled = false;
+  [CANDIDATE] on-named-method (low) x1 — Public method named on*() — Flutter style: `onFoo` is reserved for callback *properties*; name the method `handleFoo`. (Private `_onTap` handlers are a common app convention and not flagged.)
+      lib/features/cart/presentation/view/cart_view.dart:30  void onSubmit() {
+  [CANDIDATE] widget-helper-method (low) x1 — Widget-returning helper method — prefer a private StatelessWidget class (own element, const-able, rebuilds independently).
+      lib/features/cart/presentation/view/cart_view.dart:39  Widget _buildHeader() {
+  [CANDIDATE] mediaquery-of (low) x1 — MediaQuery.of(context).<x> — use MediaQuery.sizeOf/paddingOf/viewInsetsOf/... to rebuild only on that aspect.
+      lib/features/cart/presentation/view/cart_view.dart:45  final width = MediaQuery.of(context).size.width;
+  [CANDIDATE] eager-children-map (medium) x1 — children built with .map(...) — fine for small fixed sets; for long/unbounded data use ListView.builder / slivers.
+      lib/features/cart/presentation/view/cart_view.dart:60  children: widget.items.map((i) => Text(i)).toList(),
+  [CANDIDATE] future-in-build (high) x1 — FutureBuilder/StreamBuilder given a call expression — if this runs in build(), it refires every rebuild; create the future in initState / the state layer.
+      lib/features/cart/presentation/view/cart_view.dart:54  future: fetchCount(),
+  [CANDIDATE] opacity-widget (low) x1 — Opacity widget — expensive (saveLayer); in animations use FadeTransition/AnimatedOpacity, for static use a translucent color.
+      lib/features/cart/presentation/view/cart_view.dart:40  return Opacity(opacity: 0.5, child: Text('${widget.items.length} items'));
+  [CANDIDATE] unique-key (medium) x1 — UniqueKey() — if created in build(), forces a remount every rebuild; use a stable ValueKey(id).
+      lib/features/cart/presentation/view/cart_view.dart:47  key: UniqueKey(),
+  [CANDIDATE] hardcoded-color (low) x1 — Hard-coded Color(0x...) outside theme files — read from Theme.of(context).colorScheme.
+      lib/features/cart/presentation/view/cart_view.dart:49  color: Color(0xFF00897B),
+  [CANDIDATE] dynamic-in-api (medium) x1 — `dynamic` as a declared variable/param/return type — AVOID dynamic unless you mean to disable checking; use Object? or a real type. (Type arguments like Map<String, dynamic> / Route<dynamic> are not flagged.)
+      lib/core/utils.dart:4  dynamic parse(dynamic raw) => raw;
+  [CANDIDATE] then-chain (low) x1 — .then(...) — PREFER async/await over raw futures (fine for fire-and-forget one-liners).
+      lib/features/cart/data/sources/cart_api.dart:35  getItems().then((items) => items.length);
+  [CANDIDATE] grab-bag-file (low) x1 — utils/helpers/common file names.
+      lib/core/utils.dart  grab-bag file name — name the file after what it contains

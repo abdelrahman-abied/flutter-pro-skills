@@ -1,0 +1,45 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '{{import:failure}}';
+import '{{import:notifier}}';
+import '{{import:list}}';
+
+class {{View}} extends ConsumerWidget {
+  const {{View}}({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final items = ref.watch({{logicProvider}});
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('{{title}}'),
+        actions: [
+          IconButton(
+            tooltip: 'Refresh',
+            onPressed: ref.read({{logicProvider}}.notifier).reload,
+            icon: const Icon(Icons.refresh),
+          ),
+        ],
+      ),
+      body: switch (items) {
+        AsyncData(:final value) => {{ListWidget}}(items: value),
+        AsyncError(:final error) => Center(
+            child: TextButton.icon(
+              onPressed: ref.read({{logicProvider}}.notifier).reload,
+              icon: const Icon(Icons.refresh),
+              label: Text(_failureMessage(error)),
+            ),
+          ),
+        AsyncLoading() => const Center(child: CircularProgressIndicator()),
+      },
+    );
+  }
+}
+
+// TODO: map the failure to a localized, user-safe message.
+String _failureMessage(Object error) => switch (error) {
+      NetworkFailure() => 'No connection. Tap to retry.',
+      _ => 'Could not load {{title_lc}}. Tap to retry.',
+    };

@@ -1,0 +1,8 @@
+name: calib_bloc_mixed
+dependencies:
+  flutter_bloc: ^9.0.0
+  get: ^4.6.0
+  get_it: ^8.0.0
+  http: ^1.0.0
+  todos_repository:
+    path: packages/todos_repository

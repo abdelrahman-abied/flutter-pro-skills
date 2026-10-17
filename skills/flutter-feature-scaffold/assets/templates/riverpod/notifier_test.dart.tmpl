@@ -1,0 +1,55 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:repository}}';
+import '{{import:di}}';
+import '{{import:notifier}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  Fake{{Repository}}([this._failure]);
+
+  final Failure? _failure;
+
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async {
+    if (_failure case final failure?) throw failure;
+    return const [{{Entity}}(id: '1', title: 'First')];
+  }
+}
+
+ProviderContainer _container(Fake{{Repository}} repository) {
+  final container = ProviderContainer(
+{{#modern}}    retry: (retryCount, error) => null,
+{{/modern}}    overrides: [
+      {{featureCamel}}RepositoryProvider.overrideWithValue(repository),
+    ],
+  );
+  addTearDown(container.dispose);
+  final subscription = container.listen({{logicProvider}}, (previous, next) {});
+  addTearDown(subscription.close);
+  return container;
+}
+
+void main() {
+  test('build() loads the {{title_lc}} items', () async {
+    final container = _container(Fake{{Repository}}());
+
+    final items = await container.read({{logicProvider}}.future);
+
+    expect(items, const [{{Entity}}(id: '1', title: 'First')]);
+  });
+
+  test('a failure becomes AsyncError holding the typed failure', () async {
+    final container = _container(Fake{{Repository}}(const NetworkFailure()));
+
+    await expectLater(container.read({{logicProvider}}.future), throwsA(anything));
+
+    expect(
+      container.read({{logicProvider}}),
+      isA<AsyncError<List<{{Entity}}>>>()
+          .having((s) => s.error, 'error', isA<NetworkFailure>()),
+    );
+  });
+}

@@ -1,0 +1,7 @@
+name: suppressed
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  shared_preferences: ^2.2.0

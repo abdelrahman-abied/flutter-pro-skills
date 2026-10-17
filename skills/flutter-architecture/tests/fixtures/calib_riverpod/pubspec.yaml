@@ -1,0 +1,6 @@
+name: calib_riverpod
+dependencies:
+  hooks_riverpod: ^2.6.0
+  riverpod_annotation: ^2.6.0
+  dio: ^5.0.0
+  firebase_auth: ^5.0.0

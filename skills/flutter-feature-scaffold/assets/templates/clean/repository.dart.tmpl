@@ -1,0 +1,6 @@
+import '{{import:entity}}';
+
+/// The domain owns this contract; `data/` implements it.
+abstract interface class {{Repository}} {
+  Future<List<{{Entity}}>> fetch{{Feature}}List();
+}

@@ -1,0 +1,5 @@
+name: calib_mvvm_compass
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2

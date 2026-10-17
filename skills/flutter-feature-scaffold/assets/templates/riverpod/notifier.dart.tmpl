@@ -1,0 +1,23 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '{{import:entity}}';
+import '{{import:di}}';
+
+part '{{self}}.g.dart';
+
+/// Loads the {{title_lc}} list. `AsyncValue` already models loading and error.
+@riverpod
+class {{Logic}} extends _${{Logic}} {
+  @override
+  Future<List<{{Entity}}>> build() =>
+{{#clean}}      ref.watch({{useCase}}Provider).call();{{/clean}}{{^clean}}      ref.watch({{featureCamel}}RepositoryProvider).fetch{{Feature}}List();{{/clean}}
+
+  /// Fetches again, showing the loading state meanwhile.
+  Future<void> reload() async {
+{{#clean}}    final fetch = ref.read({{useCase}}Provider).call;{{/clean}}{{^clean}}    final fetch = ref.read({{featureCamel}}RepositoryProvider).fetch{{Feature}}List;{{/clean}}
+    state = const AsyncLoading();
+    final result = await AsyncValue.guard(fetch);
+{{#modern}}    if (!ref.mounted) return;
+{{/modern}}    state = result;
+  }
+}

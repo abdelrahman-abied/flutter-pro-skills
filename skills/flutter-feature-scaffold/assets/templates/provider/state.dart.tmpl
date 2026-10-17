@@ -1,0 +1,31 @@
+import 'package:flutter/foundation.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+
+/// Every state the {{title_lc}} screen can be in; switch over it exhaustively.
+@immutable
+sealed class {{State}} {
+  const {{State}}();
+}
+
+final class {{Feature}}Initial extends {{State}} {
+  const {{Feature}}Initial();
+}
+
+final class {{Feature}}Loading extends {{State}} {
+  const {{Feature}}Loading();
+}
+
+final class {{Feature}}Success extends {{State}} {
+  const {{Feature}}Success(this.items);
+
+  final List<{{Entity}}> items;
+}
+
+/// Holds a typed failure, never raw error text: the view picks the words.
+final class {{Feature}}Error extends {{State}} {
+  const {{Feature}}Error(this.failure);
+
+  final Failure failure;
+}

@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="582" viewBox="0 0 920 582" role="img" aria-labelledby="t d">
+<title id="t">dart-flutter-review: mechanical pass output</title>
+<desc id="d">A trimmed excerpt of real review.sh output on the smelly_app test fixture: the detected architecture profile (MVN, feature-first, Riverpod), two high-severity architecture violations (ARCH-005 and ARCH-101 in cart_view.dart) and three heuristic candidates (undisposed timer, swallowed catch, future created in build).</desc>
+<style>text{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', monospace;font-size:13.5px;white-space:pre}.bg{fill:#0d1117}.bar{fill:#161b22}.border{fill:#30363d}.fg{fill:#c9d1d9}.dim{fill:#8b949e}.head{fill:#79c0ff}.prompt{fill:#7ee787}.high{fill:#ff7b72}.med{fill:#e3b341}.low{fill:#79c0ff}.cand{fill:#d2a8ff}.ok{fill:#3fb950}.info{fill:#8b949e}.b{font-weight:700}</style>
+<rect x="0.5" y="0.5" width="919" height="581" rx="10" fill="#0d1117" stroke="#30363d"/>
+<path d="M0.5 34 V10.5 A10 10 0 0 1 10.5 0.5 H909.5 A10 10 0 0 1 919.5 10.5 V34 Z" fill="#161b22"/>
+<line x1="0.5" y1="34" x2="919.5" y2="34" stroke="#30363d"/>
+<circle cx="20" cy="17.5" r="6" fill="#ff5f57"/><circle cx="40" cy="17.5" r="6" fill="#febc2e"/><circle cx="60" cy="17.5" r="6" fill="#28c840"/>
+<text x="460.0" y="22" text-anchor="middle" class="dim" style="font-size:12.5px">dart-flutter-review · scripts/review.sh · read-only</text>
+<text x="24" y="52" xml:space="preserve"><tspan class="prompt">$ </tspan><tspan class="fg">bash review.sh path/to/app --max 3</tspan></text>
+<text x="24" y="73" xml:space="preserve"><tspan class="dim">…</tspan><tspan class="dim">  (format, analyzer, dart fix and extra-lint sections elided)</tspan></text>
+<text x="24" y="94" xml:space="preserve"><tspan class="head b">== ARCHITECTURE PROFILE</tspan></text>
+<text x="24" y="115" xml:space="preserve"><tspan class="fg">  presentation: </tspan><tspan class="prompt">mvn</tspan></text>
+<text x="24" y="136" xml:space="preserve"><tspan class="fg">  confidence: medium</tspan></text>
+<text x="24" y="157" xml:space="preserve"><tspan class="fg">  repository_pattern: true</tspan></text>
+<text x="24" y="178" xml:space="preserve"><tspan class="fg">  layout: feature-first</tspan></text>
+<text x="24" y="199" xml:space="preserve"><tspan class="fg">  state_management: riverpod</tspan></text>
+<text x="24" y="220" xml:space="preserve"><tspan class="dim">  signals: dependency: flutter_riverpod; 1 files under */presentation/notifier/</tspan></text>
+<text x="24" y="262" xml:space="preserve"><tspan class="head b">== ARCHITECTURE VIOLATIONS</tspan></text>
+<text x="24" y="283" xml:space="preserve"><tspan class="high">  [ARCH-005] </tspan><tspan class="fg">ui-depends-on-data-source </tspan><tspan class="high">(high)</tspan><tspan class="fg"> x1</tspan></text>
+<text x="24" y="304" xml:space="preserve"><tspan class="dim">      lib/features/cart/presentation/view/cart_view.dart:7  </tspan><tspan class="fg">import &#39;package:dio/dio.dart&#39;;</tspan></text>
+<text x="24" y="325" xml:space="preserve"><tspan class="high">  [ARCH-101] </tspan><tspan class="fg">io-in-widget </tspan><tspan class="high">(high)</tspan><tspan class="fg"> x1</tspan></text>
+<text x="24" y="346" xml:space="preserve"><tspan class="dim">      lib/features/cart/presentation/view/cart_view.dart:35  </tspan><tspan class="fg">final response = await Dio().get&lt;int&gt;(…</tspan></text>
+<text x="24" y="388" xml:space="preserve"><tspan class="head b">== CANDIDATES </tspan><tspan class="dim">(heuristic — confirm each by reading the code before reporting)</tspan></text>
+<text x="24" y="409" xml:space="preserve"><tspan class="cand">  [CANDIDATE] </tspan><tspan class="fg">undisposed-resource </tspan><tspan class="high">(high)</tspan><tspan class="fg"> x2</tspan></text>
+<text x="24" y="430" xml:space="preserve"><tspan class="dim">      lib/features/cart/presentation/view/cart_view.dart:27  </tspan><tspan class="fg">`_poll` (subscription/timer) never cancelled</tspan></text>
+<text x="24" y="451" xml:space="preserve"><tspan class="cand">  [CANDIDATE] </tspan><tspan class="fg">swallowed-catch </tspan><tspan class="high">(high)</tspan><tspan class="fg"> x2</tspan></text>
+<text x="24" y="472" xml:space="preserve"><tspan class="dim">      lib/features/cart/data/sources/cart_api.dart:31  </tspan><tspan class="fg">catch (e) {}</tspan></text>
+<text x="24" y="493" xml:space="preserve"><tspan class="cand">  [CANDIDATE] </tspan><tspan class="fg">future-in-build </tspan><tspan class="high">(high)</tspan><tspan class="fg"> x1</tspan></text>
+<text x="24" y="514" xml:space="preserve"><tspan class="dim">      lib/features/cart/presentation/view/cart_view.dart:54  </tspan><tspan class="fg">future: fetchCount(),</tspan></text>
+<text x="24" y="535" xml:space="preserve"><tspan class="dim">  … 16 more candidate rules</tspan></text>
+</svg>

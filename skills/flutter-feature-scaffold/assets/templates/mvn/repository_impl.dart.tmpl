@@ -1,0 +1,32 @@
+import 'package:dio/dio.dart';
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '{{import:failure}}';
+import '{{import:http_client}}';
+import '{{import:entity}}';
+import '{{import:repository}}';
+import '{{import:source}}';
+
+part '{{self}}.g.dart';
+
+class {{RepositoryImpl}} implements {{Repository}} {
+  final {{Source}} _source;
+  const {{RepositoryImpl}}(this._source);
+
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async {
+    // TODO: map transport exceptions to typed failures; never log request or response bodies.
+    try {
+      final responses = await _source.get{{Feature}}List();
+      return [for (final response in responses) response.toEntity()];
+    } on DioException catch (error, stackTrace) {
+      Error.throwWithStackTrace(failureFromDio(error), stackTrace);
+    } on FormatException catch (_, stackTrace) {
+      Error.throwWithStackTrace(const ParseFailure(), stackTrace);
+    }
+  }
+}
+
+@riverpod
+{{Repository}} {{featureCamel}}Repository(Ref ref) =>
+    {{RepositoryImpl}}(ref.watch({{sourceFn}}Provider));

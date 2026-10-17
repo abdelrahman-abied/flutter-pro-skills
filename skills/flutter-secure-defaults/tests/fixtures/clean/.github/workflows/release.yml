@@ -1,0 +1,9 @@
+name: release
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: |
+          flutter build appbundle --release \
+            --obfuscate --split-debug-info=build/symbols

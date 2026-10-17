@@ -1,0 +1,9 @@
+name: calib_mvvm
+description: Calibration regressions (K1, Flutter-guide MVVM / Provider shapes) for check_errors.py.
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.0
+  http: ^1.2.0

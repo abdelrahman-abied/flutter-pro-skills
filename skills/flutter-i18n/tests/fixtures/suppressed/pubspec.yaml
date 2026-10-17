@@ -1,0 +1,10 @@
+name: suppressed_app
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+flutter:
+  generate: true

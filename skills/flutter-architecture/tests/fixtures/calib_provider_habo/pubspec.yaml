@@ -1,0 +1,7 @@
+name: calib_provider_habo
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  shared_preferences: ^2.3.5
+  supabase_flutter: ^2.0.0

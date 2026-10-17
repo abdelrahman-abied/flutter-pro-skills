@@ -1,0 +1,20 @@
+import 'package:meta/meta.dart';
+
+import '{{import:entity}}';
+
+// TODO: inbound DTO; mirror the real payload, then map it in toEntity().
+@immutable
+class {{Feature}}Response {
+  final String id;
+  final String title;
+  const {{Feature}}Response({required this.id, required this.title});
+
+  // TODO: validate the JSON shape here; throw FormatException on a mismatch.
+  factory {{Feature}}Response.fromJson(Object? json) => switch (json) {
+        {'id': final String id, 'title': final String title} =>
+          {{Feature}}Response(id: id, title: title),
+        _ => throw const FormatException('Unexpected {{title_lc}} payload'),
+      };
+
+  {{Entity}} toEntity() => {{Entity}}(id: id, title: title);
+}

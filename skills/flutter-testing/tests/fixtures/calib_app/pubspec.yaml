@@ -1,0 +1,17 @@
+name: calib_app
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  flutter_riverpod: ^2.6.0
+  riverpod_annotation: ^2.6.0
+  equatable: ^2.0.5
+  foo_repository:
+    path: packages/foo_repository
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mocktail: ^1.0.4
+  drift_dev: ^2.20.0

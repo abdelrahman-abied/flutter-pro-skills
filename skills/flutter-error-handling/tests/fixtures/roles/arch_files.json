@@ -1,0 +1,10 @@
+{
+  "schema": "flutter-pro-skills/arch-profile@1",
+  "profile": {"presentation": "bloc", "confidence": "high", "clean_architecture": false, "repository_pattern": true},
+  "files": [
+    {"file": "lib/cart/cart_repository.dart", "layer": "data", "role": "repository", "feature": "cart", "classes": ["CartRepository"]},
+    {"file": "lib/cart/bloc/bloc.dart", "layer": "presentation", "role": "barrel", "feature": "cart", "classes": []},
+    {"file": "lib/di/providers.dart", "layer": "app", "role": "di", "feature": null, "classes": ["CartModule"]},
+    {"file": "lib/misc/weird.dart", "layer": "other", "role": "frobnicator", "feature": null, "classes": ["Weird"]}
+  ]
+}

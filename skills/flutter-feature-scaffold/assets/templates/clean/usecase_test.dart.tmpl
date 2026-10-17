@@ -1,0 +1,21 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:entity}}';
+import '{{import:repository}}';
+import '{{import:usecase}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async =>
+      const [{{Entity}}(id: '1', title: 'First')];
+}
+
+void main() {
+  test('{{UseCase}} returns the repository items', () async {
+    final useCase = {{UseCase}}(Fake{{Repository}}());
+
+    final items = await useCase();
+
+    expect(items, const [{{Entity}}(id: '1', title: 'First')]);
+  });
+}

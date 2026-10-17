@@ -1,0 +1,52 @@
+import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+
+import '{{import:failure}}';
+import '{{import:notifier}}';
+import '{{import:state}}';
+import '{{import:widget}}';
+
+class {{View}} extends ConsumerWidget {
+  const {{View}}({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    // One-time side effects, outside the paint pipeline.
+    ref.listen<{{State}}>({{logicProvider}}, (previous, current) {
+      if (current is {{Feature}}Error && previous is! {{Feature}}Error) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(_failureMessage(current.failure))),
+        );
+      }
+    });
+
+    final state = ref.watch({{logicProvider}});
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{title}}')),
+      body: switch (state) {
+        {{Feature}}Initial() => Center(
+            child: ElevatedButton(
+              onPressed: ref.read({{logicProvider}}.notifier).load,
+              child: const Text('Load'),
+            ),
+          ),
+        {{Feature}}Loading() => const Center(child: CircularProgressIndicator()),
+        {{Feature}}Error(:final failure) => Center(
+            child: TextButton.icon(
+              onPressed: ref.read({{logicProvider}}.notifier).load,
+              icon: const Icon(Icons.refresh),
+              label: Text(_failureMessage(failure)),
+            ),
+          ),
+        {{Feature}}Success(items: final list) => {{ListWidget}}(items: list),
+      },
+    );
+  }
+}
+
+// TODO: map the failure to a localized, user-safe message.
+String _failureMessage(Failure failure) => switch (failure) {
+      NetworkFailure() => 'No connection. Tap to retry.',
+      _ => 'Could not load {{title_lc}}. Tap to retry.',
+    };

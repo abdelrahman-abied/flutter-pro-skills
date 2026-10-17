@@ -1,0 +1,42 @@
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:repository}}';
+{{#clean}}import '{{import:usecase}}';
+{{/clean}}import '{{import:logic}}';
+import '{{import:state}}';
+
+class Fake{{Repository}} implements {{Repository}} {
+  Fake{{Repository}}([this._failure]);
+
+  final Failure? _failure;
+
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async {
+    if (_failure case final failure?) throw failure;
+    return const [{{Entity}}(id: '1', title: 'First')];
+  }
+}
+
+void main() {
+  test('load() moves to {{Feature}}Success with the items', () async {
+    final controller = {{Logic}}({{dep}}: {{fakeDep}});
+
+    await controller.load();
+
+    final state = controller.loadState.value;
+    expect(state, isA<{{Feature}}Success>());
+    expect((state as {{Feature}}Success).items.single.title, 'First');
+  });
+
+  test('load() moves to {{Feature}}Error with the typed failure', () async {
+    final controller = {{Logic}}({{dep}}: {{failingDep}});
+
+    await controller.load();
+
+    final state = controller.loadState.value;
+    expect(state, isA<{{Feature}}Error>());
+    expect((state as {{Feature}}Error).failure, isA<NetworkFailure>());
+  });
+}

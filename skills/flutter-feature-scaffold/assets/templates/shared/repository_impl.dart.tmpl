@@ -1,0 +1,25 @@
+{{#dio}}import 'package:dio/dio.dart';
+
+{{/dio}}import '{{import:failure}}';
+{{#dio}}import '{{import:http_client}}';
+{{/dio}}import '{{import:entity}}';
+import '{{import:repository}}';
+import '{{import:source}}';
+
+final class {{RepositoryImpl}} implements {{Repository}} {
+  const {{RepositoryImpl}}(this._source);
+
+  final {{Source}} _source;
+
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async {
+    // TODO: map transport exceptions to typed failures; never log request or response bodies.
+    try {
+      return await _source.fetch{{Feature}}List();
+{{#dio}}    } on DioException catch (error, stackTrace) {
+      Error.throwWithStackTrace(failureFromDio(error), stackTrace);
+{{/dio}}    } on FormatException catch (_, stackTrace) {
+      Error.throwWithStackTrace(const ParseFailure(), stackTrace);
+    }
+  }
+}

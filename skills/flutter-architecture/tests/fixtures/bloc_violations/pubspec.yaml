@@ -1,0 +1,8 @@
+name: bloc_violations
+publish_to: 'none'
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^8.1.0

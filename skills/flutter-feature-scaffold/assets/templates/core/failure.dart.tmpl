@@ -1,0 +1,24 @@
+/// Typed failures the data layer throws (or returns in a `Result`) instead of
+/// transport exceptions. They carry no server message, URL, headers or body,
+/// so nothing sensitive reaches state, logs or the screen: the view picks the
+/// words from the type.
+sealed class Failure implements Exception {
+  const Failure();
+}
+
+/// No answer: offline, DNS, timeout, TLS.
+final class NetworkFailure extends Failure {
+  const NetworkFailure();
+}
+
+/// The server answered with an error status.
+final class ServerFailure extends Failure {
+  const ServerFailure([this.statusCode]);
+
+  final int? statusCode;
+}
+
+/// The response did not have the expected shape.
+final class ParseFailure extends Failure {
+  const ParseFailure();
+}

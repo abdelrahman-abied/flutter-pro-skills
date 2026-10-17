@@ -1,0 +1,21 @@
+import 'package:flutter/material.dart';
+
+import '{{import:entity}}';
+
+/// Renders the {{title_lc}} items. Presentational only: data in, widgets out.
+class {{ListWidget}} extends StatelessWidget {
+  const {{ListWidget}}({super.key, required this.items});
+
+  final List<{{Entity}}> items;
+
+  @override
+  Widget build(BuildContext context) {
+    if (items.isEmpty) {
+      return const Center(child: Text('Nothing here yet.'));
+    }
+    return ListView.builder(
+      itemCount: items.length,
+      itemBuilder: (context, index) => ListTile(title: Text(items[index].title)),
+    );
+  }
+}

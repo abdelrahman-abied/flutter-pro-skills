@@ -1,0 +1,6 @@
+name: ws_root
+publish_to: none
+environment:
+  sdk: ^3.4.0
+workspace:
+  - app

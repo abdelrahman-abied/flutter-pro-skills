@@ -1,0 +1,24 @@
+import 'package:flutter/foundation.dart';
+
+import '{{import:entity}}';
+
+/// Wire format of a {{title_lc}} item. Stays in `data/`; callers get entities.
+// TODO: mirror the real payload, then map it in toEntity().
+@immutable
+final class {{Feature}}Dto {
+  const {{Feature}}Dto({required this.id, required this.title});
+
+  // TODO: validate the JSON shape here; throw FormatException on a mismatch.
+  factory {{Feature}}Dto.fromJson(Object? json) => switch (json) {
+        {'id': final String id, 'title': final String title} =>
+          {{Feature}}Dto(id: id, title: title),
+        _ => throw const FormatException('Unexpected {{title_lc}} payload'),
+      };
+
+  final String id;
+  final String title;
+
+  Map<String, dynamic> toJson() => {'id': id, 'title': title};
+
+  {{Entity}} toEntity() => {{Entity}}(id: id, title: title);
+}

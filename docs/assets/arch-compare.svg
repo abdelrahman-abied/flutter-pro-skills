@@ -1,0 +1,65 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1060" height="590" viewBox="0 0 1060 590" role="img" aria-labelledby="t d">
+<title id="t">Same code, different verdict per architecture</title>
+<desc id="d">A comparison table. Logic calling a repository directly: OK in MVVM, ARCH-012 medium in MVN, OK in Bloc. Logic depending on sibling logic: ARCH-010 low in MVVM, OK in MVN via ref.watch in build, ARCH-010 medium in Bloc. A pass-through use case: Info in MVVM, prescribed in MVN, Info in Bloc. A view importing a repository to construct its logic: ARCH-008 medium in MVVM and MVN, OK in Bloc inside BlocProvider or RepositoryProvider.</desc>
+<style>text{font-family:ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', 'DejaVu Sans Mono', monospace}</style>
+<rect x="0.5" y="0.5" width="1059" height="589" rx="14" fill="#0d1117" stroke="#30363d"/>
+<text x="36" y="58" fill="#f0f6fc" font-size="25" font-weight="700">Same code. Different pattern. Different verdict.</text>
+<text x="36" y="88" fill="#8b949e" font-size="14.5">flutter-pro-skills detects the architecture first, then applies only that pattern's rules.</text>
+<text x="36" y="138" fill="#8b949e" font-size="12.5" letter-spacing="1">WHAT THE CODE DOES</text>
+<text x="467.0" y="128" text-anchor="middle" fill="#f0f6fc" font-size="18" font-weight="700">MVVM</text>
+<text x="467.0" y="147" text-anchor="middle" fill="#8b949e" font-size="11.5">Flutter architecture guide</text>
+<text x="689.0" y="128" text-anchor="middle" fill="#f0f6fc" font-size="18" font-weight="700">MVN</text>
+<text x="689.0" y="147" text-anchor="middle" fill="#8b949e" font-size="11.5">Model-View-Notifier spec</text>
+<text x="911.0" y="128" text-anchor="middle" fill="#f0f6fc" font-size="18" font-weight="700">Bloc</text>
+<text x="911.0" y="147" text-anchor="middle" fill="#8b949e" font-size="11.5">bloclibrary.dev</text>
+<line x1="36" y1="160" x2="1024" y2="160" stroke="#30363d"/>
+<text x="36" y="200" fill="#c9d1d9" font-size="15" font-weight="700">Logic calls a repository directly</text>
+<text x="36" y="222" fill="#8b949e" font-size="12.5">view model, notifier or bloc → repo</text>
+<rect x="449.8" y="182" width="34.4" height="28" rx="14" fill="#0f2a18" stroke="#3fb950" stroke-opacity="0.75"/>
+<text x="467.0" y="201" text-anchor="middle" fill="#3fb950" font-size="13.5" font-weight="700">OK</text>
+<text x="467.0" y="230" text-anchor="middle" fill="#8b949e" font-size="12">use cases are optional</text>
+<rect x="610.3" y="182" width="157.4" height="28" rx="14" fill="#2e2410" stroke="#e3b341" stroke-opacity="0.75"/>
+<text x="689.0" y="201" text-anchor="middle" fill="#e3b341" font-size="13.5" font-weight="700">ARCH-012 · medium</text>
+<text x="689.0" y="230" text-anchor="middle" fill="#8b949e" font-size="12">go through a use case</text>
+<rect x="893.8" y="182" width="34.4" height="28" rx="14" fill="#0f2a18" stroke="#3fb950" stroke-opacity="0.75"/>
+<text x="911.0" y="201" text-anchor="middle" fill="#3fb950" font-size="13.5" font-weight="700">OK</text>
+<text x="911.0" y="230" text-anchor="middle" fill="#8b949e" font-size="12">repositories are injected</text>
+<line x1="36" y1="252" x2="1024" y2="252" stroke="#30363d"/>
+<text x="36" y="292" fill="#c9d1d9" font-size="15" font-weight="700">Logic depends on sibling logic</text>
+<text x="36" y="314" fill="#8b949e" font-size="12.5">bloc → bloc, notifier → notifier</text>
+<rect x="400.6" y="274" width="132.8" height="28" rx="14" fill="#0f2235" stroke="#79c0ff" stroke-opacity="0.75"/>
+<text x="467.0" y="293" text-anchor="middle" fill="#79c0ff" font-size="13.5" font-weight="700">ARCH-010 · low</text>
+<text x="467.0" y="322" text-anchor="middle" fill="#8b949e" font-size="12">one view model per view</text>
+<rect x="671.8" y="274" width="34.4" height="28" rx="14" fill="#0f2a18" stroke="#3fb950" stroke-opacity="0.75"/>
+<text x="689.0" y="293" text-anchor="middle" fill="#3fb950" font-size="13.5" font-weight="700">OK</text>
+<text x="689.0" y="322" text-anchor="middle" fill="#8b949e" font-size="12">ref.watch(other) in build()</text>
+<rect x="832.3" y="274" width="157.4" height="28" rx="14" fill="#2e2410" stroke="#e3b341" stroke-opacity="0.75"/>
+<text x="911.0" y="293" text-anchor="middle" fill="#e3b341" font-size="13.5" font-weight="700">ARCH-010 · medium</text>
+<text x="911.0" y="322" text-anchor="middle" fill="#8b949e" font-size="12">no bloc knows another</text>
+<line x1="36" y1="344" x2="1024" y2="344" stroke="#30363d"/>
+<text x="36" y="384" fill="#c9d1d9" font-size="15" font-weight="700">A use case that only forwards</text>
+<text x="36" y="406" fill="#8b949e" font-size="12.5">call() just returns repo.fetch()</text>
+<rect x="441.6" y="366" width="50.8" height="28" rx="14" fill="#1c2128" stroke="#8b949e" stroke-opacity="0.75"/>
+<text x="467.0" y="385" text-anchor="middle" fill="#8b949e" font-size="13.5" font-weight="700">Info</text>
+<text x="467.0" y="414" text-anchor="middle" fill="#8b949e" font-size="12">add use cases when needed</text>
+<rect x="639.0" y="366" width="100.0" height="28" rx="14" fill="#0f2a18" stroke="#3fb950" stroke-opacity="0.75"/>
+<text x="689.0" y="385" text-anchor="middle" fill="#3fb950" font-size="13.5" font-weight="700">Prescribed</text>
+<text x="689.0" y="414" text-anchor="middle" fill="#8b949e" font-size="12">one use case per intent</text>
+<rect x="885.6" y="366" width="50.8" height="28" rx="14" fill="#1c2128" stroke="#8b949e" stroke-opacity="0.75"/>
+<text x="911.0" y="385" text-anchor="middle" fill="#8b949e" font-size="13.5" font-weight="700">Info</text>
+<text x="911.0" y="414" text-anchor="middle" fill="#8b949e" font-size="12">ceremony, not a defect</text>
+<line x1="36" y1="436" x2="1024" y2="436" stroke="#30363d"/>
+<text x="36" y="476" fill="#c9d1d9" font-size="15" font-weight="700">A view imports a repository</text>
+<text x="36" y="498" fill="#8b949e" font-size="12.5">to construct its logic class</text>
+<rect x="388.3" y="458" width="157.4" height="28" rx="14" fill="#2e2410" stroke="#e3b341" stroke-opacity="0.75"/>
+<text x="467.0" y="477" text-anchor="middle" fill="#e3b341" font-size="13.5" font-weight="700">ARCH-008 · medium</text>
+<text x="467.0" y="506" text-anchor="middle" fill="#8b949e" font-size="12">wire it in the router/DI</text>
+<rect x="610.3" y="458" width="157.4" height="28" rx="14" fill="#2e2410" stroke="#e3b341" stroke-opacity="0.75"/>
+<text x="689.0" y="477" text-anchor="middle" fill="#e3b341" font-size="13.5" font-weight="700">ARCH-008 · medium</text>
+<text x="689.0" y="506" text-anchor="middle" fill="#8b949e" font-size="12">provide it via a provider</text>
+<rect x="828.2" y="458" width="165.6" height="28" rx="14" fill="#0f2a18" stroke="#3fb950" stroke-opacity="0.75"/>
+<text x="911.0" y="477" text-anchor="middle" fill="#3fb950" font-size="13.5" font-weight="700">OK in BlocProvider</text>
+<text x="911.0" y="506" text-anchor="middle" fill="#8b949e" font-size="12">RepositoryProvider idiom</text>
+<line x1="36" y1="528" x2="1024" y2="528" stroke="#30363d"/>
+<text x="36" y="562" fill="#8b949e" font-size="12">ARCH rules: scripts/arch_check.py · Info and Prescribed: reviewer judgment · sources: references/anti-patterns.md</text>
+</svg>

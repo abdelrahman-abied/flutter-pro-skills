@@ -1,0 +1,11 @@
+name: err_clean
+description: Fixture with correct layered error handling; must produce zero findings.
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  riverpod_annotation: ^2.6.0
+  dio: ^5.4.0
+  firebase_crashlytics: ^4.0.0

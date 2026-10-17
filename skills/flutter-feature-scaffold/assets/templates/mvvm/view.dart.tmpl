@@ -1,0 +1,47 @@
+import 'package:flutter/material.dart';
+
+import '{{import:failure}}';
+import '{{import:result}}';
+import '{{import:logic}}';
+import '{{import:list}}';
+
+class {{View}} extends StatelessWidget {
+  const {{View}}({super.key, required this.viewModel});
+
+  final {{Logic}} viewModel;
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{title}}')),
+      body: ListenableBuilder(
+        listenable: viewModel.load,
+        builder: (context, child) {
+          if (viewModel.load.running) {
+            return const Center(child: CircularProgressIndicator());
+          }
+          if (viewModel.load.result case Error(:final error)) {
+            return Center(
+              child: TextButton.icon(
+                onPressed: viewModel.load.execute,
+                icon: const Icon(Icons.refresh),
+                label: Text(_failureMessage(error)),
+              ),
+            );
+          }
+          return child!;
+        },
+        child: ListenableBuilder(
+          listenable: viewModel,
+          builder: (context, child) => {{ListWidget}}(items: viewModel.items),
+        ),
+      ),
+    );
+  }
+}
+
+// TODO: map the failure to a localized, user-safe message.
+String _failureMessage(Exception error) => switch (error) {
+      NetworkFailure() => 'No connection. Tap to retry.',
+      _ => 'Could not load {{title_lc}}. Tap to retry.',
+    };

@@ -1,0 +1,7 @@
+{
+  "@@locale": "en",
+  "title": "Title",
+  "@title": {"description": "Screen title"},
+  "draftOnly": "Draft",
+  "@draftOnly": {"description": "Not shipped yet"}
+}

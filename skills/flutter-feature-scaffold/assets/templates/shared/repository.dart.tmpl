@@ -1,0 +1,6 @@
+import '{{import:entity}}';
+
+/// Source of truth for {{title_lc}} data. Callers depend on this contract only.
+abstract interface class {{Repository}} {
+  Future<List<{{Entity}}>> fetch{{Feature}}List();
+}

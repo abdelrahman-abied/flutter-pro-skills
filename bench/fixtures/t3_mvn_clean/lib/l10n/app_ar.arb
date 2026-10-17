@@ -1,0 +1,8 @@
+{
+  "@@locale": "ar",
+  "appTitle": "المتجر",
+  "productsTitle": "المنتجات",
+  "searchHint": "ابحث عن منتج",
+  "genericError": "حدث خطأ ما. حاول مرة أخرى.",
+  "retry": "إعادة المحاولة"
+}

@@ -1,0 +1,15 @@
+name: shop_app
+description: i18n checker fixture (clean)
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any
+  flutter_riverpod: ^2.6.1
+  riverpod_annotation: ^2.6.1
+  shared_preferences: ^2.3.0
+flutter:
+  generate: true

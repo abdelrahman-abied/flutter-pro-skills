@@ -1,0 +1,38 @@
+import 'package:flutter/material.dart';
+import 'package:get/get.dart';
+
+import '{{import:failure}}';
+import '{{import:logic}}';
+import '{{import:state}}';
+import '{{import:list}}';
+
+class {{View}} extends GetView<{{Logic}}> {
+  const {{View}}({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: const Text('{{title}}')),
+      body: Obx(
+        () => switch (controller.loadState.value) {
+          {{Feature}}Initial() ||
+          {{Feature}}Loading() => const Center(child: CircularProgressIndicator()),
+          {{Feature}}Error(:final failure) => Center(
+              child: TextButton.icon(
+                onPressed: controller.load,
+                icon: const Icon(Icons.refresh),
+                label: Text(_failureMessage(failure)),
+              ),
+            ),
+          {{Feature}}Success(:final items) => {{ListWidget}}(items: items),
+        },
+      ),
+    );
+  }
+}
+
+// TODO: map the failure to a localized, user-safe message.
+String _failureMessage(Failure failure) => switch (failure) {
+      NetworkFailure() => 'No connection. Tap to retry.',
+      _ => 'Could not load {{title_lc}}. Tap to retry.',
+    };

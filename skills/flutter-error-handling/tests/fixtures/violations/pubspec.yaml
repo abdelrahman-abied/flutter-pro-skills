@@ -1,0 +1,11 @@
+name: err_violations
+description: Fixture that triggers every ERR rule (static only; no pub get).
+environment:
+  sdk: ">=3.4.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.6.0
+  riverpod_annotation: ^2.6.0
+  dio: ^5.4.0
+  sentry_flutter: ^8.0.0

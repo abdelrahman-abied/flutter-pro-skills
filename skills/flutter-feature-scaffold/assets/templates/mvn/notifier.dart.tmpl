@@ -1,0 +1,25 @@
+import 'package:riverpod_annotation/riverpod_annotation.dart';
+
+import '{{import:failure}}';
+import '{{import:usecase}}';
+import '{{import:state}}';
+
+part '{{self}}.g.dart';
+
+@riverpod
+class {{Logic}} extends _${{Logic}} {
+  @override
+  {{State}} build() => const {{Feature}}Initial();
+
+  Future<void> load() async {
+    state = const {{Feature}}Loading();
+    try {
+      final items = await ref.read({{useCase}}Provider)();
+{{#modern}}      if (!ref.mounted) return;
+{{/modern}}      state = {{Feature}}Success(items);
+    } on Failure catch (failure) {
+{{#modern}}      if (!ref.mounted) return;
+{{/modern}}      state = {{Feature}}Error(failure);
+    }
+  }
+}

@@ -1,0 +1,10 @@
+name: mvvm_clean
+publish_to: 'none'
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.0
+  go_router: ^14.0.0
+  http: ^1.2.0

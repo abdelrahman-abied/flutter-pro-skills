@@ -1,0 +1,15 @@
+import '{{import:entity}}';
+import '{{import:result}}';
+import '{{import:repository}}';
+
+/// Loads the {{title_lc}} list.
+// TODO: the guide adds use cases only when logic merges several repositories,
+// is complex, or is reused by several view models. Put that logic here, or
+// delete this class and let the view model call the repository.
+final class {{UseCase}} {
+  const {{UseCase}}(this._repository);
+
+  final {{Repository}} _repository;
+
+  Future<Result<List<{{Entity}}>>> call() => _repository.fetch{{Feature}}List();
+}

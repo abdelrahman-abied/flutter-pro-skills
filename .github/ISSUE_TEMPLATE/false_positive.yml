@@ -1,0 +1,76 @@
+name: False positive
+description: A rule flagged code that is actually fine. This is the most valuable report you can send.
+title: "[false positive] <RULE-ID>: "
+labels: ["false-positive", "triage"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thanks! False positives are how the rules get sharper. Please keep the snippet small and strip anything private.
+        You can write in English or Arabic.
+  - type: input
+    id: rule
+    attributes:
+      label: Rule ID
+      description: The ID from the report, e.g. ARCH-012, ARCH-101, UI-future-in-build, NAME-get-prefix.
+      placeholder: ARCH-012
+    validations:
+      required: true
+  - type: dropdown
+    id: source
+    attributes:
+      label: Where did the finding come from?
+      options:
+        - arch_check.py (ARCH-0xx / ARCH-1xx line)
+        - review.sh heuristic ([CANDIDATE] line)
+        - An agent's review report (judgment finding)
+        - Another script (test_gaps.py, error checks, …)
+    validations:
+      required: true
+  - type: textarea
+    id: snippet
+    attributes:
+      label: Code snippet
+      description: The smallest code that triggers the finding, with the file path (e.g. lib/features/cart/presentation/notifier/cart_notifier.dart).
+      render: dart
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: The finding as reported
+      description: Paste the line(s) from the tool output or the agent's report.
+      render: text
+    validations:
+      required: true
+  - type: textarea
+    id: profile
+    attributes:
+      label: Detected profile
+      description: |
+        Run `python3 -I skills/flutter-architecture/scripts/arch_check.py path/to/app --json` and paste the `"profile"` object.
+        Many false positives are a wrong detection (e.g. MVVM read as MVN), and this shows it at once.
+      render: json
+      placeholder: |
+        {"presentation": "mvn", "clean_architecture": true, "use_cases": true, "layout": "feature-first", "confidence": "medium", "signals": ["..."]}
+    validations:
+      required: true
+  - type: input
+    id: declared
+    attributes:
+      label: Declared architecture (if any)
+      description: What your AGENTS.md / CLAUDE.md / project instructions declare, or what you'd pass to --profile.
+      placeholder: "Clean Architecture + MVVM (Flutter guide)"
+  - type: textarea
+    id: why
+    attributes:
+      label: Why is this a false positive?
+      description: Ideally cite the pattern's own source (Flutter architecture guide, bloclibrary.dev, riverpod.dev, the MVN spec, Effective Dart).
+    validations:
+      required: true
+  - type: checkboxes
+    id: pr
+    attributes:
+      label: Contribution
+      options:
+        - label: I'm willing to open a PR with a regression fixture for this.

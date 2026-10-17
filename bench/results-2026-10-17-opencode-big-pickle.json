@@ -1,0 +1,615 @@
+[
+ {
+  "task": "t1",
+  "run": "bench/runs/t1-baseline-r1",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "A2",
+   "E1",
+   "E2",
+   "I1",
+   "N1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [
+   "F1",
+   "S1"
+  ],
+  "recall": 0.833,
+  "decoys_total": 3,
+  "decoys_flagged": [],
+  "claim_blocks": 35,
+  "text_chars": 11422,
+  "false_claims": 5,
+  "neutral": [
+   "null-assertion-response-data",
+   "weak-email-validation"
+  ],
+  "false_claim_examples": [
+   "- order_history_view.dart:16-17 DateFormat locale",
+   "- cart_state.dart:16 + cart_notifier (CartError never constructed)",
+   "- cart_repository_impl.dart:16-24 ignores title",
+   "- app_exception.dart:8-17 incomplete DioException mapping",
+   "- **`analysis_options.yaml:1-6`** \u2014 only `flutter_lints`; enabling `unawaited_futures` would flag fire-and-forget calls like `product_detail_view.dart:26-27`."
+  ],
+  "decoy_examples": {},
+  "name": "t1-baseline-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 180,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 14,
+   "tools": {
+    "bash": 3,
+    "glob": 2,
+    "read": 66,
+    "grep": 2
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t1",
+  "run": "bench/runs/t1-baseline-r2",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "A2",
+   "E1",
+   "E2",
+   "F1",
+   "I1",
+   "N1",
+   "S1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 3,
+  "decoys_flagged": [
+   "D1"
+  ],
+  "claim_blocks": 36,
+  "text_chars": 8995,
+  "false_claims": 15,
+  "neutral": [
+   "image-network",
+   "microtask-in-build",
+   "only-AppException-caught",
+   "token-not-attached-or-logout"
+  ],
+  "false_claim_examples": [
+   "| `lib/features/auth/presentation/notifier/auth_notifier.dart:12` + `auth_local_source.dart:26` | No session restore; `build()` returns `AuthInitial` and `readToken()` is never called anywhere \u2192 logged out on every cold start. |",
+   "| `lib/features/product/presentation/notifier/product_detail_notifier.dart:13,18-24` | Same pattern; `state =` / `ref.read` after dispose throws `UnmountedRefException` (uncaught \u2014 only `AppException` handled). |",
+   "| `lib/features/profile/presentation/notifier/profile_notifier.dart:14,19-25,28-36` | Same dispose race in `load()` and `updateName()`; `updateName` has no in-flight guard (double-tap fires concurrent PATCHes, older response wins) and `ProfileError` carries no payload \u2192 typed text is lost on a faile",
+   "| `lib/features/cart/presentation/notifier/cart_notifier.dart:15-19` | Overlapping `addItem` calls \u2192 responses can reorder, showing a wrong quantity. |",
+   "| `lib/features/cart/data/repositories/cart_repository_impl.dart:18-21` + `cart_item_request.dart:1-9` | `title` is threaded from view\u2192usecase\u2192repository but `CartItemRequest` has no such field \u2014 it is silently dropped from the request. |",
+   "| `lib/core/router/app_router.dart:50-54` | `/orders` and `/profile` routes are never navigated to (only `/cart` and `/products/:id` are pushed) \u2014 those features are unreachable. |",
+   "| `lib/features/auth/presentation/state/auth_state.dart:24` + `login_view.dart:41-44` | `AuthError` has no reason \u2014 network vs. invalid credentials indistinguishable to the user. |",
+   "| `lib/features/product/presentation/view/product_list_view.dart:44-49`, `product_detail_view.dart:24-30` | Error states show only \"Retry\"; the exception and `l10n.genericError` are never displayed. |",
+   "| `lib/features/product/presentation/view/product_list_view.dart:50-56` | List items built without keys. |",
+   "| `lib/features/product/presentation/view/product_detail_view.dart:20` | Detail AppBar shows generic list title, not the product title. |",
+   "| `lib/features/product/presentation/notifier/product_query_notifier.dart:11` vs `widget/product_search_bar.dart:15-28` | Search field not synced with the query provider; no debounce, submit-only. |",
+   "| `lib/features/product/presentation/view/product_list_view.dart:38-58` | `RefreshIndicator` wraps non-scrollable loading/error branches \u2014 pull-to-refresh dead in those states. |",
+   "| `lib/features/profile/presentation/widget/edit_name_field.dart:20-21` | `late final` controller never updated in `didUpdateWidget` \u2014 stale text if `initialName` changes. |",
+   "| `lib/features/auth/presentation/view/login_view.dart` (no double-tap guard until rebuild) | Two rapid taps can both pass `state is AuthLoading` check before the first rebuild disables the button. |",
+   "| `lib/main.dart:17-20` | `onError` returns `true`, fully swallowing uncaught async errors (relevant to the several notifiers above). |"
+  ],
+  "decoy_examples": {
+   "D1": "| `lib/features/auth/domain/usecases/login_usecase.dart:3`, `cart_usecase.dart:3`, `order_usecase.dart:3`, `product_usecase.dart:3`, `profile_usecase.dart:3` | Domain layer imports data-layer repository impls (Clean Architecture dependency-direction violation). |"
+  },
+  "name": "t1-baseline-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 831,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 8,
+   "tools": {
+    "glob": 1,
+    "bash": 8,
+    "task": 3,
+    "read": 1
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t1",
+  "run": "bench/runs/t1-skills-r1",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "A2",
+   "E1",
+   "E2",
+   "F1",
+   "I1",
+   "N1",
+   "S1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 3,
+  "decoys_flagged": [],
+  "claim_blocks": 39,
+  "text_chars": 9988,
+  "false_claims": 19,
+  "neutral": [
+   "token-not-attached-or-logout"
+  ],
+  "false_claim_examples": [
+   "| 12 | Medium | Failed name-save replaces loaded profile/typed input with a full-screen error | `profile/presentation/notifier/profile_notifier.dart:33` |",
+   "| 13 | Medium | Network images decoded at full resolution / unsized | `product_tile.dart:18`, `product_detail_view.dart:34` |",
+   "| 14 | Medium | `EditNameField` ignores a changed `initialName` (no `didUpdateWidget`) | `profile/presentation/widget/edit_name_field.dart:20` |",
+   "| 16 | Medium | Double-submit not guarded in logic (profile save has no guard at all) | `profile/.../profile_notifier.dart:28`, `auth/.../auth_notifier.dart:14` |",
+   "| 18 | Medium | Post-login redirect drops the deep-link target | `core/router/app_router.dart:29` |",
+   "| 19 | Medium | Same price shown in two different currencies (`en`=USD, `ar`=EGP) | `product_tile.dart:14` |",
+   "| 22 | Medium | Dio\u2192`AppException` mapping (the only error taxonomy) untested | `core/error/app_exception.dart:7` |",
+   "| 23 | Medium | Router auth redirect (the only auth guard) untested | `core/router/app_router.dart:26` |",
+   "| 25 | Low | Cart is the only feature not using the `Loading/Success/Error` vocabulary (`CartReady`) | `cart/presentation/state/cart_state.dart:10` |",
+   "| 26 | Low | Cart renders `CartError` identically to success \u2014 error never shown | `cart/presentation/view/cart_view.dart:15` |",
+   "| 27 | Low | `addItem` accepts a `title` parameter that is silently dropped (5 signatures) | `cart/data/repositories/cart_repository_impl.dart:16` |",
+   "| 30 | Low | No 404/unknown-route error page | `core/router/app_router.dart:23` |",
+   "| 31 | Low | Name field submits empty with no client check | `edit_name_field.dart:35,42` |",
+   "| 32 | Low | Login fields: no `textInputAction`, no focus on first invalid field | `login_view.dart:55,64` |",
+   "| 34 | Low | Email trimmed but not lower-cased | `login_view.dart:31` |",
+   "| 35 | Low | Login form not in an `AutofillGroup`; autofill context never finished | `login_view.dart:50,39` |",
+   "| 36 | Low | Dirty profile editor unguarded on back | `profile_view.dart:34` |",
+   "| 39 | Low | No `Accept-Language` sent for server-localised content | `core/network/api_client.dart:12` |",
+   "| 40 | Info | 4 leaf widgets untested | `edit_name_field.dart`, `product_search_bar.dart`, `product_tile.dart`, `main.dart` |"
+  ],
+  "decoy_examples": {},
+  "name": "t1-skills-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 3537,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 10,
+   "tools": {
+    "skill": 1,
+    "read": 5,
+    "bash": 4,
+    "task": 13
+   },
+   "skills_loaded": [
+    "dart-flutter-review",
+    "dart-naming",
+    "flutter-architecture",
+    "flutter-error-handling",
+    "flutter-forms",
+    "flutter-i18n",
+    "flutter-navigation",
+    "flutter-secure-defaults",
+    "flutter-security-audit",
+    "flutter-testing",
+    "flutter-ui-practices"
+   ],
+   "checker_runs": 7
+  }
+ },
+ {
+  "task": "t1",
+  "run": "bench/runs/t1-skills-r2",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "E1",
+   "E2",
+   "F1",
+   "I1",
+   "N1",
+   "S1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [
+   "A2"
+  ],
+  "recall": 0.917,
+  "decoys_total": 3,
+  "decoys_flagged": [],
+  "claim_blocks": 35,
+  "text_chars": 6269,
+  "false_claims": 15,
+  "neutral": [
+   "config-base-url",
+   "image-network",
+   "json-casts",
+   "token-not-attached-or-logout"
+  ],
+  "false_claim_examples": [
+   "| 7 | Medium | NAME-misleading: addItem carries unused required `title` across layers | cart repo/domain/usecase/notifier + product_detail_view.dart:40-43 |",
+   "| 10 | Medium | UI-image-decode-size: network images decoded at full resolution | product_tile.dart:18; product_detail_view.dart:34 |",
+   "| 12 | Medium | ERR-error-replaces-data: failures replace data with full-screen error | profile_notifier.dart:33; product_list_notifier.dart:20 |",
+   "| 17 | Medium | I18N-currency-default: currency inferred from UI locale (ar\u2192EGP, en\u2192USD) | product_tile.dart:14; product_entity.dart:14 |",
+   "| 18 | Medium | FORM-double-submit-logic: login/updateName allow duplicate submits | auth_notifier.dart:14; profile_notifier.dart:28 |",
+   "| 22 | Medium | SEC-unvalidated-response: hard casts over untrusted JSON | login_response.dart:12-15; auth_remote_source.dart:27; profile_remote_source.dart:25 |",
+   "| 24 | Low | UI-did-update-widget: EditNameField doesn't sync controller to initialName | edit_name_field.dart:20-21 |",
+   "| 25 | Low | ARCH-014: Product detail view reaches into cart feature presentation | product_detail_view.dart:5,40 |",
+   "| 30 | Low | I18N-accept-language-missing: no Accept-Language header | api_client.dart:13-19; product/order sources |",
+   "| 33 | Low | NAV-refresh-loses-session: token not restored on startup | auth_notifier.dart:12; auth_local_source.dart:26; app_router.dart:18 |",
+   "| 35 | Low | FORM-focus-order: missing textInputAction/onFieldSubmitted; no first-error focus | login_view.dart:55,64 |",
+   "| 36 | Low | FORM-autofill-group: missing AutofillGroup/finishAutofillContext | login_view.dart:50,40 |",
+   "| 37 | Low | FORM-unsaved-changes-unguarded: edit name lost on nav/error | edit_name_field.dart:15,42; profile_notifier.dart:33 |",
+   "| 39 | Low | ERR-mapping-loses-cause: AppException drops cause/stackTrace | app_exception.dart:7; remote sources |",
+   "| 44 | Info | TEST-untested-widget: 4 leaf widgets untested | main.dart:10; edit_name_field.dart:8; product_search_bar.dart:8; product_tile.dart:8 |"
+  ],
+  "decoy_examples": {},
+  "name": "t1-skills-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 2475,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 13,
+   "tools": {
+    "skill": 1,
+    "read": 5,
+    "bash": 6,
+    "task": 18
+   },
+   "skills_loaded": [
+    "dart-flutter-review",
+    "dart-naming",
+    "flutter-architecture",
+    "flutter-error-handling",
+    "flutter-forms",
+    "flutter-i18n",
+    "flutter-navigation",
+    "flutter-secure-defaults",
+    "flutter-testing",
+    "flutter-ui-practices"
+   ],
+   "checker_runs": 2
+  }
+ },
+ {
+  "task": "t2",
+  "run": "bench/runs/t2-baseline-r1",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [],
+  "claim_blocks": 5,
+  "text_chars": 2149,
+  "contradicting": 0,
+  "other_claims": 1,
+  "other_examples": [
+   "6. **Error-type leak breaks the layer contract** \u2014 `weather_repository.dart:11` calls `.first` on search results: a missing city throws `StateError` (an `Error`), while `LocationNotFoundFailure` is never mapped; the bloc's `on Exception` (`weather_bloc.dart:28,42`) won't catch it, so it escapes as a"
+  ],
+  "decoy_examples": {},
+  "name": "t2-baseline-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 157,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 8,
+   "tools": {
+    "bash": 3,
+    "glob": 1,
+    "read": 19,
+    "grep": 1
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t2",
+  "run": "bench/runs/t2-baseline-r2",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [],
+  "claim_blocks": 12,
+  "text_chars": 4909,
+  "contradicting": 0,
+  "other_claims": 3,
+  "other_examples": [
+   "4. **Repository lifecycle leak**: `WeatherRepository.dispose()` (weather_repository.dart:23) never called; `main.dart:8` constructs it and drops it. http.Client never closed.\n",
+   "7. **Widget directly consumes bloc stream for refresh**: weather_page.dart:60 returns `bloc.stream.firstWhere(...)`. Presentation logic reaching into bloc internals. Minor.\n\nHmm, is that actually a violation? RefreshIndicator needs a Future. It's a workaround. Could be noted.\n\nLet me also examine: `",
+   "2. **Missing business-logic layer for the search feature.** The README claims every feature has a bloc/cubit + views, but `lib/search/` has only `view/search_page.dart` \u2014 no `SearchBloc`/`SearchCubit`. State (`_suggestions`, loading/error) lives in `_SearchPageState` (flutter `setState`) instead of "
+  ],
+  "decoy_examples": {},
+  "name": "t2-baseline-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 41,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 6,
+   "tools": {
+    "bash": 3,
+    "glob": 1,
+    "read": 19
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t2",
+  "run": "bench/runs/t2-skills-r1",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [
+   "TD4"
+  ],
+  "claim_blocks": 9,
+  "text_chars": 7830,
+  "contradicting": 1,
+  "other_claims": 0,
+  "other_examples": [],
+  "decoy_examples": {
+   "TD4": "### [LOW] Cross-feature internal imports\n- id: ARCH-014 x3\n- where: `lib/settings/view/settings_page.dart:4`, `lib/weather/view/weather_page.dart:5`, `lib/weather/view/weather_page.dart:6`\n- evidence: `settings_page.dart` imports `weather/bloc/weather_bloc.dart`; `weather_page.dart` imports `search/"
+  },
+  "name": "t2-skills-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 49,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 8,
+   "tools": {
+    "skill": 1,
+    "bash": 10,
+    "read": 1
+   },
+   "skills_loaded": [
+    "flutter-architecture"
+   ],
+   "checker_runs": 2
+  }
+ },
+ {
+  "task": "t2",
+  "run": "bench/runs/t2-skills-r2",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [
+   "TD4",
+   "TD5"
+  ],
+  "claim_blocks": 4,
+  "text_chars": 1405,
+  "contradicting": 2,
+  "other_claims": 0,
+  "other_examples": [],
+  "decoy_examples": {
+   "TD5": "3. **[ARCH-009] Low** \u2014 `lib/theme/cubit/theme_cubit.dart:4` imports `package:flutter/material.dart`  \n   Logic imports Flutter UI. Remove Material import; keep logic framework-agnostic (use `Color` values or `dart:ui`).\n",
+   "TD4": "4. **[ARCH-014] Low (x3)** \u2014 Cross-feature internal imports  \n   - `lib/settings/view/settings_page.dart:4` \u2192 `weather/bloc/weather_bloc.dart`  \n   - `lib/weather/view/weather_page.dart:5` \u2192 `search/view/search_page.dart`  \n   - `lib/weather/view/weather_page.dart:6` \u2192 `settings/view/settings_page.d"
+  },
+  "name": "t2-skills-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 86,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 9,
+   "tools": {
+    "skill": 1,
+    "bash": 7
+   },
+   "skills_loaded": [
+    "flutter-architecture"
+   ],
+   "checker_runs": 1
+  }
+ },
+ {
+  "task": "t3",
+  "run": "bench/runs/t3-baseline-r1",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 1,
+  "sec_high": 1,
+  "sec_ids": [
+   "SEC-001"
+  ],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "calls_post_login": true,
+  "token_store": "shared_preferences",
+  "login_files": 11,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t3-baseline-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 502,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 8,
+   "tools": {
+    "task": 1,
+    "bash": 3,
+    "read": 3,
+    "write": 11,
+    "edit": 3
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t3",
+  "run": "bench/runs/t3-baseline-r2",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 1,
+  "sec_high": 1,
+  "sec_ids": [
+   "SEC-001"
+  ],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "calls_post_login": true,
+  "token_store": "shared_preferences",
+  "login_files": 9,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t3-baseline-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 1468,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 36,
+   "tools": {
+    "task": 1,
+    "todowrite": 2,
+    "read": 5,
+    "bash": 21,
+    "edit": 3,
+    "write": 15
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t3",
+  "run": "bench/runs/t3-skills-r1",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "calls_post_login": true,
+  "token_store": "flutter_secure_storage",
+  "login_files": 15,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t3-skills-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 2592,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 48,
+   "tools": {
+    "skill": 4,
+    "bash": 37,
+    "read": 4,
+    "write": 20,
+    "edit": 11
+   },
+   "skills_loaded": [
+    "flutter-feature-scaffold",
+    "flutter-forms",
+    "flutter-navigation",
+    "flutter-secure-defaults"
+   ],
+   "checker_runs": 6
+  }
+ },
+ {
+  "task": "t3",
+  "run": "bench/runs/t3-skills-r2",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "calls_post_login": true,
+  "token_store": "flutter_secure_storage",
+  "login_files": 12,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t3-skills-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 1943,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 39,
+   "tools": {
+    "skill": 4,
+    "bash": 17,
+    "read": 14,
+    "edit": 8,
+    "write": 18
+   },
+   "skills_loaded": [
+    "dart-flutter-best-practices",
+    "flutter-feature-scaffold",
+    "flutter-forms",
+    "flutter-secure-defaults"
+   ],
+   "checker_runs": 4
+  }
+ }
+]

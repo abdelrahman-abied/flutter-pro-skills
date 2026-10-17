@@ -1,0 +1,13 @@
+name: mvvm_app
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.2
+  http: ^1.2.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.4.4
+  build_runner: ^2.4.0

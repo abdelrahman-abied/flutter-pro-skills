@@ -1,0 +1,37 @@
+part of '{{partOf}}';
+
+/// Exclusive states of the {{title_lc}} screen, with value equality so equal
+/// states don't rebuild the UI.
+sealed class {{State}} extends Equatable {
+  const {{State}}();
+
+  @override
+  List<Object> get props => const [];
+}
+
+final class {{Feature}}Initial extends {{State}} {
+  const {{Feature}}Initial();
+}
+
+final class {{Feature}}LoadInProgress extends {{State}} {
+  const {{Feature}}LoadInProgress();
+}
+
+final class {{Feature}}LoadSuccess extends {{State}} {
+  const {{Feature}}LoadSuccess(this.items);
+
+  final List<{{Entity}}> items;
+
+  @override
+  List<Object> get props => [items];
+}
+
+/// Holds a typed failure, never raw error text: the view picks the words.
+final class {{Feature}}LoadFailure extends {{State}} {
+  const {{Feature}}LoadFailure(this.failure);
+
+  final Failure failure;
+
+  @override
+  List<Object> get props => [failure];
+}

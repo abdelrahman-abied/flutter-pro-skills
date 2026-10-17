@@ -1,0 +1,32 @@
+import 'dart:collection';
+
+import 'package:flutter/foundation.dart';
+
+import '{{import:command}}';
+import '{{import:entity}}';
+import '{{import:result}}';
+import '{{import:dep}}';
+
+class {{Logic}} extends ChangeNotifier {
+{{#privnamed}}  {{Logic}}({required this._{{dep}}}) {
+{{/privnamed}}{{^privnamed}}  {{Logic}}({required {{Dep}} {{dep}}}) : _{{dep}} = {{dep}} {
+{{/privnamed}}    load = Command0(_load)..execute();
+  }
+
+  // Private, so the view can't reach the data layer.
+  final {{Dep}} _{{dep}};
+
+  late final Command0<void> load;
+
+  List<{{Entity}}> _items = const [];
+  UnmodifiableListView<{{Entity}}> get items => UnmodifiableListView(_items);
+
+  Future<Result<void>> _load() async {
+    final result = await {{depCall}};
+    if (result case Ok(:final value)) {
+      _items = value;
+      notifyListeners();
+    }
+    return result;
+  }
+}

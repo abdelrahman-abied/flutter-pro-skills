@@ -1,0 +1,86 @@
+# Recommended analysis_options.yaml: Effective Dart + Flutter team lints.
+#
+# Base: package:flutter_lints (includes package:lints/recommended + core).
+# For a pure Dart package or CLI, replace the include with
+#   include: package:lints/recommended.yaml
+# and drop the Flutter-only rules marked [flutter].
+#
+# Every rule below is stable in the Dart linter registry and maps to an Effective
+# Dart guideline or a Flutter team recommendation. Comments name the guideline.
+# Delete anything your team disagrees with. Consistency matters more than any
+# single rule.
+
+include: package:flutter_lints/flutter.yaml
+
+formatter:
+  page_width: 80              # Effective Dart: PREFER lines 80 characters or fewer (Dart >= 3.7)
+  # trailing_commas: preserve # opt-in manual control over splitting (Dart >= 3.8)
+
+analyzer:
+  exclude:
+    - "**/*.g.dart"
+    - "**/*.freezed.dart"
+    - "**/*.gr.dart"
+    - "**/*.mocks.dart"
+    - "lib/generated/**"
+  language:
+    strict-casts: true        # no implicit downcasts from dynamic
+    strict-inference: true    # Effective Dart: DO annotate with dynamic instead of letting inference fail
+    strict-raw-types: true    # Effective Dart: AVOID writing incomplete generic types
+  errors:
+    # Promote the bug-catching ones so they can't be ignored.
+    use_build_context_synchronously: error
+    cancel_subscriptions: warning
+    close_sinks: warning
+    unawaited_futures: warning
+
+linter:
+  rules:
+    # --- Style: ordering & formatting ---
+    - directives_ordering                 # dart: → package: → relative; exports last; alphabetical
+    - prefer_relative_imports             # Usage: PREFER relative import paths (within lib/)
+                                          #   (incompatible with always_use_package_imports; pick one)
+
+    # --- Documentation ---
+    - comment_references                  # DO use [square brackets] for in-scope identifiers
+    # - public_member_api_docs            # PREFER doc comments for public APIs (enable for published packages)
+
+    # --- Usage ---
+    - unnecessary_lambdas                 # DON'T create a lambda when a tear-off will do
+    - prefer_final_locals                 # DO follow a consistent var/final rule (this picks "final if not reassigned")
+    - prefer_final_in_for_each
+    - avoid_catching_errors               # DON'T explicitly catch Error
+    - only_throw_errors                   # throw Error/Exception subtypes, never strings
+    - unawaited_futures                   # every Future is awaited or explicitly unawaited()
+    - avoid_void_async                    # DO use Future<void> for async members with no value
+    - cancel_subscriptions                # lifecycle: StreamSubscription must be cancelled
+    - close_sinks                         # lifecycle: sinks/StreamControllers must be closed
+    - use_string_buffers                  # perf: StringBuffer in loops
+    - avoid_slow_async_io
+    # - avoid_catches_without_on_clauses  # AVOID catches without `on` (strict; noisy in app code)
+    # - prefer_expression_function_bodies # CONSIDER => for simple members (noisy)
+
+    # --- Design ---
+    - always_declare_return_types         # DO annotate return types on function declarations
+    - type_annotate_public_apis           # DO type annotate fields/top-levels if not obvious
+    - omit_local_variable_types           # DON'T redundantly type annotate initialized locals
+    - avoid_types_on_closure_parameters   # DON'T annotate inferred params on function expressions
+    - avoid_positional_boolean_parameters # AVOID positional boolean parameters
+    - use_to_and_as_if_applicable         # PREFER to___() / as___() naming
+    - avoid_returning_this                # AVOID returning this for fluent interfaces (use cascades)
+    - avoid_setters_without_getters       # DON'T define a setter without a getter
+    - use_setters_to_change_properties
+    - avoid_classes_with_only_static_members
+    - avoid_equals_and_hash_code_on_mutable_classes
+    - avoid_dynamic_calls                 # AVOID dynamic unless you want to disable static checking
+    - prefer_mixin                        # PREFER pure mixin / pure class over mixin class
+    - use_enums
+    - avoid_unused_constructor_parameters
+
+    # --- Flutter [flutter] ---
+    - use_colored_box
+    - use_decorated_box
+    - sized_box_shrink_expand
+    - avoid_redundant_argument_values
+    # - prefer_const_constructors                  # removed from flutter_lints 5 as noisy; enable if your team wants it
+    # - prefer_const_literals_to_create_immutables

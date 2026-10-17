@@ -1,0 +1,12 @@
+{
+  "@@locale": "en",
+  "cartTitle": "Your cart",
+  "@cartTitle": {"description": "Title of the cart screen"},
+  "total": "Total",
+  "hello": "Hello {name}",
+  "@hello": {"placeholders": {"name": {"type": "String"}}},
+  "itemsInCart": "{count, plural, =0{No items} =1{One item} other{{count} items}}",
+  "@itemsInCart": {"placeholders": {"count": {"type": "int"}}},
+  "checkout": "Checkout",
+  "mapsKey": "AIzaSyD4x9Q2mN7pL0kT3vR8wZ5yB6cE1fH2jK9"
+}

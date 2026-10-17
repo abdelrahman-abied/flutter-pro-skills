@@ -1,0 +1,27 @@
+import 'package:flutter/foundation.dart';
+
+/// A {{title_lc}} item as the app uses it.
+// TODO: replace the placeholder fields with the real {{title_lc}} data.
+@immutable
+final class {{Entity}} {
+  const {{Entity}}({required this.id, required this.title});
+
+  // TODO: validate the JSON shape here; throw FormatException on a mismatch.
+  factory {{Entity}}.fromJson(Object? json) => switch (json) {
+        {'id': final String id, 'title': final String title} =>
+          {{Entity}}(id: id, title: title),
+        _ => throw const FormatException('Unexpected {{title_lc}} payload'),
+      };
+
+  final String id;
+  final String title;
+
+  Map<String, dynamic> toJson() => {'id': id, 'title': title};
+
+  @override
+  bool operator ==(Object other) =>
+      other is {{Entity}} && other.id == id && other.title == title;
+
+  @override
+  int get hashCode => Object.hash(id, title);
+}

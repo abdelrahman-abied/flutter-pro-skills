@@ -1,0 +1,41 @@
+import 'package:bloc_test/bloc_test.dart';
+import 'package:flutter_test/flutter_test.dart';
+
+import '{{import:failure}}';
+import '{{import:entity}}';
+import '{{import:repository}}';
+{{#clean}}import '{{import:usecase}}';
+{{/clean}}import '{{import:logic}}';
+
+const _items = [{{Entity}}(id: '1', title: 'First')];
+
+class Fake{{Repository}} implements {{Repository}} {
+  Fake{{Repository}}([this._failure]);
+
+  final Failure? _failure;
+
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async {
+    if (_failure case final failure?) throw failure;
+    return _items;
+  }
+}
+
+void main() {
+  blocTest<{{Logic}}, {{State}}>(
+    'emits [LoadInProgress, LoadSuccess] when {{Feature}}Started is added',
+    build: () => {{Logic}}({{dep}}: {{fakeDep}}),
+    act: (bloc) => bloc.add(const {{Feature}}Started()),
+    expect: () => const [{{Feature}}LoadInProgress(), {{Feature}}LoadSuccess(_items)],
+  );
+
+  blocTest<{{Logic}}, {{State}}>(
+    'emits [LoadInProgress, LoadFailure] with the typed failure when {{Feature}}Started fails',
+    build: () => {{Logic}}({{dep}}: {{failingDep}}),
+    act: (bloc) => bloc.add(const {{Feature}}Started()),
+    expect: () => const [
+      {{Feature}}LoadInProgress(),
+      {{Feature}}LoadFailure(NetworkFailure()),
+    ],
+  );
+}

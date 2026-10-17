@@ -1,0 +1,68 @@
+name: tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  test:
+    # Two runners on purpose: the scripts are bash + python3, and macOS ships bash 3.2 and BSD tools
+    # while ubuntu ships bash 5 and GNU tools. Both must pass.
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    steps:
+      - uses: actions/checkout@v4
+      # use the runner's own python3 on purpose: that is what end users' agents will call
+      - name: Toolchain
+        run: |
+          bash --version | head -1
+          python3 --version
+      - name: Test suite
+        env:
+          SCAFFOLD_SKIP_COMPILE: "1"   # real compile checks need Flutter + network; run them locally
+        run: bash tests/run_all.sh
+
+  scaffold-compile:
+    # Real compile check of every scaffold profile (bloc/cubit/getx need packages that are
+    # not in a fresh offline cache, so this job has network and a Flutter SDK).
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+      - name: Warm the pub cache for every scaffold profile
+        run: |
+          d="$(mktemp -d)"; cd "$d"
+          flutter create --project-name warm warm >/dev/null && cd warm
+          flutter pub add flutter_riverpod riverpod_annotation provider flutter_bloc equatable get meta
+          flutter pub add --dev build_runner riverpod_generator bloc_test
+      - name: Scaffold tests with real dart analyze + flutter test
+        run: bash skills/flutter-feature-scaffold/tests/run.sh
+
+  action:
+    # Smoke-test the published GitHub Action itself: a clean fixture must pass, a violating one must fail.
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Clean fixture passes
+        uses: ./
+        with:
+          path: skills/flutter-architecture/tests/fixtures/mvn_clean
+          fail-on: high
+      - name: Violating fixture fails
+        id: bad
+        continue-on-error: true
+        uses: ./
+        with:
+          path: skills/flutter-architecture/tests/fixtures/mvvm_violations
+          fail-on: high
+      - name: Assert the violating fixture failed
+        run: |
+          echo "outcome=${{ steps.bad.outcome }} new=${{ steps.bad.outputs.new-violations }}"
+          test "${{ steps.bad.outcome }}" = "failure"

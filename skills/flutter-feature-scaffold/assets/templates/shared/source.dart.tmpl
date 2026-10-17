@@ -1,0 +1,28 @@
+{{#dio}}import 'package:dio/dio.dart';
+{{/dio}}{{#getconnect}}import 'package:get/get.dart';
+{{/getconnect}}
+{{#getconnect}}import '{{import:http_client}}';
+{{/getconnect}}import '{{import:entity}}';
+
+/// Raw access to the {{title_lc}} backend. A leaf: no UI state, no repositories.
+abstract interface class {{Source}} {
+  Future<List<{{Entity}}>> fetch{{Feature}}List();
+}
+
+final class {{SourceImpl}} implements {{Source}} {
+  /// [_client] is the app's configured client: base URL, timeouts and auth.
+  const {{SourceImpl}}(this._client);
+
+  final {{Client}} _client;
+
+  @override
+  Future<List<{{Entity}}>> fetch{{Feature}}List() async {
+    // TODO: call the backend through the injected client; auth headers come from its interceptor.
+    final response = await _client.get<Object?>('/{{feature}}');
+{{#getconnect}}    if (response.hasError) throw failureFromResponse(response);
+{{/getconnect}}    return switch (response.{{responseBody}}) {
+      final List<Object?> rows => [for (final row in rows) {{Entity}}.fromJson(row)],
+      _ => throw const FormatException('Expected a list of {{title_lc}}'),
+    };
+  }
+}
