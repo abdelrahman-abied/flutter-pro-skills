@@ -397,11 +397,11 @@ order="$(grep -E '^== (I18N|PERFORMANCE|PERSISTENCE|NETWORKING|PLATFORM|DESIGN S
   && pass "v1.1 sections run after I18N, in contract order" || bad "v1.1 section order: $order"
 cand="$(section "$TMP/s_plain.txt" '== CANDIDATES')"
 echo "$cand" | grep -q '^  \[CANDIDATE\] eager-children-map (low) x1 — see PERFORMANCE' \
-  && echo "$cand" | grep -q '^  \[CANDIDATE\] opacity-widget (low) x1 — see PERFORMANCE' \
+  && echo "$cand" | grep -q '^      lib/features/cart/presentation/view/cart_view.dart:40  return Opacity' \
   && echo "$cand" | grep -q '^  \[CANDIDATE\] hardcoded-color (low) x1 — see DESIGN SYSTEM' \
-  && pass "eager-children-map / opacity-widget defer to PERFORMANCE, hardcoded-color to DESIGN SYSTEM" \
+  && pass "eager-children-map defers to PERFORMANCE, hardcoded-color to DESIGN SYSTEM; static Opacity keeps its location" \
   || bad "deferral: $(echo "$cand" | grep -E 'eager|opacity|hardcoded' | tr '\n' ' ')"
-echo "$cand" | grep -q 'cart_view.dart:4[09]\|cart_view.dart:60' \
+echo "$cand" | grep -q 'cart_view.dart:49\|cart_view.dart:60' \
   && bad "deferred heuristics still list locations" || pass "deferred heuristics list no locations"
 srun --no-perf --no-ds > "$TMP/s_noperf.txt" 2>&1
 ! grep -q '^== PERFORMANCE\|^== DESIGN SYSTEM' "$TMP/s_noperf.txt" && grep -q '^== PERSISTENCE' "$TMP/s_noperf.txt" \

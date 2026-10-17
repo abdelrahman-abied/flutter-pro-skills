@@ -4,7 +4,7 @@ description: Design, write and review error handling in Flutter and Dart apps so
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.4.0"
+  version: "1.4.1"
   suite: flutter-pro-skills
 ---
 
@@ -139,7 +139,10 @@ line, the line above or the line below) or
     `runZonedGuarded`.
 11. **Retry only transient failures** (network errors, timeouts, 5xx, 429), use
     backoff, and only for idempotent requests. Give the user a retry action on
-    the error state.
+    the error state. The retry *interceptor* in the HTTP client belongs to
+    `flutter-networking` (`NET-004` retry-resends-any-method; fallback
+    `../flutter-networking/SKILL.md`), which beats `ERR-retry-non-idempotent`
+    for the same line.
 12. **Don't catch what you can't handle.** Let it reach the logic layer or
     the global handler, so it gets reported instead of swallowed.
 

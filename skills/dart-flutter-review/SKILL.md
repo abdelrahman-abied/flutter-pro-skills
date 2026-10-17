@@ -4,7 +4,7 @@ description: Review, audit or quality-check Dart/Flutter code, a diff, branch or
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.4.0"
+  version: "1.4.1"
   suite: flutter-pro-skills
 ---
 
@@ -142,8 +142,9 @@ Sections (run `grep -n '^== ' "$out"` to find them):
   reading before it becomes a finding. When ERROR HANDLING ran, the
   `swallowed-catch` candidate keeps only its count and says "see ERROR
   HANDLING": those catches are ERR-001 hits, so report each one once, there.
-  Likewise `eager-children-map` and `opacity-widget` say "see PERFORMANCE"
-  when that checker ran, and `hardcoded-color` says "see DESIGN SYSTEM".
+  Likewise `eager-children-map` says "see PERFORMANCE" when that checker
+  ran, and `hardcoded-color` says "see DESIGN SYSTEM". `opacity-widget` keeps
+  its locations: drop it only where `PERF-005` reports the same line.
 
 If `dart` isn't available, still run the architecture checker on its own
 (`python3 -I <skill-dir>/../flutter-architecture/scripts/arch_check.py <project-root>

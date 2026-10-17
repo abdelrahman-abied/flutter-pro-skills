@@ -82,7 +82,7 @@ they're stable and the sibling skill documents them:
 | `check_forms.py` | `FORM-008` controller-created-inline | the `undisposed-resource` candidate / `UI-lifecycle` on that controller |
 | `check_navigation.py` | `NAV-0xx` | a `UI-` slug about the same route or link |
 | `check_performance.py` | `PERF-001/002/003` (eager, shrinkWrap, intrinsic lists) | `UI-eager-list`, the `eager-children-map` candidate |
-| `check_performance.py` | `PERF-005/006` (animated Opacity, saveLayer in list items) | `UI-opacity`, the `opacity-widget` candidate |
+| `check_performance.py` | `PERF-005/006` (animated Opacity, saveLayer in list items) | `UI-opacity`, the `opacity-widget` candidate **on the same line** (a static Opacity elsewhere stays the candidate / `UI-opacity`) |
 | `check_performance.py` | `PERF-004` / `PERF-008/009` / `PERF-010` / `PERF-011` | `UI-image-decode-size` / `UI-rebuild-scope` / `UI-build-side-effect` (sort in build) / `UI-blocking-ui-isolate` |
 | `check_design_system.py` | `DS-001/002` (raw colour, raw text style) | `UI-hardcoded-style`, the `hardcoded-color` candidate |
 | `check_accessibility.py` | `A11Y-0xx` | `UI-a11y` |

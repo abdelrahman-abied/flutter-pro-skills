@@ -4,7 +4,7 @@ description: Write and review Flutter local persistence, clean and secure by def
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.4.0"
+  version: "1.4.1"
   suite: flutter-pro-skills
 ---
 
@@ -180,7 +180,7 @@ Reading-level findings (`PERSIST-<slug>`; the checker can't see these):
 | PERSIST-persistence-type-leak | Medium | drift rows, companions or `HiveObject`s returned past the repository or used as UI state |
 | PERSIST-no-cache-policy | Medium | a cache with no TTL, no invalidation and no size bound |
 | PERSIST-sync-without-conflict-policy | Medium | two-way sync where whoever writes last silently wins |
-| PERSIST-non-idempotent-retry | Medium | retried creates with no idempotency key |
+| PERSIST-non-idempotent-retry | Medium | retried creates with no idempotency key in the offline replay queue (a retry interceptor in the HTTP client is `flutter-networking`'s `NET-004`) |
 | PERSIST-key-rename-without-migration | Medium | a renamed preferences key, box or file with no read-old/write-new step |
 | PERSIST-pii-in-key | Medium | emails, phones or names in cache keys, box or file names |
 | PERSIST-prefs-as-database | Low | lists of records or JSON blobs in shared_preferences |

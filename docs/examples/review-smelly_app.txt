@@ -4,8 +4,8 @@ $ bash skills/dart-flutter-review/scripts/review.sh path/to/app --max 3
 == CONTEXT
 project:        path/to/app
 type:           Flutter app/package
-dart sdk:       3.13.5   pubspec constraint:   sdk: ^3.5.0
-lint include:    package:flutter_lints/flutter.yaml
+dart sdk:       3.13.5   pubspec constraint: ^3.5.0
+lint include:   package:flutter_lints/flutter.yaml
 scope:          whole project — 10 non-generated .dart files
 
 == FORMAT (dart format, check only)
@@ -18,7 +18,7 @@ scope:          whole project — 10 non-generated .dart files
   INFO    curly_braces_in_flow_control_structures  x1
       lib/features/cart/presentation/view/checkout_form.dart:25  Statements in a for should be enclosed in a block.
   INFO    empty_catches  x1
-      lib/features/cart/data/sources/cart_api.dart:31  Empty catch block.
+      lib/features/cart/data/sources/cart_api.dart:32  Empty catch block.
 
 == AUTO-FIXABLE (dart fix --dry-run; nothing applied)
   1 fix(es) in 1 file(s) -> one collapsed 'Mechanical' finding: dart fix --apply
@@ -33,7 +33,7 @@ scope:          whole project — 10 non-generated .dart files
   root: path/to/app
   package: smelly_app
   presentation: mvn
-  confidence: medium
+  confidence: low
   clean_architecture: false
   repository_pattern: true
   use_cases: false
@@ -42,7 +42,7 @@ scope:          whole project — 10 non-generated .dart files
   di: riverpod
   files: 10 (domain 1, data 2, presentation 4, core 1, app 2)
   features: cart
-  signals: dependency: flutter_riverpod; 1 files under */presentation/notifier/
+  signals: dependency: flutter_riverpod; 1 files under */presentation/notifier/; presentation/notifier/ + domain/ but 0 use cases; use cases: 0 files
 
 == ARCHITECTURE VIOLATIONS
   [ARCH-005] ui-depends-on-data-source (high) x1 — A view imports a transport/data-source; route it through the notifier/view model.
@@ -50,24 +50,133 @@ scope:          whole project — 10 non-generated .dart files
   [ARCH-101] io-in-widget (high) x1 — A widget does I/O; move it behind a repository/source and the notifier/view model.
       lib/features/cart/presentation/view/cart_view.dart:35  final response = await Dio().get<int>('https://example.com/cart/count');
 
+== TEST GAPS
+  root: path/to/app
+  profile: mvn (confidence low)
+  classifier: arch_check (../flutter-architecture/scripts/arch_check.py)
+  units: 7, tested 0 (0.0%); test files: 0 with 0 tests; integration_test files: 0 (not mapped)
+  coverage by role: repository-impl 0/1 0%, logic 0/1 0%, source 0/1 0%, view 0/3 0%, widget 0/1 0%
+  mapped by: mirror 0, name 0, import 0
+  [TEST-untested-repository] (low) x1 — Repository implementation with no test; test it against a fake source (mapping, errors, caching).
+      #1 lib/features/cart/data/repositories/cart_repository_impl.dart  (repository-impl, 8 lines, 0 branches)  — thin delegation (every method is one call, no branches): low value on its own; a test of its caller over a fake source covers it
+  [TEST-untested-logic] (medium) x1 — Notifier / view model / bloc with no test; test its state transitions with faked dependencies.
+      #2 lib/features/cart/presentation/notifier/ticks_provider.dart  (logic, 10 lines, 0 branches)
+  [TEST-untested-source] (low) x1 — Data source with no test; test parsing and error mapping against a fake client or recorded fixtures.
+      #3 lib/features/cart/data/sources/cart_api.dart  (source, 29 lines, 3 branches)
+  [TEST-untested-view] (low) x3 — Screen with no widget test; pump it with faked logic and assert each state renders.
+      #4 lib/features/cart/presentation/view/cart_view.dart  (view, 54 lines, 1 branches)
+      #5 lib/features/cart/presentation/view/checkout_form.dart  (view, 31 lines, 1 branches)
+      #6 lib/features/cart/presentation/view/search_binding.dart  (view, 10 lines, 0 branches)
+  [TEST-untested-widget] (info) x1 — Widget with no widget test; cover it if it branches on its inputs.
+      #7 lib/main.dart  (widget, 10 lines, 0 branches)
+
+== TEST SMELLS
+  no smells found
+
+== ERROR HANDLING
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files, 2 catch clauses, 0 throw statements, 0 Result-returning methods (style: exceptions)
+  global handlers: none found
+  [ERR-001] swallowed-catch (high) x2 — A catch (or catchError/onError handler) discards the error: empty, comment-only, print-only or `return <default>;`. Log/report it, rethrow it, or map it to a typed failure.
+      lib/features/cart/data/sources/cart_api.dart:24  catch (e) { return const []; }   [returns a default]
+      lib/features/cart/data/sources/cart_api.dart:32  catch (e) {}   [empty]
+  [ERR-004] repository-leaks-transport-exception (medium) x1 — Repository method awaits a transport/persistence call with no try/catch mapping, so DioException/SocketException/FormatException reach the logic layer (AP-exceptions-across-layers).
+      lib/features/cart/data/repositories/cart_repository_impl.dart:12  1 public method(s) unguarded: fetchItems; first: Future<List<String>> fetchItems() => _api.getItems();   [depends on lib/features/cart/data/sources/cart_api.dart, which does I/O without mapping its exceptions; map DioException/SocketException/ClientException/FormatException to a domain failure or Result at this boundary]
+  [ERR-012] missing-global-error-handler (low) x1 — The app does not install both global handlers (FlutterError.onError for framework errors and PlatformDispatcher.instance.onError or runZonedGuarded for async errors). Uncaught errors are only printed.
+      lib/main.dart:6  missing: FlutterError.onError, PlatformDispatcher.instance.onError (or runZonedGuarded)   [no crash reporter dependency; at least log uncaught errors in release builds]
+
+== SECURITY DEFAULTS
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 Dart files, 1 config files (pubspec.yaml)
+  secure storage: no secure-storage dependency; http: dio
+  deep audit: flutter-security-audit not installed (pinning, RASP, manifests, attestation not checked); install from https://github.com/abdelrahman-abied/flutter-security-audit
+  no security-default findings
+
+== SECURITY AUDIT (skipped: flutter-security-audit skill not installed)
+
+== NAVIGATION
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  router: none found; 0 GoRouter instance(s), 0 routes (0 unresolved), 0 typed routes, 0 guards, 0 navigation calls
+  no navigation findings
+
+== FORMS
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files, 2 fields (0 secret, 0 one-time-code, 1 email/phone), 0 forms, 0 async submit buttons
+  [FORM-007] input-type-mismatch (low) x1 — An email or phone field uses the default text keyboard. Set keyboardType (TextInputType.emailAddress / TextInputType.phone).
+      lib/features/cart/presentation/view/checkout_form.dart:36  TextField(controller: _email)   [email field (from controller); keyboardType not set, want TextInputType.emailAddress]
+
+== I18N
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  localisation: not localised (no l10n.yaml, catalogs or translation package); RTL: none
+  scanned: 10 Dart files, 0 catalog files
+  no i18n findings
+
+== PERFORMANCE
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files, 3 build methods, 0 lazy item builders (+0 item widgets one hop), 1 eager-capable scrollables, 0 network/file images
+  [PERF-001] eager-list-over-data (medium) x1 — A scrollable builds one child per data item up front (children: list.map(...), List.generate, collection-for), so every item is built and laid out even when off screen. Use a builder constructor (ListView.builder, GridView.builder, SliverList.builder).
+      lib/features/cart/presentation/view/cart_view.dart:58  ListView( controller: _scroll, children: widget.items.map((i) => Text(i)).toList(), ),   [ListView over `widget.items`; MVN: keep the list in the notifier state and render ListView.builder(itemCount: state.items.length, ...)]
+
+== PERSISTENCE
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files; stores: none declared; 0 SQL statements, 0 drift databases, 0 sqflite opens, 0 Hive types
+  no persistence findings
+
+== NETWORKING
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files; packages: dio; 1 Dio client, 0 http clients, 0 interceptors, 0 WebSockets, 0 CancelTokens, 0 page handlers
+  [NET-001] client-without-timeouts (medium) x1 — A Dio client is built without connectTimeout and receiveTimeout (Dio waits forever by default), or a dart:io HttpClient without connectionTimeout. On a dead network the request never fails, so the spinner never stops and the error path never runs. Set both timeouts on the one shared client.
+      lib/features/cart/presentation/view/cart_view.dart:35  final response = await Dio().get<int>('https://example.com/cart/count');   [missing connectTimeout and receiveTimeout. MVN: one client provider in core/network (@Riverpod(keepAlive: true)) injected into data/sources/<x>_remote_source.dart; the repository impl maps DTOs and errors; use cases and notifiers never see the client.]
+
+== PLATFORM
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files (0 generated skipped); channels: 0 method, 0 event, 0 message; 0 Pigeon APIs; 0 FFI files, 0 native allocations; 0 platform interfaces; 0 isolate entries; 0 permission requests
+  no platform findings
+
+== DESIGN SYSTEM
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files, 0 themes, 0 theme extensions, design tokens: no
+  scales: spacing none; radius none
+  [DS-001] raw-color-in-widget (info) x1 — A widget hard-codes a colour (Color(0x...), Color.fromARGB, Colors.<name>) instead of reading a role from the theme, so it ignores dark mode, high contrast and rebrands.
+      lib/features/cart/presentation/view/cart_view.dart:49  Color(0xFF00897B)   [no theme tokens in this project yet; graded info. use Theme.of(context).colorScheme.<role> or the project's ThemeExtension tokens]
+
+== ACCESSIBILITY
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files, 0 icon buttons, 1 tappables, 0 images, 0 semantics widgets, 0 color schemes
+  no accessibility findings
+
+== RELEASE
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 Dart files; platforms: none; 0 CI files; flavors: none; skipped (no android/ or ios/ folder: a pure Dart package or a web/desktop-only app)
+  no release findings
+
 == CANDIDATES (heuristic — confirm each by reading the code before reporting)
-  [CANDIDATE] undisposed-resource (high) x2 — Disposable created but not disposed/cancelled in the same file (Flutter: dispose what you create). False positive if ownership is handed elsewhere.
+  [CANDIDATE] undisposed-resource (high) x2 — Disposable created but not disposed/cancelled/closed in the same file (Flutter: dispose what you create). False positive if ownership is handed elsewhere.
       lib/features/cart/presentation/view/cart_view.dart:20  `_scroll` created, no dispose()/close() found in file
       lib/features/cart/presentation/view/cart_view.dart:27  `_poll` (subscription/timer) never cancelled in file
-  [CANDIDATE] swallowed-catch (high) x2 — catch block that is empty or only returns a default — Effective Dart: DON'T discard errors; log, report, rethrow, or map to a typed failure.
-      lib/features/cart/data/sources/cart_api.dart:23  catch (e) { return const []; }
-      lib/features/cart/data/sources/cart_api.dart:31  catch (e) {}
-  [CANDIDATE] get-prefixed-method (low) x2 — Method named get*() — Effective Dart: AVOID starting a method name with `get`; make it a getter if cheap, else name the work (fetch/load/calculate).
-      lib/features/cart/data/sources/cart_api.dart:6  Future<List<String>> getItems();
-      lib/features/cart/data/sources/cart_api.dart:19  Future<List<String>> getItems() async {
+  [CANDIDATE] swallowed-catch (high) x2 — see ERROR HANDLING: check_errors.py covers these with ERR- ids; report each once, there
+  [CANDIDATE] get-prefixed-method (low) x1 — Zero-argument, synchronous get*() method — Effective Dart: AVOID starting a method name with `get`; if it is cheap, make it a getter. (Methods with parameters or Future/Stream returns, e.g. repository `getBooking(id)`, are not flagged.)
+      lib/core/utils.dart:7  String getVersion() => '1.0.0';
   [CANDIDATE] async-suffix (low) x1 — `Async` suffix — the Future return type already says it; drop the suffix.
-      lib/features/cart/data/sources/cart_api.dart:28  Future<void> syncAsync() async {
+      lib/features/cart/data/sources/cart_api.dart:29  Future<void> syncAsync() async {
   [CANDIDATE] k-or-hungarian-prefix (low) x1 — Prefix-letter name (kFoo / mFoo / strFoo) — Effective Dart: DON'T use prefix letters. Skip if the project consistently uses k-constants.
-      lib/core/utils.dart:2  const kDefaultTimeout = Duration(seconds: 5);
+      lib/core/utils.dart:3  const kDefaultTimeout = Duration(seconds: 5);
   [CANDIDATE] i-prefixed-interface (low) x1 — I-prefixed type (IFoo) — every Dart class is an interface; name it for its role.
-      lib/features/cart/data/sources/cart_api.dart:5  abstract class ICartApi {
+      lib/features/cart/data/sources/cart_api.dart:6  abstract class ICartApi {
   [CANDIDATE] noise-word-type (low) x1 — Noise-word type name (Manager/Helper/Util/Utils/Info/Data) — prefer a precise role name; static-only Utils classes violate avoid_classes_with_only_static_members. (`*Impl` is deliberately not flagged: Clean Architecture/MVN prescribe it.)
-      lib/features/cart/data/sources/cart_api.dart:9  class CartManager {
+      lib/features/cart/data/sources/cart_api.dart:10  class CartManager {
   [CANDIDATE] negative-boolean (low) x1 — Negatively named boolean — Effective Dart: PREFER the positive name (isEnabled over isDisabled).
       lib/features/cart/presentation/view/cart_view.dart:22  bool isDisabled = false;
   [CANDIDATE] on-named-method (low) x1 — Public method named on*() — Flutter style: `onFoo` is reserved for callback *properties*; name the method `handleFoo`. (Private `_onTap` handlers are a common app convention and not flagged.)
@@ -76,19 +185,17 @@ scope:          whole project — 10 non-generated .dart files
       lib/features/cart/presentation/view/cart_view.dart:39  Widget _buildHeader() {
   [CANDIDATE] mediaquery-of (low) x1 — MediaQuery.of(context).<x> — use MediaQuery.sizeOf/paddingOf/viewInsetsOf/... to rebuild only on that aspect.
       lib/features/cart/presentation/view/cart_view.dart:45  final width = MediaQuery.of(context).size.width;
-  [CANDIDATE] eager-children-map (medium) x1 — children built with .map(...) — fine for small fixed sets; for long/unbounded data use ListView.builder / slivers.
-      lib/features/cart/presentation/view/cart_view.dart:60  children: widget.items.map((i) => Text(i)).toList(),
-  [CANDIDATE] future-in-build (high) x1 — FutureBuilder/StreamBuilder given a call expression — if this runs in build(), it refires every rebuild; create the future in initState / the state layer.
+  [CANDIDATE] eager-children-map (low) x1 — see PERFORMANCE: check_performance.py covers these with PERF- ids; report each once, there
+  [CANDIDATE] future-in-build (high) x1 — FutureBuilder/StreamBuilder inside build() given a call expression — it refires every rebuild; create the future in initState / the state layer.
       lib/features/cart/presentation/view/cart_view.dart:54  future: fetchCount(),
   [CANDIDATE] opacity-widget (low) x1 — Opacity widget — expensive (saveLayer); in animations use FadeTransition/AnimatedOpacity, for static use a translucent color.
       lib/features/cart/presentation/view/cart_view.dart:40  return Opacity(opacity: 0.5, child: Text('${widget.items.length} items'));
-  [CANDIDATE] unique-key (medium) x1 — UniqueKey() — if created in build(), forces a remount every rebuild; use a stable ValueKey(id).
+  [CANDIDATE] unique-key (medium) x1 — UniqueKey() inside build() — forces a remount every rebuild; use a stable ValueKey(id).
       lib/features/cart/presentation/view/cart_view.dart:47  key: UniqueKey(),
-  [CANDIDATE] hardcoded-color (low) x1 — Hard-coded Color(0x...) outside theme files — read from Theme.of(context).colorScheme.
-      lib/features/cart/presentation/view/cart_view.dart:49  color: Color(0xFF00897B),
+  [CANDIDATE] hardcoded-color (low) x1 — see DESIGN SYSTEM: check_design_system.py covers these with DS- ids; report each once, there
   [CANDIDATE] dynamic-in-api (medium) x1 — `dynamic` as a declared variable/param/return type — AVOID dynamic unless you mean to disable checking; use Object? or a real type. (Type arguments like Map<String, dynamic> / Route<dynamic> are not flagged.)
-      lib/core/utils.dart:4  dynamic parse(dynamic raw) => raw;
-  [CANDIDATE] then-chain (low) x1 — .then(...) — PREFER async/await over raw futures (fine for fire-and-forget one-liners).
-      lib/features/cart/data/sources/cart_api.dart:35  getItems().then((items) => items.length);
-  [CANDIDATE] grab-bag-file (low) x1 — utils/helpers/common file names.
+      lib/core/utils.dart:5  dynamic parse(dynamic raw) => raw;
+  [CANDIDATE] then-chain (low) x1 — .then(...) whose result is used (returned, assigned, awaited, passed on, or in an async function) — PREFER async/await. Fire-and-forget statements in sync callbacks are not flagged.
+      lib/features/cart/data/sources/cart_api.dart:39  Future<int> countItems() => getItems().then((items) => items.length);
+  [CANDIDATE] grab-bag-file (low) x1 — utils/helpers/common file names holding several unrelated declarations (a file named after its only class is fine).
       lib/core/utils.dart  grab-bag file name — name the file after what it contains

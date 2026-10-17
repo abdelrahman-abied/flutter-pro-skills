@@ -5,6 +5,27 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [1.4.1] - 2026-10-17
+
+### Fixed
+
+- **A static `Opacity` was reported nowhere.** When `check_performance.py`
+  ran, `review.sh` deferred the `opacity-widget` candidate to PERFORMANCE.
+  But PERF-005 reports only an `Opacity` that is animated or inside a list
+  item, so a static one was dropped. The candidate now keeps its locations.
+- **Stale examples.** `docs/examples/`, `sample-review.md` and the README's
+  review preview were out of date. They predated the v1.1–v1.4 sections and
+  the fixture's current line numbers, and they are now regenerated from the
+  current scripts.
+
+### Changed
+
+- New cross-references between the skills:
+  - error handling and persistence point to NET-004 for the HTTP client's
+    retry policy
+  - secure-defaults points to networking, platform integration and release
+- Every skill is versioned 1.4.1.
+
 ## [1.4.0] - 2026-10-17
 
 The suite now has nineteen skills and fifteen checkers.
@@ -184,7 +205,7 @@ skills and twelve checkers.
     - DS beats `UI-hardcoded-style`.
     - A11Y beats `UI-a11y`.
   - **Deferred heuristics:** when the matching checker ran, the
-    `eager-children-map`, `opacity-widget` and `hardcoded-color` candidates
+    `eager-children-map`, `opacity-widget` (until 1.4.1) and `hardcoded-color` candidates
     keep only their count.
 
 ### Changed

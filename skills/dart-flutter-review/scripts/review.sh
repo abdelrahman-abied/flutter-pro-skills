@@ -360,7 +360,7 @@ fi
 # ---- CANDIDATES (heuristics) ------------------------------------------------
 # swallowed-catch overlaps check_errors.py's swallowed-catch rule: when that ran, keep only the
 # count here and point at ERROR HANDLING, so the same catch is not reported twice. Likewise
-# eager-children-map / opacity-widget defer to PERFORMANCE and hardcoded-color to DESIGN SYSTEM (§23).
+# eager-children-map defers to PERFORMANCE and hardcoded-color to DESIGN SYSTEM (§23, §33).
 DEFER=""; [[ $ERR_RAN == 1 ]] && DEFER="defer-catch"
 [[ $PERF_RAN == 1 ]] && DEFER="$DEFER defer-perf"
 [[ $DS_RAN == 1 ]] && DEFER="$DEFER defer-ds"

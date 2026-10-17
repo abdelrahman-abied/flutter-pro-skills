@@ -15,8 +15,9 @@
 
 `defer-catch`: flutter-error-handling's check_errors.py ran too, so swallowed-catch
 keeps only its count and points at the ERROR HANDLING section (reported once, as ERR-).
-`defer-perf`: flutter-performance's check_performance.py ran, so eager-children-map and
-opacity-widget keep only their count and point at PERFORMANCE (CONTRACTS §23).
+`defer-perf`: flutter-performance's check_performance.py ran, so eager-children-map keeps
+only its count and points at PERFORMANCE (CONTRACTS §23, §33). opacity-widget is not deferred:
+PERF-005 reports only animated or in-list Opacity, so a static one would be lost.
 `defer-ds`: flutter-design-system's check_design_system.py ran, so hardcoded-color keeps
 only its count and points at DESIGN SYSTEM.
 """
@@ -880,7 +881,6 @@ def future_in_build_hits(masked, builds):
 DEFERRED = {
     'swallowed-catch': ('defer-catch', 'ERROR HANDLING', 'check_errors.py covers these with ERR- ids'),
     'eager-children-map': ('defer-perf', 'PERFORMANCE', 'check_performance.py covers these with PERF- ids'),
-    'opacity-widget': ('defer-perf', 'PERFORMANCE', 'check_performance.py covers these with PERF- ids'),
     'hardcoded-color': ('defer-ds', 'DESIGN SYSTEM', 'check_design_system.py covers these with DS- ids'),
 }
 

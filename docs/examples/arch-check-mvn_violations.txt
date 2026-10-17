@@ -4,7 +4,7 @@ $ python3 -I skills/flutter-architecture/scripts/arch_check.py path/to/app   # f
   root: path/to/app
   package: mvn_violations
   presentation: mvn
-  confidence: medium
+  confidence: high
   clean_architecture: true
   repository_pattern: true
   use_cases: true
@@ -13,26 +13,23 @@ $ python3 -I skills/flutter-architecture/scripts/arch_check.py path/to/app   # f
   di: riverpod
   files: 14 (domain 3, data 4, presentation 5, core 1, app 1)
   features: movie
-  signals: dependency: flutter_riverpod, riverpod_annotation; 1 files under */presentation/notifier/; suffix *Notifier extends _$X x1; *Controller classes under controller(s)/ x1
+  signals: dependency: flutter_riverpod, riverpod_annotation; 1 files under */presentation/notifier/; suffix *Notifier extends _$X x1; *Controller classes under controller(s)/ x1; use cases: 1 files
 
 == ARCHITECTURE VIOLATIONS
   [ARCH-001] domain-depends-on-data (high) x1 — Domain imports the data layer; depend on a domain contract and bind the implementation in the composition root.
       lib/features/movie/domain/entities/movie_entity.dart:4  import '../../data/models/movie_response.dart';
-  [ARCH-002] domain-depends-on-presentation (high) x1 — Domain imports presentation; the domain must not know about the UI.
-      lib/features/movie/domain/repositories/movie_repository.dart:2  import '../../presentation/state/movie_state.dart';
   [ARCH-004] data-depends-on-presentation (high) x2 — Data imports presentation; data must not know about the UI.
       lib/features/movie/data/repositories/movie_repository_impl.dart:5  import '../../presentation/notifier/movie_notifier.dart';
       lib/features/movie/data/repositories/movie_repository_impl.dart:6  import '../../presentation/state/movie_state.dart';
-  [ARCH-005] ui-depends-on-data-source (high) x2 — A view imports a transport/data-source; route it through the notifier/view model.
-      lib/features/movie/presentation/view/movie_view.dart:1  import 'package:dio/dio.dart';
+  [ARCH-005] ui-depends-on-data-source (high) x1 — A view imports a transport/data-source; route it through the notifier/view model.
       lib/features/movie/presentation/view/movie_view.dart:8  import '../../data/sources/movie_source.dart';
+  [ARCH-002] domain-depends-on-presentation (medium) x1 — Domain imports presentation; the domain must not know about the UI.
+      lib/features/movie/domain/repositories/movie_repository.dart:2  import '../../presentation/state/movie_state.dart';
   [ARCH-003] domain-depends-on-framework (medium) x2 — Domain imports Flutter, an I/O package or a UI state-management package; keep the domain pure Dart.
       lib/features/movie/domain/entities/movie_entity.dart:2  import 'package:flutter/material.dart';
       lib/features/movie/domain/usecases/movie_usecase.dart:1  import 'package:dio/dio.dart';
   [ARCH-006] ui-depends-on-dto (medium) x1 — Presentation imports a DTO; map DTOs to entities/models in the data layer.
       lib/features/movie/presentation/view/movie_view.dart:7  import '../../data/models/movie_response.dart';
-  [ARCH-007] logic-depends-on-concrete-data (medium) x1 — Logic depends on a concrete source/service/repository implementation or an I/O package; depend on a repository contract.
-      lib/features/movie/presentation/notifier/movie_notifier.dart:4  import '../../data/sources/movie_source.dart';
   [ARCH-008] view-depends-on-repository (medium) x1 — A view imports a repository or a use case; go through the notifier/view model/bloc.
       lib/features/movie/presentation/view/movie_view.dart:9  import '../../domain/repositories/movie_repository.dart';
   [ARCH-009] logic-depends-on-flutter-ui (medium) x1 — Logic imports Flutter UI libraries; keep it testable without widgets (foundation.dart is fine).
@@ -43,9 +40,6 @@ $ python3 -I skills/flutter-architecture/scripts/arch_check.py path/to/app   # f
   [ARCH-102] context-in-logic (medium) x2 — Logic uses BuildContext, navigation or dialogs; expose state/events and let the view react.
       lib/features/movie/presentation/notifier/movie_notifier.dart:19  Future<void> load(BuildContext context) async {
       lib/features/movie/presentation/notifier/movie_notifier.dart:24  Navigator.of(context).pop();
-  [ARCH-105] global-mutable-state (medium) x2 — Mutable global/static state; move it into a provider/service with an owner and a lifecycle.
-      lib/core/utils/logger.dart:1  int logLevel = 0; // ARCH-105: top-level mutable
-      lib/core/utils/logger.dart:4  static bool verbose = false; // ARCH-105: static mutable
   [ARCH-106] mutable-state-class (medium) x2 — A state class has a mutable field; make state immutable and copy on change.
       lib/features/movie/presentation/state/movie_state.dart:4  int page; // ARCH-106
       lib/features/movie/presentation/state/movie_state.dart:5  bool showErrorDialog = false; // ARCH-106 + ARCH-111
@@ -53,6 +47,11 @@ $ python3 -I skills/flutter-architecture/scripts/arch_check.py path/to/app   # f
       lib/features/movie/data/repositories/movie_repository_impl.dart:20  Future<Map<String, dynamic>> rawTrending() async => {'count': (await _source.getTrending()).length};
   [ARCH-003] domain-depends-on-framework (low) x1 — Domain imports Flutter, an I/O package or a UI state-management package; keep the domain pure Dart.
       lib/features/movie/domain/entities/movie_entity.dart:1  import 'package:flutter/foundation.dart';
+  [ARCH-005] ui-depends-on-data-source (low) x1 — A view imports a transport/data-source; route it through the notifier/view model.
+      lib/features/movie/presentation/view/movie_view.dart:1  import 'package:dio/dio.dart';
+  [ARCH-105] global-mutable-state (low) x2 — Mutable global/static state; move it into a provider/service with an owner and a lifecycle.
+      lib/core/utils/logger.dart:1  int logLevel = 0; // ARCH-105: top-level mutable
+      lib/core/utils/logger.dart:4  static bool verbose = false; // ARCH-105: static mutable
   [ARCH-108] concrete-repository-only (low) x1 — Concrete repository with no abstraction; add a contract so logic depends on it and tests can fake it.
       lib/features/movie/data/repositories/favorites_repository.dart:1  class FavoritesRepository {
   [ARCH-109] ephemeral-state-in-provider (low) x1 — An ephemeral UI controller is created in logic/a provider; own it in a State and dispose it there.

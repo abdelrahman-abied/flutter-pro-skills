@@ -13,7 +13,7 @@ $ python3 -I skills/flutter-architecture/scripts/arch_check.py path/to/app   # f
   di: bloc
   files: 6 (data 1, presentation 4, app 1)
   features: none
-  signals: dependency: flutter_bloc; 2 *_bloc/_cubit.dart files
+  signals: dependency: flutter_bloc; 2 *_bloc/_cubit.dart files; use cases: 0 files
 
 == ARCHITECTURE VIOLATIONS
   [ARCH-008] view-depends-on-repository (medium) x1 — A view imports a repository or a use case; go through the notifier/view model/bloc.

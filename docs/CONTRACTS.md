@@ -1487,3 +1487,22 @@ plugin.
       and never freed)
     - immich, lichess, news_toolkit, io_flip, wonderous
     - a read-only robustness pass over 173 cached pub.dev plugin packages
+
+## 33. v1.4.1 corrections (these entries win over §23 and §25)
+
+- **`opacity-widget` is no longer deferred to PERFORMANCE.** PERF-005 reports
+  an `Opacity` only when it is animated or sits inside a list item. Deferring
+  the candidate hid every static `Opacity`, which regenerating the
+  `smelly_app` example showed. The candidate keeps its locations, and
+  reviewers drop it only where PERF-005 reports the same line.
+- **`defer-perf` covers only `eager-children-map`.** `defer-ds` still covers
+  `hardcoded-color`, because DS-001 reports every raw colour (as info when the
+  app has no theme).
+- **New cross-references:**
+  - `flutter-error-handling` and `flutter-persistence` point to NET-004 for the
+    retry policy in the HTTP client.
+  - `flutter-secure-defaults` points to `flutter-networking`,
+    `flutter-platform-integration` and `flutter-release`.
+- **Regenerated examples.** `docs/examples/*` and `docs/assets/review-preview.svg`
+  were regenerated from the current scripts. `sample-review.md` was rewritten
+  against the new output and the fixture's current line numbers.

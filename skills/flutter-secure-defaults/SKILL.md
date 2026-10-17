@@ -4,7 +4,7 @@ description: Write and review Flutter/Dart code that is secure by default, each 
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.4.0"
+  version: "1.4.1"
   suite: flutter-pro-skills
 ---
 
@@ -193,7 +193,9 @@ from a scan that didn't run.
 12. **Ask for the minimum.** Request a permission at the moment it is needed,
     with a reason, and only the narrowest one (coarse location, the photo
     picker instead of storage). The audit checks the merged manifest and
-    plists (PRV-PERMS, PRV-IOS-PERMS).
+    plists (PRV-PERMS, PRV-IOS-PERMS). `flutter-platform-integration` covers
+    the request flow (`PLAT-011` startup requests, `PLAT-012` permanent
+    denial) and `flutter-release` the iOS usage strings (`REL-009`).
 13. **Ship release builds with `--obfuscate --split-debug-info=<dir>`**, and
     keep the symbols as a private CI artifact (SEC-012). It is friction, not
     secrecy. For depth, see `flutter-security-audit` L1.1 and L7.2.
@@ -319,6 +321,15 @@ say which check you skipped.
   Fallback: `../flutter-forms/SKILL.md`.
 - **`flutter-error-handling`** for user-safe errors (ERR-008) and global crash
   reporting. Fallback: `../flutter-error-handling/SKILL.md`.
+- **`flutter-networking`** for the client itself: one configured Dio/http
+  client, timeouts, retry policy (NET-004), pagination and cancellation. The
+  auth interceptor and transport security stay here. Fallback:
+  `../flutter-networking/SKILL.md`.
+- **`flutter-platform-integration`** for channels, FFI and permission
+  requests (no secrets over channels, libraries never loaded from writable
+  paths, PLAT-007). Fallback: `../flutter-platform-integration/SKILL.md`.
+- **`flutter-release`** for signing, flavors and CI secrets (REL-010/011/012).
+  Fallback: `../flutter-release/SKILL.md`.
 - **`dart-flutter-review`** runs this checker and a security reviewer pass.
   Fallback: `../dart-flutter-review/SKILL.md`.
 
