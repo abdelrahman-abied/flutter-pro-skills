@@ -45,7 +45,7 @@ bash <skill-dir>/scripts/review.sh <project-root> --profile mvn   # declared arc
 skips the stricter lint pass, `--no-arch` the architecture pass, `--no-tests`,
 `--no-errors`, `--no-security` (both security passes), `--no-audit`,
 `--no-nav`, `--no-forms`, `--no-i18n`, `--no-perf`, `--no-persist`, `--no-net`, `--no-ds`,
-`--no-a11y` and `--no-release` the sibling passes (or one
+`--no-a11y`, `--no-release` and `--no-platform` the sibling passes (or one
 `--skip <list>`), and `--max <n>` sets how many example locations each rule
 prints (default 5). Generated files (`arch_check.py`'s `files[]` decides for
 `lib/`) are never in scope.

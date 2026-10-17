@@ -1,0 +1,12 @@
+name: plat_violations
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.0
+  riverpod_annotation: ^2.3.0
+  permission_handler: ^11.0.0
+  plugin_platform_interface: ^2.1.0
+  path_provider: ^2.1.0
+  ffi: ^2.1.0

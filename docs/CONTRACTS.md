@@ -1355,3 +1355,135 @@ to v1.3.0: eighteen skills, fourteen checkers.
   - Non-canonical apps: `io_flip`, immich, lichess, hiddify and wonderous.
   - About 120 CI workflows were scanned; the only hit was 1 low (immich: a
     keystore left on a persistent self-hosted runner).
+
+---
+
+# Phase 7 contracts (v1.4.0)
+
+## 31. flutter-platform-integration
+
+**Scope.** Talking to native code safely:
+- **Channels:** `MethodChannel`, `EventChannel` and `BasicMessageChannel`,
+  with channel names as one constant and codecs.
+- **Pigeon:** typed channels, generated code kept out of review, and the
+  `@HostApi`/`@FlutterApi` design.
+- **FFI:** `dart:ffi`, `ffigen`, `jnigen`, native assets and build hooks, plus
+  memory ownership (`calloc`/`free`, `using()` arenas, `Finalizable`) and long
+  calls moved off the UI isolate.
+- **Platform views** (`AndroidView`, `UiKitView`) and their performance cost.
+- **Writing a plugin:** federated plugins, platform interfaces, and
+  `implements` vs `extends`.
+- **Permissions:** requesting them at the moment of use, and handling denied
+  and permanently-denied states.
+- **Background and isolate rules:** `BackgroundIsolateBinaryMessenger` and
+  `RootIsolateToken`.
+- **Errors:** `PlatformException`, `MissingPluginException`,
+  `UnimplementedError` on unsupported platforms, and `kIsWeb` guards.
+- **Testing:** `TestDefaultBinaryMessengerBinding` /
+  `setMockMethodCallHandler` and fake platform interfaces.
+
+**Architecture placement.** A platform channel or FFI binding is a **data
+source**. It lives in `data/` (or a plugin package) behind a repository or
+service contract. The repository maps `PlatformException` to a typed failure.
+Views and logic (MVN notifiers, MVVM view models, blocs, GetX controllers)
+never touch a channel or a native pointer. Permission requests are the one UI
+exception: the view asks, the logic decides when, and a service wraps the
+plugin.
+
+**Contract values.**
+
+| Item | Value |
+|---|---|
+| Owner | Agent P7: `skills/flutter-platform-integration/**` |
+| Prefix | `PLAT-0xx` / `PLAT-<slug>` |
+| Checker | `scripts/check_platform.py` (§22 CLI and output contract; Dart only, it may also read `pubspec.yaml` and `ffigen.yaml`/`pigeons/*.dart`) |
+| Header | `== PLATFORM` |
+| Schema | `flutter-pro-skills/platform@1` |
+| Suppression | `plat-ignore` |
+
+**Ownership.**
+- arch_check doesn't treat channels as I/O. **PLAT owns platform-channel
+  placement**: a `MethodChannel` or FFI call in a view, widget or logic file.
+- Everything below stays with its owner. Cross-reference these; never
+  re-detect them:
+
+  | Concern | Owner |
+  |---|---|
+  | HTTP/DB I/O in UI | ARCH-005/101 |
+  | Generic swallowed or untyped catches | ERR-001/002/003 |
+  | Unguarded I/O in UI | ERR-014 (PLAT owns only the *channel-specific* missing `PlatformException`/`MissingPluginException` handling) |
+  | Minimal permissions, secrets over channels | flutter-secure-defaults |
+  | iOS usage descriptions | REL-009 |
+  | Heavy work on the UI isolate | PERF-011 (PLAT owns *synchronous FFI calls* only) |
+  | Undisposed controllers | UI-lifecycle (PLAT owns `EventChannel` stream subscriptions never cancelled only when channel-specific) |
+
+**Secure by default.**
+- Validate every value that comes back from native code at the source
+  boundary.
+- Never send tokens over a channel unless it's needed.
+- Free every native allocation.
+- Never load a dynamic library from a writable path.
+- Request permissions only when they're used.
+
+**Review integration (lead).**
+- `== PLATFORM` runs after `== NETWORKING`, with `--no-platform` and the
+  `--skip` key `platform`. It is informational.
+- Add reviewer Template P and the dedupe rows.
+- Bump to v1.4.0: nineteen skills, fifteen checkers.
+
+**Calibration (§24).**
+- **Canonical apps** (zero high or medium false positives):
+  - compass_app, the bloc examples and the riverpod examples, which must stay
+    quiet
+  - the Flutter team's `samples/platform_channels`, `samples/add_to_app/**`
+    (Pigeon), `samples/pedometer` (FFI/jnigen) and
+    `samples/platform_view_swift` (all BSD)
+- **Non-canonical apps:** immich/mobile (Pigeon, FFI; AGPL), lichess
+  (channels; GPL) and hiddify (FFI; GPL). Their fixtures are fresh repros with
+  no copied lines.
+
+## 32. Phase 7 as built: v1.4.0 (these entries win over §31)
+
+- **Release.** v1.4.0 has nineteen skills and fifteen checkers. Every
+  `metadata.version` is `"1.4.0"`.
+- **Rules.** `platform@1` has PLAT-001…012:
+  - PLAT-001 channel-outside-data-layer (reported once per file; skips the
+    composition root, wrapper classes, logic classes in core/data/domain, and
+    `SystemChannels.*`)
+  - PLAT-002 channel-name-duplicated
+  - PLAT-003 platform-call-unhandled (callers followed up to 3 hops)
+  - PLAT-004 platform-result-force-unwrapped
+  - PLAT-005 event-subscription-dropped
+  - PLAT-006 native-memory-not-freed
+  - PLAT-007 library-loaded-from-writable-path
+  - PLAT-008 call-handler-never-cleared
+  - PLAT-009 platform-interface-not-enforced
+  - PLAT-010 isolate-channel-without-messenger
+  - PLAT-011 permission-requested-at-startup
+  - PLAT-012 permanent-denial-unhandled
+
+  There are also 8 reading slugs.
+- **Generated code.** Generated Pigeon, ffigen and jnigen output is skipped,
+  found both by its banner and by the configured output paths (`dartOut`,
+  `ffigen.yaml`, pubspec `ffigen:`, `jnigen.yaml`).
+- **Ownership** (as in §31, plus these):
+  - PLAT-005 beats the `undisposed-resource` candidate only when the `listen`
+    result is discarded. The deferral is a reviewer dedupe rule;
+    `heuristics.py` doesn't defer by line.
+  - PLAT-011 beats `SEC-permission-overreach` for the startup case.
+  - Synchronous FFI work on the UI isolate is the reading slug
+    `PLAT-sync-ffi-on-ui-isolate` (PERF-011 keeps Dart work).
+- **review.sh.** `== PLATFORM` runs after NETWORKING, with `--no-platform`
+  and the `--skip` key `platform`. Reviewer Template P covers it.
+- **Scaffold.** The generated files get zero PLAT findings, enforced in
+  tests.
+- **Calibration.**
+  - **Canonical apps:** compass_app, the bloc examples, the riverpod
+    examples, and the Flutter samples `platform_channels`, `add_to_app/**`
+    (Pigeon), `pedometer` (FFI/jnigen) and `platform_view_swift`. They have
+    zero high or medium hits; every low was read and judged a true positive.
+  - **Non-canonical apps:**
+    - hiddify: 5 high PLAT-006 true positives (`toNativeUtf8()` passed inline
+      and never freed)
+    - immich, lichess, news_toolkit, io_flip, wonderous
+    - a read-only robustness pass over 173 cached pub.dev plugin packages

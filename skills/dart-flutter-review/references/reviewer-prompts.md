@@ -17,7 +17,8 @@
 14. Template M: accessibility reviewer (optional)
 15. Template N: networking reviewer (optional)
 16. Template O: release reviewer (optional)
-17. Template V: adversarial verifier (one per High finding)
+17. Template P: platform-integration reviewer (optional)
+18. Template V: adversarial verifier (one per High finding)
 
 ## 1. How to use these templates
 
@@ -39,15 +40,15 @@ between the `PROMPT` fences verbatim and replace every `{{PLACEHOLDER}}`:
 The security template (D) uses `SEC-0xx` (the `flutter-secure-defaults`
 checker) and `SEC-<slug>` (found by reading). The optional templates use
 `TEST-` (E), `ERR-` (F), `NAV-` (G), `FORM-` (H), `I18N-` (I), `PERF-` (J),
-`PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N) and `REL-` (O) IDs: `-0xx`
+`PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N), `REL-` (O) and `PLAT-` (P) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
 Spawn A, B, C and D, plus E if the `flutter-testing` skill is installed or
 tests were asked about, F if `flutter-error-handling` is installed or error
-handling was asked about, and G to O when their skill is installed (the
+handling was asked about, and G to P when their skill is installed (the
 section isn't "skipped") and the code has, respectively, a router, forms,
 user-facing strings, widgets or lists, local storage, theme code, widgets,
-HTTP calls, or platform folders and CI config,
+HTTP calls, platform folders and CI config, or native code,
 or the user asked about that area, **at the same time**, as read-only sub-agents, in whatever form your agent has
 (for example Claude Code's Agent/Task tool, Codex sub-agents, or another agent's equivalent). Then wait
 for all of them. Don't redo their work while they run. If your agent can't
@@ -1211,7 +1212,70 @@ PROMPT
 
 ---
 
-## 17. Template V: adversarial verifier (one per High finding)
+## 17. Template P: platform-integration reviewer (optional)
+
+Use this when the `flutter-platform-integration` skill is installed (the mechanical output has
+a `== PLATFORM` section that isn't "skipped") and the code uses platform channels, Pigeon, dart:ffi, platform views, a plugin platform interface or runtime permissions, or when the user
+asked about native code, channels, Pigeon, FFI, plugins or permissions. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the PLATFORM INTEGRATION reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-platform-integration` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-platform-integration/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): channels-and-pigeon.md, ffi.md, plugins-and-platform-views.md, permissions-and-isolates.md, placement-by-architecture.md and testing-platform-code.md, plus rules.md for the PLAT-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter platform-integration guides.
+
+Start from the `== PLATFORM` section of the mechanical output:
+`grep -n '^== PLATFORM' {{MECHANICAL_OUTPUT}}`. It comes from `check_platform.py` and lists
+`[PLAT-0xx]` groups with example locations (channels or FFI outside the data layer, duplicated channel names, unhandled platform calls, force-unwrapped results, dropped EventChannel subscriptions, native memory never freed, libraries loaded from writable paths, call handlers never cleared, platform interfaces not enforced, channels used in background isolates without the messenger, permissions requested at startup, permanent denial unhandled). Generated Pigeon, ffigen and jnigen files are skipped. In diff mode it covers only the changed files. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-platform-integration/scripts/check_platform.py {{PROJECT_ROOT}} [--profile <p>]`.
+
+What to do:
+1. Confirm every PLAT-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (a wrapper class that is itself the data source, a call handled by the repository that calls it, memory handed to a finalizer or an owner, a channel used only in the composition root).
+2. Then read the files in scope for what the script can't see: values from native code used without validation, sensitive data sent over a channel, long synchronous FFI calls on the UI isolate, platform views inside scrolling lists, hand-written channel APIs that should be Pigeon, platform checks inside widgets, edited generated code, and channels with no fake for tests.
+3. Place each fix where this architecture puts it (the channel, Pigeon API or FFI binding is a data source in data/ (or a plugin package) behind a repository or service contract; the repository maps PlatformException to a typed failure; MVN notifiers, MVVM view models, blocs and GetX controllers never touch a channel or a pointer; the view only triggers permission requests through a service), and respect the
+   project's own consistent conventions.
+4. The PLAT- id leads, and doesn't duplicate the rest of the suite: HTTP and DB I/O in UI stays ARCH-005/007/101, generic catches stay ERR-001/002/003, permission policy and secrets stay SEC-, iOS usage strings stay REL-009, and heavy Dart work stays PERF-011. PLAT-003 replaces ERR-014 for the same channel call, and PLAT-005 replaces the undisposed-resource candidate when the listen result is discarded.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <PLAT-0xx (the script's rule) | PLAT-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-platform-integration › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is a crash, leak or code-injection risk under ordinary use (native memory never freed, a library loaded from a writable path, a channel used in a background isolate without the messenger). MEDIUM is a channel in a view or logic class, a dropped EventChannel subscription in UI, or a platform interface that is not enforced. LOW is hygiene. Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (platform): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 18. Template V: adversarial verifier (one per High finding)
 
 Spawn one per HIGH finding (they can run in parallel), or batch several small
 ones into one verifier. Paste the finding block verbatim. If you can't spawn

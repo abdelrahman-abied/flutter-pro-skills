@@ -55,11 +55,12 @@ template). This format is the hand-off between passes.
 | `PERSIST-0xx` / `PERSIST-<slug>` | Local storage, caching and migrations (`flutter-persistence`): `check_persistence.py` rules (`PERSIST-001` sql-built-from-strings) or slugs (`PERSIST-no-cache-policy`) |
 | `NET-0xx` / `NET-<slug>` | The API client layer (`flutter-networking`): `check_networking.py` rules (`NET-001` client-without-timeouts) or slugs (`NET-unvalidated-json`). Not to be confused with `flutter-security-audit`'s upper-case `NET-ACCEPT-ALL` style ids, which become `SEC-<slug>` |
 | `REL-0xx` / `REL-<slug>` | Release and delivery (`flutter-release`): `check_release.py` rules (`REL-001` release-signed-with-debug-key), which can point at Gradle, Xcode, plist or CI files, or slugs (`REL-build-number-reused`) |
+| `PLAT-0xx` / `PLAT-<slug>` | Native code (`flutter-platform-integration`): `check_platform.py` rules (`PLAT-006` native-memory-not-freed) or slugs (`PLAT-unvalidated-native-value`) |
 | `DS-0xx` / `DS-<slug>` | Design system and theming (`flutter-design-system`): `check_design_system.py` rules (`DS-005` theme-extension-not-registered) or slugs (`DS-no-component-layer`) |
 | `A11Y-0xx` / `A11Y-<slug>` | Accessibility (`flutter-accessibility`): `check_accessibility.py` rules (`A11Y-001` icon-button-without-label) or slugs (`A11Y-focus-order`) |
 | `LINT:<code>` | An analyzer diagnostic with no better home: `LINT:unused_field`. When a lint is the symptom of a judgment finding, fold it into that finding's evidence |
 
-Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/NET/DS/A11Y/REL are free-form but stable: lower-kebab-case,
+Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/NET/DS/A11Y/REL/PLAT are free-form but stable: lower-kebab-case,
 named after the problem. Reuse one slug for one problem across the whole report.
 
 **Overlaps.** An empty or default-returning `catch` can surface three ways: the
@@ -88,6 +89,10 @@ they're stable and the sibling skill documents them:
 | `check_networking.py` | `NET-004` retry-resends-any-method | `ERR-retry-non-idempotent` |
 | `check_networking.py` | `NET-007` websocket-never-closed | the `undisposed-resource` candidate / `UI-lifecycle` on that channel |
 | `check_networking.py` | `NET-008` base-url-duplicated (API hosts) | `AP-hardcoded-config-in-sources` |
+| `check_platform.py` | `PLAT-001` channel-outside-data-layer | none (arch_check does not treat channels as I/O; `ARCH-005/007/101` keep HTTP and DB I/O) |
+| `check_platform.py` | `PLAT-003` platform-call-unhandled | `ERR-014` for the same channel call (generic catches stay `ERR-001/002/003`) |
+| `check_platform.py` | `PLAT-005` event-subscription-dropped (listen result discarded) | the `undisposed-resource` candidate on that line (an assigned but never cancelled subscription stays the candidate / `UI-lifecycle`) |
+| `check_platform.py` | `PLAT-011` permission-requested-at-startup | `SEC-permission-overreach` for the startup case (permission policy stays `SEC-`) |
 | `check_release.py` | `REL-006` flavor-read-outside-root | `AP-hardcoded-config-in-sources` (environment and flavor reads) |
 | `check_release.py` | `REL-0xx` on Gradle/Xcode/CI files | a `scan.sh` id for the same file and line (keep REL for signing, flavors, store and CI; `scan.sh` keeps debuggable, allowBackup, ATS, pinning, RASP) |
 

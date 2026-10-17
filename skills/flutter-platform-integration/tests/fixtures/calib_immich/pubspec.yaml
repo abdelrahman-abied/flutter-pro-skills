@@ -1,0 +1,9 @@
+name: calib_immich
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.5.0
+dev_dependencies:
+  pigeon: ^22.0.0

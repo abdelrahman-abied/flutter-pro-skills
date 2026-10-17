@@ -1,0 +1,5 @@
+name: NativeBindings
+output: 'lib/src/native_bindings.dart'
+headers:
+  entry-points:
+    - 'src/native.h'

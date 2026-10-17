@@ -5,6 +5,54 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [1.4.0] - 2026-10-17
+
+The suite now has nineteen skills and fifteen checkers.
+
+### Added
+
+- **flutter-platform-integration** covers native code as a data source:
+  - **Placement.** Channels, Pigeon APIs and FFI bindings live in `data/`
+    behind a repository or service. The repository maps `PlatformException`
+    to a typed failure. Views and logic never touch a channel or a pointer.
+  - **Channels:** MethodChannel, EventChannel and BasicMessageChannel, plus
+    Pigeon.
+  - **FFI:** memory ownership with `using()`, `free` and `NativeFinalizer`;
+    ffigen and jnigen; native assets.
+  - **Platform views** and their cost.
+  - **Plugins:** federated layout with `PlatformInterface` and `verify`.
+  - **Permissions:** asked at the moment of use, with permanent denial
+    handled.
+  - **Background isolates:** `BackgroundIsolateBinaryMessenger`.
+  - **Testing:** mocked channels and fake platform interfaces.
+
+  It ships `check_platform.py` with 12 rules (`PLAT-001…012`), among them
+  channels outside the data layer, native memory never freed, libraries
+  loaded from writable paths and channels in background isolates without the
+  messenger. It skips generated Pigeon, ffigen and jnigen code.
+- **dart-flutter-review** gets:
+  - a `PLATFORM` section
+  - `--no-platform` / `--skip platform`
+  - reviewer Template P
+  - dedupe rows (PLAT-003 beats `ERR-014` for channel calls, and PLAT-005
+    beats the `undisposed-resource` candidate)
+
+### Changed
+
+- **Scaffold.** `flutter-feature-scaffold` output is tested to produce zero
+  PLAT findings.
+- **Versions.** Every skill is versioned 1.4.0, and `install.sh` installs all
+  nineteen.
+
+### Quality
+
+- **Calibration.** `check_platform.py` was calibrated on the canonical apps
+  and the Flutter team's platform samples (`platform_channels`, `add_to_app`
+  with Pigeon, `pedometer` with FFI/jnigen, `platform_view_swift`), with no
+  high or medium hits. It was also run on immich, lichess, hiddify (5 real
+  native-memory leaks), news_toolkit, io_flip, Wonderous and 173 cached
+  pub.dev plugins.
+
 ## [1.3.0] - 2026-10-17
 
 The suite now has eighteen skills and fourteen checkers.

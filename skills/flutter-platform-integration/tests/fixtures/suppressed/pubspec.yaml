@@ -1,0 +1,7 @@
+name: plat_suppressed
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  ffi: ^2.1.0

@@ -23,7 +23,7 @@ the gate on today without fixing the whole codebase first.
 | Analyzer results when the analyzer **crashed** (often an analyzer plugin), or when the pubspec SDK constraint excludes the installed SDK | No, the section says why |
 | Architecture violations below `fail-on`, or recorded in the baseline | No, reported |
 | Analyzer warnings and infos, format, `dart fix` | No, reported |
-| Test gaps, error handling, security defaults, the `flutter-security-audit` `scan.sh` pass (whatever its own exit code), navigation, forms, i18n, performance, persistence, networking, design system, accessibility, release, heuristic candidates | No, informational |
+| Test gaps, error handling, security defaults, the `flutter-security-audit` `scan.sh` pass (whatever its own exit code), navigation, forms, i18n, performance, persistence, networking, design system, accessibility, release, platform, heuristic candidates | No, informational |
 | A usage or environment error (no `pubspec.yaml`, bad input, missing base ref) | Yes (exit 2) |
 
 `fail-on` is `high` by default. `medium` also fails on medium violations, and
@@ -154,14 +154,15 @@ python3 -I <skills>/flutter-i18n/scripts/check_i18n.py . [--files <list>] [--pro
 python3 -I <skills>/flutter-performance/scripts/check_performance.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-persistence/scripts/check_persistence.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-networking/scripts/check_networking.py . [--files <list>] [--profile <p>]
+python3 -I <skills>/flutter-platform-integration/scripts/check_platform.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-release/scripts/check_release.py . [--profile <p>]   # reads Gradle/Xcode/plist/CI files too
 python3 -I <skills>/flutter-design-system/scripts/check_design_system.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-accessibility/scripts/check_accessibility.py . [--files <list>] [--profile <p>]
 bash <skills>/flutter-security-audit/scan.sh . [--json]   # separate skill; exits 1 on Critical/High by itself
 
 # skip sections in review.sh: --no-security (both security passes), --no-audit, --no-nav,
-# --no-forms, --no-i18n, --no-perf, --no-persist, --no-net, --no-ds, --no-a11y, --no-release,
-# or one list: --skip audit,nav,forms,i18n,perf,persist,net,ds,a11y,release
+# --no-forms, --no-i18n, --no-perf, --no-persist, --no-net, --no-ds, --no-a11y, --no-release, --no-platform,
+# or one list: --skip audit,nav,forms,i18n,perf,persist,net,ds,a11y,release,platform
 ```
 
 `echo $?` after any of them: `0` pass, `1` CI failure, `2` usage error.

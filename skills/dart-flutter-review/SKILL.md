@@ -4,7 +4,7 @@ description: Review, audit or quality-check Dart/Flutter code, a diff, branch or
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.3.0"
+  version: "1.4.0"
   suite: flutter-pro-skills
 ---
 
@@ -40,7 +40,7 @@ Sibling skills, each with a fallback path relative to this skill's folder:
 - `flutter-error-handling` (`../flutter-error-handling/SKILL.md`): error flow across layers, `check_errors.py` (optional errors pass)
 - `flutter-secure-defaults` (`../flutter-secure-defaults/SKILL.md`): write-time security per layer, `check_secure_defaults.py` (security pass)
 - `flutter-navigation`, `flutter-forms`, `flutter-i18n` (`../flutter-<x>/SKILL.md`): routing and deep links, forms and input, localisation and RTL, each with a `check_*.py` (optional passes)
-- `flutter-performance`, `flutter-persistence`, `flutter-networking`, `flutter-design-system`, `flutter-accessibility`, `flutter-release` (`../flutter-<x>/SKILL.md`): jank and rebuilds, local storage and migrations, the API client layer, tokens and themes, semantics and contrast, flavors/signing/store/CI, each with a `check_*.py` (optional passes)
+- `flutter-performance`, `flutter-persistence`, `flutter-networking`, `flutter-design-system`, `flutter-accessibility`, `flutter-release`, `flutter-platform-integration` (`../flutter-<x>/SKILL.md`): jank and rebuilds, local storage and migrations, the API client layer, tokens and themes, semantics and contrast, flavors/signing/store/CI, channels/Pigeon/FFI/plugins, each with a `check_*.py` (optional passes)
 - `flutter-security-audit`: a separate skill by the same author (RASP, pinning, obfuscation, attestation, MASVS/CWE). When installed next to this one, `review.sh` runs its `scan.sh`, and the security pass loads it for depth
 
 If a sibling is missing, run without it and name the gap on the report's
@@ -97,7 +97,8 @@ echo "$out"
 `--no-extra`, `--no-arch`, `--no-tests`, `--no-errors`, `--no-security` (both
 security sections), `--no-audit`, `--no-nav`, `--no-forms`, `--no-i18n`,
 `--no-perf`, `--no-persist`, `--no-net`, `--no-ds`, `--no-a11y`, `--no-release`,
-or one `--skip extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y,release`. The script never
+`--no-platform`, or one
+`--skip extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y,release,platform`. The script never
 modifies the project. Exit code 0 means the report was produced, even with
 findings. Exit code 2 means there's no `pubspec.yaml` or `dart` isn't on PATH.
 Only `--ci` exits 1.
@@ -128,7 +129,7 @@ Sections (run `grep -n '^== ' "$out"` to find them):
   `check_errors.py`, limited to the diff in diff mode.
 - `SECURITY DEFAULTS` (`[SEC-0xx]`), `NAVIGATION` (`[NAV-0xx]`), `FORMS`
   (`[FORM-0xx]`), `I18N` (`[I18N-0xx]`), `PERFORMANCE` (`[PERF-0xx]`),
-  `PERSISTENCE` (`[PERSIST-0xx]`), `NETWORKING` (`[NET-0xx]`), `DESIGN SYSTEM` (`[DS-0xx]`),
+  `PERSISTENCE` (`[PERSIST-0xx]`), `NETWORKING` (`[NET-0xx]`), `PLATFORM` (`[PLAT-0xx]`), `DESIGN SYSTEM` (`[DS-0xx]`),
   `ACCESSIBILITY` (`[A11Y-0xx]`): the sibling checkers, limited to the diff in
   diff mode. `RELEASE` (`[REL-0xx]`) reads Gradle, Xcode, plist and CI files,
   so it always covers the whole project and says so in diff mode.
@@ -150,13 +151,13 @@ If `dart` isn't available, still run the architecture checker on its own
 analyzer and format passes were skipped. The other checkers (`test_gaps.py`,
 `check_errors.py`, `check_secure_defaults.py`, `check_navigation.py`,
 `check_forms.py`, `check_i18n.py`, `check_performance.py`,
-`check_persistence.py`, `check_networking.py`, `check_release.py`, `check_design_system.py`, `check_accessibility.py`)
+`check_persistence.py`, `check_networking.py`, `check_platform.py`, `check_release.py`, `check_design_system.py`, `check_accessibility.py`)
 need only Python, and `scan.sh` only bash
 (CLIs in `references/ci.md` › Local equivalents).
 
 ## Phase 2: judgment passes
 
-There are four core dimensions and eleven optional ones. Each returns findings
+There are four core dimensions and twelve optional ones. Each returns findings
 in the shape given in `references/finding-format.md`.
 
 | Pass | Loads | Starts from | IDs |
@@ -176,14 +177,15 @@ in the shape given in `references/finding-format.md`.
 | (m) Accessibility (optional) | `flutter-accessibility` | `ACCESSIBILITY` | `A11Y-0xx`, `A11Y-` |
 | (n) Networking (optional) | `flutter-networking` | `NETWORKING` | `NET-0xx`, `NET-` |
 | (o) Release (optional) | `flutter-release` | `RELEASE` | `REL-0xx`, `REL-` |
+| (p) Platform integration (optional) | `flutter-platform-integration` | `PLATFORM` | `PLAT-0xx`, `PLAT-` |
 
 The security pass (d) is core: "secure by default" means every review looks.
 If neither security skill is installed, run it from the template's own
 checklist and say so on Coverage. Run each optional pass when its skill is
 installed (its section isn't `skipped`) or the user asks about that area; for
-(g)–(o), also only when the code has it (a router, forms, localisation or
+(g)–(p), also only when the code has it (a router, forms, localisation or
 user-facing strings, widgets, local storage, theme code, HTTP calls, platform
-folders or CI config). If a skill is missing, leave the pass out and name the
+folders or CI config, platform channels or FFI). If a skill is missing, leave the pass out and name the
 gap on the Coverage line. The idioms pass (c) still covers swallowed catches
 when (f) doesn't run, and the UI pass (b) still covers l10n/RTL when (i)
 doesn't, and lists, images, colours and semantics when (j), (l) or (m) don't.
@@ -197,7 +199,8 @@ files, or the user asked for a deep or thorough review.
 2. Fill in the templates from `references/reviewer-prompts.md` verbatim: A, B,
    C and D (security), plus E (testing), F (errors), G (navigation), H (forms),
    I (i18n), J (performance), K (persistence), L (design system), M
-   (accessibility), N (networking) and O (release) when they apply, as above.
+   (accessibility), N (networking), O (release) and P (platform integration)
+   when they apply, as above.
    Use absolute paths.
 3. Spawn every reviewer **at once**, each **read-only**, and wait for all of
    them. Each prompt says: confirm by reading, return text only, write no
@@ -285,7 +288,7 @@ It exits 1 when architecture violations at or above `--fail-on` (default
 (only counted after `pub get`, and never for codegen cascades, an analyzer
 crash or an SDK the pubspec excludes). Test gaps, error handling, security
 (including `scan.sh`, whatever its own exit code), navigation, forms, i18n,
-performance, persistence, networking, design system, accessibility, release and candidates are informational and never fail the run. A `== CI RESULT` section explains the
+performance, persistence, networking, design system, accessibility, release, platform and candidates are informational and never fail the run. A `== CI RESULT` section explains the
 verdict, and with `$GITHUB_STEP_SUMMARY` set it appends a Markdown summary
 (section counts and top findings). The baseline comes from
 `arch_check.py --write-baseline <file>`, and its keys ignore line numbers, so

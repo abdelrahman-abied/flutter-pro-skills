@@ -4,7 +4,7 @@ description: Find and fix Flutter jank and wasted work, judged by the app's own 
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.3.0"
+  version: "1.4.0"
   suite: flutter-pro-skills
 ---
 

@@ -27,11 +27,12 @@ that is clean and secure by default, judged by your app's own architecture.**
   repositories, MVN notifiers go through use cases, and Bloc forbids
   bloc→bloc. Other packs pick one stack and flag everything else.
 - **Real checkers, not just prose.**
-  - Fourteen read-only checkers: architecture (import graph), error handling,
+  - Fifteen read-only checkers: architecture (import graph), error handling,
     test gaps, security defaults, navigation, forms, i18n/RTL, performance,
-    persistence, networking, design system, accessibility, release (flavors,
-    signing, store, CI), and review heuristics.
-  - All of them use stdlib Python and have about 1,950 regression tests.
+    persistence, networking, platform integration, design system,
+    accessibility, release (flavors, signing, store, CI), and review
+    heuristics.
+  - All of them use stdlib Python and have about 2,050 regression tests.
   - They are calibrated on real open-source apps: Flutter's Compass sample,
     the bloc and riverpod examples, lichess, immich, Wonderous, the drift
     examples and others.
@@ -83,6 +84,7 @@ Then just ask:
 | [`flutter-performance`](skills/flutter-performance/SKILL.md) | Rebuild scope per pattern, `const`, `RepaintBoundary`, lazy lists and slivers, isolates, image decode size, jank diagnosis in DevTools | `check_performance.py` |
 | [`flutter-persistence`](skills/flutter-persistence/SKILL.md) | Drift, sqflite, Hive, shared_preferences, caching, offline-first and sync, migrations, placed behind your repositories. Parameterised SQL only | `check_persistence.py` |
 | [`flutter-networking`](skills/flutter-networking/SKILL.md) | The API client layer per architecture: one configured Dio/http client with timeouts, DTOs and validated JSON, pagination guards, cancellation, idempotent-only retry, WebSockets, fake clients in tests | `check_networking.py` |
+| [`flutter-platform-integration`](skills/flutter-platform-integration/SKILL.md) | Native code as a data source: platform channels and Pigeon, FFI with freed memory, platform views, writing plugins, permissions at the moment of use, background isolates | `check_platform.py` |
 | [`flutter-design-system`](skills/flutter-design-system/SKILL.md) | Tokens, `ThemeData`/`ColorScheme`, `ThemeExtension`, a component layer, dark mode, no raw colours or sizes in features | `check_design_system.py` |
 | [`flutter-accessibility`](skills/flutter-accessibility/SKILL.md) | `Semantics` and labels, tap targets, WCAG contrast, text scale, focus order, screen-reader tests. No secrets read aloud | `check_accessibility.py` |
 | [`flutter-release`](skills/flutter-release/SKILL.md) | Shipping the app: flavors and environments injected at the root, signing kept out of git, versioning, store requirements, safe CI/CD (no secrets in logs, no `pull_request_target` holes) | `check_release.py` |
@@ -111,6 +113,7 @@ The review runs its `scan.sh` automatically when it is installed.
 | "Cache this offline", "Drift migration", "Hive or SQLite?" | `flutter-persistence` |
 | "Set up Dio", "infinite scroll", "retry", "parse this JSON" | `flutter-networking` |
 | "Add flavors", "sign the release", "publish to the Play Store", "release workflow" | `flutter-release` |
+| "Call native code", "MethodChannel", "Pigeon", "FFI", "write a plugin", "ask for permission" | `flutter-platform-integration` |
 | "Dark mode", "design tokens", "ThemeExtension", "hard-coded colours" | `flutter-design-system` |
 | "Screen reader", "TalkBack/VoiceOver", "contrast", "tap target" | `flutter-accessibility` |
 | "What should I call this?" | `dart-naming` |
@@ -203,7 +206,7 @@ recipe exists, these skills point to it.
 
 To accept a specific finding, add `// arch-ignore: ARCH-005 <reason>` on that
 line or the line above it. There are matching `err-`, `sec-`, `nav-`, `form-`,
-`i18n-`, `perf-`, `persist-`, `net-`, `ds-`, `a11y-` and `rel-ignore` comments.
+`i18n-`, `perf-`, `persist-`, `net-`, `ds-`, `a11y-`, `rel-` and `plat-ignore` comments.
 
 **Precedence:**
 1. Your project's own decisions: lints, the declared architecture, and

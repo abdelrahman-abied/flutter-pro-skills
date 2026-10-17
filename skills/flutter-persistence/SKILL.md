@@ -4,7 +4,7 @@ description: Write and review Flutter local persistence, clean and secure by def
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.3.0"
+  version: "1.4.0"
   suite: flutter-pro-skills
 ---
 
