@@ -15,7 +15,8 @@
 12. Template K: persistence reviewer (optional)
 13. Template L: design-system reviewer (optional)
 14. Template M: accessibility reviewer (optional)
-15. Template V: adversarial verifier (one per High finding)
+15. Template N: networking reviewer (optional)
+16. Template V: adversarial verifier (one per High finding)
 
 ## 1. How to use these templates
 
@@ -37,14 +38,15 @@ between the `PROMPT` fences verbatim and replace every `{{PLACEHOLDER}}`:
 The security template (D) uses `SEC-0xx` (the `flutter-secure-defaults`
 checker) and `SEC-<slug>` (found by reading). The optional templates use
 `TEST-` (E), `ERR-` (F), `NAV-` (G), `FORM-` (H), `I18N-` (I), `PERF-` (J),
-`PERSIST-` (K), `DS-` (L) and `A11Y-` (M) IDs: `-0xx`
+`PERSIST-` (K), `DS-` (L), `A11Y-` (M) and `NET-` (N) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
 Spawn A, B, C and D, plus E if the `flutter-testing` skill is installed or
 tests were asked about, F if `flutter-error-handling` is installed or error
-handling was asked about, and G to M when their skill is installed (the
+handling was asked about, and G to N when their skill is installed (the
 section isn't "skipped") and the code has, respectively, a router, forms,
-user-facing strings, widgets or lists, local storage, theme code, or widgets,
+user-facing strings, widgets or lists, local storage, theme code, widgets, or
+HTTP calls,
 or the user asked about that area, **at the same time**, as read-only sub-agents, in whatever form your agent has
 (for example Claude Code's Agent/Task tool, Codex sub-agents, or another agent's equivalent). Then wait
 for all of them. Don't redo their work while they run. If your agent can't
@@ -1081,7 +1083,71 @@ PROMPT
 
 ---
 
-## 15. Template V: adversarial verifier (one per High finding)
+## 15. Template N: networking reviewer (optional)
+
+Use this when the `flutter-networking` skill is installed (the mechanical output has
+a `== NETWORKING` section that isn't "skipped") and the app calls an HTTP API or opens WebSockets, or when the user
+asked about the API layer, Dio or http setup, timeouts, pagination, retries or JSON parsing. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the NETWORKING reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-networking` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-networking/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): client-setup.md, placement-by-architecture.md, dtos-and-json.md, requests.md and testing-with-fakes.md, plus rules.md for the NET-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter networking cookbook and the Dio and http package documentation.
+
+Start from the `== NETWORKING` section of the mechanical output:
+`grep -n '^== NETWORKING' {{MECHANICAL_OUTPUT}}`. It comes from `check_networking.py` and lists
+`[NET-0xx]` groups with example locations (clients without timeouts, clients created per call, http clients never closed, retries that re-send any method, page fetches without an in-flight guard, cancel tokens never cancelled, WebSockets never closed, duplicated base URLs, top-level http calls, unencoded query values). In diff mode it covers
+only the changed files. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-networking/scripts/check_networking.py {{PROJECT_ROOT}} [--files <list>] [--profile <p>]`.
+
+What to do:
+1. Confirm every NET-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (a client that gets its timeouts from a shared factory, a fetch guarded by the caller, a WebSocket handed to an owner that closes it).
+2. Then read the files in scope for what the script can't see: JSON accepted without validation at the DTO boundary, stale responses overwriting newer ones, retries without backoff, WebSocket reconnect storms, uploads read fully into memory, requests not cancelled when the screen goes away, interceptor order (auth, then retry, then logging), and whether the client has a fake seam for tests.
+3. Place each fix where this architecture puts it (one configured client provided through DI, a remote source per resource in data/, DTO to entity mapping and failure mapping in the repository; MVN use cases, MVVM view models and blocs never see a client or a DTO; cancellation tied to the logic holder (`ref.onDispose`, `close()`, `dispose()`)), and respect the
+   project's own consistent conventions.
+4. The NET- id leads, and doesn't duplicate the rest of the suite: transport security stays SEC- (auth headers SEC-002, cleartext SEC-003, release loggers SEC-005, accept-any-certificate SEC-006, logged bodies SEC-011), clients in widgets or logic stay ARCH-005/007/101/012, repositories returning Response or DTOs stay ARCH-107, unmapped transport errors stay ERR-004, JSON decoded on the UI isolate stays PERF-011 and offline replay stays PERSIST-. NET-004 replaces ERR-retry-non-idempotent and NET-007 the undisposed-resource candidate for the same line.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <NET-0xx (the script's rule) | NET-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-networking › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is a request that hangs or duplicates a payment-like write under ordinary use. MEDIUM is a client without timeouts, a client per call, an unguarded page fetch or an unclosed WebSocket. LOW is hygiene (an unclosed local client, a duplicated base URL, an unencoded query value). Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (networking): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 16. Template V: adversarial verifier (one per High finding)
 
 Spawn one per HIGH finding (they can run in parallel), or batch several small
 ones into one verifier. Paste the finding block verbatim. If you can't spawn

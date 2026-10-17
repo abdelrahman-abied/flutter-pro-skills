@@ -1116,3 +1116,115 @@ these rows to `dart-flutter-review/references/finding-format.md`.
     - white on red at 3.68:1
   - The non-canonical apps were immich, lichess, wonderous and the drift
     examples.
+
+---
+
+# Phase 5 contracts (v1.2.0)
+
+## 27. flutter-networking
+
+**What it covers.** The API layer in each architecture:
+- clients: `http`, Dio, retrofit, chopper, generated OpenAPI clients
+- configuration: base options, timeouts, interceptors and their order
+- data: DTOs and JSON (`json_serializable`, `freezed`, validating
+  `fromJson`), and mapping DTOs to entities
+- requests: pagination (cursor or page, plus an in-flight guard),
+  cancellation (`CancelToken`, `ref.onDispose`, `close()`), retry with
+  backoff (idempotent methods only)
+- environment: connectivity as a hint, uploads, downloads and progress,
+  WebSockets
+- testing: fake HTTP clients and adapters
+
+**Where each part sits.** The remote source sits in `data/`. The repository
+maps DTOs to entities and transport errors to failures. MVN use cases, MVVM
+view models and blocs never see a client or a DTO.
+
+**Contract values.**
+
+| Item | Value |
+|---|---|
+| Owner | Agent P5: `skills/flutter-networking/**` |
+| Prefix | `NET-0xx` / `NET-<slug>` |
+| Checker | `scripts/check_networking.py` (§22 CLI and output contract) |
+| Header | `== NETWORKING` |
+| Schema | `flutter-pro-skills/networking@1` |
+| Suppression | `net-ignore` |
+
+**No duplicates.** These rules already exist, so the skill cross-references
+them and never re-detects them:
+
+| Concern | Owner |
+|---|---|
+| Auth headers outside the data layer | SEC-002 |
+| Cleartext `http://` | SEC-003 |
+| HTTP loggers in release | SEC-005 |
+| Accept-any-certificate | SEC-006 |
+| Bodies logged | SEC-011 |
+| Token storage | SEC-001 |
+| Clients or I/O in widgets and logic | ARCH-005 / 007 / 101 / 012 |
+| Repositories returning `Response` / `Map` / DTOs | ARCH-107 |
+| Transport exceptions escaping repositories | ERR-004 |
+| Unguarded I/O in UI | ERR-014 |
+| Large JSON decoded on the UI isolate | PERF-011 |
+| Cache policy and connectivity-as-truth | PERSIST-* |
+| Untrusted URL launches | NAV-005 |
+| Pinning | flutter-security-audit |
+
+**Secure by default.** The client is configured once. It has timeouts set.
+Retries happen only for idempotent requests. Server data is validated at the
+DTO boundary, never trusted.
+
+**Review integration (lead).**
+- `== NETWORKING` runs after `== PERSISTENCE`, with `--no-net` and the
+  `--skip` key `net`. It is informational.
+- Reviewer Template N is added, and the dedupe rows go in `finding-format.md`.
+
+**Calibration (§24).**
+- **Canonical apps:** compass_app, `bloc/examples/flutter_infinite_list`,
+  and `riverpod/examples/{marvel,pub,stackoverflow,first_app}`.
+- **Non-canonical apps:** hiddify (Dio), lichess (`http`) and immich
+  (generated client and `http`).
+- **Exit criterion:** zero high or medium false positives on the canonical
+  apps.
+
+## 28. Phase 5 as built: v1.2.0 (these entries win over §27)
+
+- **Release.** v1.2.0 has seventeen skills, and every skill's
+  `metadata.version` is `"1.2.0"`.
+- **Rules.** `networking@1` has NET-001…010:
+  - NET-001 client-without-timeouts
+  - NET-002 client-created-per-call
+  - NET-003 http-client-never-closed
+  - NET-004 retry-resends-any-method
+  - NET-005 page-fetch-without-guard
+  - NET-006 cancel-token-never-cancelled
+  - NET-007 websocket-never-closed
+  - NET-008 base-url-duplicated (automates `AP-hardcoded-config-in-sources`
+    for API hosts)
+  - NET-009 top-level-http-call
+  - NET-010 query-value-not-encoded
+
+  There are also 8 reading slugs. The stats keys are `packages`,
+  `dio_clients`, `http_clients`, `interceptors`, `websockets`,
+  `cancel_tokens`, `page_handlers` and `skipped_generated`. The checker also
+  skips files with an OpenAPI Generator banner.
+- **ID collision note** (like §19). `flutter-security-audit`'s `scan.sh` uses
+  upper-case `NET-ACCEPT-ALL` and `NET-CLEARTEXT`. Ours are numeric
+  (`NET-0xx`) or lower-case slugs. A `scan.sh` NET id becomes `SEC-<slug>` in
+  a report.
+- **Ownership.**
+  - The retry policy in the HTTP client is NET-004's. Offline replay belongs
+    to PERSIST, and each side only cross-references the other.
+  - NET-004 beats `ERR-retry-non-idempotent`.
+  - NET-007 beats the `undisposed-resource` candidate for the same line.
+- **Calibration.**
+  - **Canonical apps:** zero high or medium false positives. The 4 medium
+    NET-001 hits in the riverpod examples are true positives, because a
+    plain `Dio()` has no timeouts.
+  - **Non-canonical apps:** hiddify (Dio, GPL), lichess and immich. Their
+    fixtures are fresh minimal repros, with no copied lines.
+- **Scaffold.** The generated files get zero findings from all five v1.1+
+  checkers (performance, persistence, networking, design system,
+  accessibility), enforced in the scaffold tests.
+- **Benchmark.** Task T4 (a product list screen) is scored by
+  `grade.py t4`. `all.sh` takes a `TASKS` variable.

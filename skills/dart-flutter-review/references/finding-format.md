@@ -53,11 +53,12 @@ template). This format is the hand-off between passes.
 | `I18N-0xx` / `I18N-<slug>` | Localisation, RTL and formatting (`flutter-i18n`): `check_i18n.py` rules (`I18N-010` hardcoded-ui-string) or slugs (`I18N-overflow-when-translated`) |
 | `PERF-0xx` / `PERF-<slug>` | Performance (`flutter-performance`): `check_performance.py` rules (`PERF-001` eager-list-over-data) or slugs (`PERF-rebuild-whole-screen`) |
 | `PERSIST-0xx` / `PERSIST-<slug>` | Local storage, caching and migrations (`flutter-persistence`): `check_persistence.py` rules (`PERSIST-001` sql-built-from-strings) or slugs (`PERSIST-no-cache-policy`) |
+| `NET-0xx` / `NET-<slug>` | The API client layer (`flutter-networking`): `check_networking.py` rules (`NET-001` client-without-timeouts) or slugs (`NET-unvalidated-json`). Not to be confused with `flutter-security-audit`'s upper-case `NET-ACCEPT-ALL` style ids, which become `SEC-<slug>` |
 | `DS-0xx` / `DS-<slug>` | Design system and theming (`flutter-design-system`): `check_design_system.py` rules (`DS-005` theme-extension-not-registered) or slugs (`DS-no-component-layer`) |
 | `A11Y-0xx` / `A11Y-<slug>` | Accessibility (`flutter-accessibility`): `check_accessibility.py` rules (`A11Y-001` icon-button-without-label) or slugs (`A11Y-focus-order`) |
 | `LINT:<code>` | An analyzer diagnostic with no better home: `LINT:unused_field`. When a lint is the symptom of a judgment finding, fold it into that finding's evidence |
 
-Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/DS/A11Y are free-form but stable: lower-kebab-case,
+Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/NET/DS/A11Y are free-form but stable: lower-kebab-case,
 named after the problem. Reuse one slug for one problem across the whole report.
 
 **Overlaps.** An empty or default-returning `catch` can surface three ways: the
@@ -83,6 +84,9 @@ they're stable and the sibling skill documents them:
 | `check_performance.py` | `PERF-004` / `PERF-008/009` / `PERF-010` / `PERF-011` | `UI-image-decode-size` / `UI-rebuild-scope` / `UI-build-side-effect` (sort in build) / `UI-blocking-ui-isolate` |
 | `check_design_system.py` | `DS-001/002` (raw colour, raw text style) | `UI-hardcoded-style`, the `hardcoded-color` candidate |
 | `check_accessibility.py` | `A11Y-0xx` | `UI-a11y` |
+| `check_networking.py` | `NET-004` retry-resends-any-method | `ERR-retry-non-idempotent` |
+| `check_networking.py` | `NET-007` websocket-never-closed | the `undisposed-resource` candidate / `UI-lifecycle` on that channel |
+| `check_networking.py` | `NET-008` base-url-duplicated (API hosts) | `AP-hardcoded-config-in-sources` |
 
 Some overlaps go the other way, because the suite already owns them: navigation
 or `BuildContext` inside a logic class stays `ARCH-102`, `context` after

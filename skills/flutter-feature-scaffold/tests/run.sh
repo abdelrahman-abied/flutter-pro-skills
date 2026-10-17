@@ -15,6 +15,8 @@ AC="$SKILL/../flutter-architecture/scripts/arch_check.py"
 SECC="$SKILL/../flutter-secure-defaults/scripts/check_secure_defaults.py"
 ERRC="$SKILL/../flutter-error-handling/scripts/check_errors.py"
 FORMC="$SKILL/../flutter-forms/scripts/check_forms.py"
+# v1.1 checkers (CONTRACTS §21): generated code must be clean for these too
+V11C="flutter-performance:check_performance flutter-persistence:check_persistence flutter-networking:check_networking flutter-design-system:check_design_system flutter-accessibility:check_accessibility"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/scaffold-tests.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 PASS=0
@@ -166,6 +168,15 @@ for fx in ff_app lf_app; do
       else
         skip "$name: check_forms (flutter-forms skill not installed)"
       fi
+      for kv in $V11C; do
+        ck="$SKILL/../${kv%%:*}/scripts/${kv#*:}.py"
+        if [ -f "$ck" ]; then
+          v=$(findings "$ck" "$d" $ap info "$TMP/$name.files")
+          [ "${v%% *}" = "0" ]; check "$name: ${kv#*:} reports zero findings in the generated files" $? "$v"
+        else
+          skip "$name: ${kv#*:} (${kv%%:*} skill not installed)"
+        fi
+      done
       v=$(secure_reading "$d" "$TMP/$name.files")
       [ -z "$v" ]; check "$name: secure-scaffold checklist greps (S-1..S-30) all hold" $? "$v"
       snap=$(snapshot "$d")

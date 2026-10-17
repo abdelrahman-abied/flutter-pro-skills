@@ -5,6 +5,52 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [1.2.0] - 2026-10-17
+
+The suite now has seventeen skills and thirteen checkers.
+
+### Added
+
+- **flutter-networking** covers the API client layer in each architecture:
+  - **the client:** one configured Dio or `http` client provided through DI,
+    with timeouts and interceptor order
+  - **sources and repositories:** a remote source per resource, and DTO to
+    entity mapping in the repository
+  - **JSON:** validated at the DTO boundary
+  - **requests:** pagination with an in-flight guard (Bloc transformers,
+    notifier and Command guards), cancellation tied to the logic holder,
+    retry for idempotent requests only, and WebSockets
+  - **tests:** fake clients
+
+  It ships `check_networking.py` with 10 rules (`NET-001…010`), among them
+  clients without timeouts, a client per call, retries that re-send any
+  method, unguarded page fetches and unclosed WebSockets. Transport security
+  stays in `flutter-secure-defaults`.
+- **dart-flutter-review:**
+  - a `NETWORKING` section, `--no-net` / `--skip net`, and reviewer
+    Template N
+  - new dedupe rows: NET-004 beats `ERR-retry-non-idempotent`, NET-007 beats
+    the `undisposed-resource` candidate, and NET-008 beats
+    `AP-hardcoded-config-in-sources`
+- **Benchmark:** task T4, a product list screen scored by the performance,
+  design-system and accessibility checkers. `bench/all.sh` takes a `TASKS`
+  list.
+
+### Changed
+
+- **Scaffold.** `flutter-feature-scaffold` output is now tested to produce
+  zero findings from the performance, persistence, networking, design-system
+  and accessibility checkers, in every profile and layout. The output was
+  already clean; the tests now enforce it.
+- **Versions.** Every skill is versioned 1.2.0, and `install.sh` installs all
+  seventeen.
+
+### Quality
+
+- **Calibration.** `check_networking.py` was calibrated on the canonical
+  apps plus hiddify, lichess, immich, Wonderous and the drift examples. The
+  canonical apps have no high or medium false positives.
+
 ## [1.1.0] - 2026-10-17
 
 Four new skills close the remaining coverage gaps. The suite now has sixteen

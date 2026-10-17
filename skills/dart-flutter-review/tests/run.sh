@@ -271,7 +271,7 @@ PY
 # stub §14/§17 checkers (secure defaults, navigation, forms, i18n): echo args, one group each
 for pair in flutter-secure-defaults:check_secure_defaults:SECURITY\ DEFAULTS:SEC-001 flutter-navigation:check_navigation:NAVIGATION:NAV-003 \
             flutter-forms:check_forms:FORMS:FORM-001 flutter-i18n:check_i18n:I18N:I18N-010 \
-            flutter-performance:check_performance:PERFORMANCE:PERF-001 flutter-persistence:check_persistence:PERSISTENCE:PERSIST-001 \
+            flutter-performance:check_performance:PERFORMANCE:PERF-001 flutter-persistence:check_persistence:PERSISTENCE:PERSIST-001 flutter-networking:check_networking:NETWORKING:NET-001 \
             flutter-design-system:check_design_system:DESIGN\ SYSTEM:DS-001 flutter-accessibility:check_accessibility:ACCESSIBILITY:A11Y-001; do
   sk="${pair%%:*}"; rest="${pair#*:}"; nm="${rest%%:*}"; rest="${rest#*:}"; hd="${rest%%:*}"; rid="${rest#*:}"
   mkdir -p "$SUITE/$sk/scripts"
@@ -352,7 +352,7 @@ PATH="$TMP/bin:$PATH" bash "$TMP/suite_min/dart-flutter-review/scripts/review.sh
   && pass "crashing sibling: error line, run continues" || bad "crashing sibling: rc=$rc"
 
 # ---- 4a. Part B: secure-defaults / security-audit / navigation / forms / i18n sections ----
-for h in 'SECURITY DEFAULTS' 'NAVIGATION' 'FORMS' 'I18N' 'PERFORMANCE' 'PERSISTENCE' 'DESIGN SYSTEM' 'ACCESSIBILITY'; do
+for h in 'SECURITY DEFAULTS' 'NAVIGATION' 'FORMS' 'I18N' 'PERFORMANCE' 'PERSISTENCE' 'NETWORKING' 'DESIGN SYSTEM' 'ACCESSIBILITY'; do
   section "$TMP/s_plain.txt" "== $h" | grep -q '^  args: --max 5$' && pass "$h: checker runs with --max" \
     || bad "$h: $(section "$TMP/s_plain.txt" "== $h" | head -3 | tr '\n' ' ')"
 done
@@ -368,7 +368,7 @@ grep -q '^== SECURITY DEFAULTS\|^== NAVIGATION\|^== FORMS\|^== I18N\|^== SECURIT
   && ! grep -q '(skipped' "$TMP/s_min.txt" && bad "missing checkers printed sections" || true
 ok=1
 for kv in "SECURITY DEFAULTS:flutter-secure-defaults" "SECURITY AUDIT:flutter-security-audit" "NAVIGATION:flutter-navigation" "FORMS:flutter-forms" "I18N:flutter-i18n" \
-          "PERFORMANCE:flutter-performance" "PERSISTENCE:flutter-persistence" "DESIGN SYSTEM:flutter-design-system" "ACCESSIBILITY:flutter-accessibility"; do
+          "PERFORMANCE:flutter-performance" "PERSISTENCE:flutter-persistence" "NETWORKING:flutter-networking" "DESIGN SYSTEM:flutter-design-system" "ACCESSIBILITY:flutter-accessibility"; do
   grep -q "^== ${kv%%:*} (skipped: ${kv#*:} skill not installed)$" "$TMP/s_min.txt" || { ok=0; bad "missing ${kv#*:}: no skipped line"; }
 done
 [ $ok = 1 ] && pass "missing checkers: one skipped line each, exit 0"
@@ -391,8 +391,8 @@ bash "$RV" --help 2>&1 | grep -q -- '--no-i18n' && bash "$RV" --help 2>&1 | grep
   && pass "--help documents the new flags" || bad "--help lacks the new flags"
 
 # ---- 4b. v1.1 checkers: performance / persistence / design system / accessibility (CONTRACTS §25) ----
-order="$(grep -E '^== (I18N|PERFORMANCE|PERSISTENCE|DESIGN SYSTEM|ACCESSIBILITY|CANDIDATES)' "$TMP/s_plain.txt" | sed 's/^== //; s/ (.*//' | tr '\n' ',')"
-[ "$order" = "I18N,PERFORMANCE,PERSISTENCE,DESIGN SYSTEM,ACCESSIBILITY,CANDIDATES," ] \
+order="$(grep -E '^== (I18N|PERFORMANCE|PERSISTENCE|NETWORKING|DESIGN SYSTEM|ACCESSIBILITY|CANDIDATES)' "$TMP/s_plain.txt" | sed 's/^== //; s/ (.*//' | tr '\n' ',')"
+[ "$order" = "I18N,PERFORMANCE,PERSISTENCE,NETWORKING,DESIGN SYSTEM,ACCESSIBILITY,CANDIDATES," ] \
   && pass "v1.1 sections run after I18N, in contract order" || bad "v1.1 section order: $order"
 cand="$(section "$TMP/s_plain.txt" '== CANDIDATES')"
 echo "$cand" | grep -q '^  \[CANDIDATE\] eager-children-map (low) x1 — see PERFORMANCE' \
@@ -407,8 +407,8 @@ srun --no-perf --no-ds > "$TMP/s_noperf.txt" 2>&1
   && section "$TMP/s_noperf.txt" '== CANDIDATES' | grep -q 'cart_view.dart:49  color: Color(0xFF00897B)' \
   && section "$TMP/s_noperf.txt" '== CANDIDATES' | grep -q 'cart_view.dart:60' \
   && pass "--no-perf / --no-ds: sections skipped, heuristics keep their locations" || bad "--no-perf/--no-ds: $(grep '^== ' "$TMP/s_noperf.txt" | tr '\n' ' ')"
-srun --skip persist,a11y > "$TMP/s_skip2.txt" 2>&1
-! grep -q '^== PERSISTENCE\|^== ACCESSIBILITY' "$TMP/s_skip2.txt" && grep -q '^== PERFORMANCE' "$TMP/s_skip2.txt" \
+srun --skip persist,a11y,net > "$TMP/s_skip2.txt" 2>&1
+! grep -q '^== PERSISTENCE\|^== ACCESSIBILITY\|^== NETWORKING' "$TMP/s_skip2.txt" && grep -q '^== PERFORMANCE' "$TMP/s_skip2.txt" \
   && pass "--skip persist,a11y" || bad "--skip persist,a11y: $(grep '^== ' "$TMP/s_skip2.txt" | tr '\n' ' ')"
 section "$TMP/s_prof.txt" '== ACCESSIBILITY' | grep -q '^  args: --max 5 --profile mvn$' \
   && pass "v1.1 checkers get --profile" || bad "v1.1 --profile: $(section "$TMP/s_prof.txt" '== ACCESSIBILITY' | head -3 | tr '\n' ' ')"

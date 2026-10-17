@@ -1,0 +1,5 @@
+name: net_suppressed
+environment:
+  sdk: ^3.5.0
+dependencies:
+  dio: ^5.7.0

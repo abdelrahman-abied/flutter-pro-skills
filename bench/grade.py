@@ -5,6 +5,7 @@ Usage:
   grade.py t1 <run-dir | output-file>          score a review run against ground_truth.json["t1"]
   grade.py t2 <run-dir | output-file>          score an architecture-judgement run against ["t2"]
   grade.py t3 <run-dir>                        run the suite's checkers + dart analyze on <run-dir>/proj
+  grade.py t4 <run-dir>                        same as t3, scored on the product-list task (PERF/DS/A11Y lead)
   grade.py summary <runs-root>                 grade every run under <runs-root> and print the table
   add --json for machine output, --verbose to print every parsed claim and how it was classified.
 
@@ -422,12 +423,12 @@ def _checker(script, proj):
     return json.loads(out[start:]) if start >= 0 else {}
 
 
-def grade_t3(run_dir):
+def grade_t3(run_dir, task="t3"):
     proj = os.path.join(run_dir, "proj")
     work = tempfile.mkdtemp(prefix="t3grade-")
     dst = os.path.join(work, "proj")
     shutil.copytree(proj, dst, symlinks=True, ignore=shutil.ignore_patterns(".agents", ".git"))
-    res = {"task": "t3", "run": run_dir}
+    res = {"task": task, "run": run_dir}
     arch = _checker("flutter-architecture/scripts/arch_check.py", dst)
     res["arch_violations"] = len(arch.get("violations", []))
     res["arch_ids"] = sorted({v["id"] for v in arch.get("violations", [])})
@@ -445,6 +446,16 @@ def grade_t3(run_dir):
         fl = [f for f in j.get("findings", []) if f.get("severity") not in ("info",)]
         res[name + "_findings"] = len(fl)
         res[name + "_ids"] = sorted({f["id"] for f in fl})
+    # v1.1 checkers: low and above count (info is advice, not a defect)
+    for name, script in (("perf", "flutter-performance/scripts/check_performance.py"),
+                         ("persist", "flutter-persistence/scripts/check_persistence.py"),
+                         ("ds", "flutter-design-system/scripts/check_design_system.py"),
+                         ("a11y", "flutter-accessibility/scripts/check_accessibility.py")):
+        j = _checker(script, dst) if os.path.isfile(os.path.join(SUITE_SKILLS, script)) else {}
+        fl = [f for f in j.get("findings", []) if f.get("severity") != "info"]
+        res[name + "_findings"] = len(fl)
+        res[name + "_high_medium"] = len([f for f in fl if f.get("severity") in ("high", "medium")])
+        res[name + "_ids"] = sorted({f["id"] for f in fl})
     # functional sanity
     src = ""
     for root, _, fs in os.walk(os.path.join(dst, "lib")):
@@ -458,6 +469,7 @@ def grade_t3(run_dir):
         res["token_store"] = "shared_preferences"
     else:
         res["token_store"] = "other/none"
+    res["lazy_list"] = bool(re.search(r"\b(?:ListView|GridView|SliverList|SliverGrid)\.builder\b|SliverChildBuilderDelegate", src))
     res["login_files"] = len([1 for root, _, fs in os.walk(os.path.join(dst, "lib")) for f in fs
                               if re.search(r"(auth|login|session)", os.path.join(root, f)) and f.endswith(".dart") and not f.endswith(".g.dart")])
     # dart analyze: resolve offline with the developer's pub cache, run codegen if needed
@@ -499,7 +511,7 @@ def summary(root, as_json=False):
         if os.path.exists(cache):
             r = json.load(open(cache))
         else:
-            r = grade_t3(d) if task == "t3" else grade_review(task, d)
+            r = grade_t3(d, task) if task in ("t3", "t4") else grade_review(task, d)
             json.dump(r, open(cache, "w"), indent=1)
         r["name"] = name
         r["meta"] = meta
@@ -516,6 +528,11 @@ def summary(root, as_json=False):
         elif r["task"] == "t2":
             print("%-22s recall %d/%d  contradicting %d %s  other %d  | %s" % (
                 r["name"], len(r["credited"]), r["issues_total"], r["contradicting"], r["decoys_flagged"], r["other_claims"], tail))
+        elif r["task"] == "t4":
+            print("%-22s PERF %s  DS %s  A11Y %s  (h+m %s/%s/%s)  SEC %s  ARCH %s  ERR h+m %s  lazy=%s  analyze E/W %s/%s | %s" % (
+                r["name"], r.get("perf_findings"), r.get("ds_findings"), r.get("a11y_findings"), r.get("perf_high_medium"),
+                r.get("ds_high_medium"), r.get("a11y_high_medium"), r["sec_findings"], r["arch_violations"], r["err_high_medium"],
+                r.get("lazy_list"), r.get("analyze_errors"), r.get("analyze_warnings"), tail))
         else:
             print("%-22s SEC %s (high %s)  ARCH %s  ERR h+m %s  FORM %s  I18N %s  analyze E/W %s/%s  post_login=%s store=%s | %s" % (
                 r["name"], r["sec_findings"], r["sec_high"], r["arch_violations"], r["err_high_medium"], r["forms_findings"], r["i18n_findings"],
@@ -535,8 +552,8 @@ def main(argv):
         return 0
     if task in ("t1", "t2"):
         r = grade_review(task, path, verbose)
-    elif task == "t3":
-        r = grade_t3(path)
+    elif task in ("t3", "t4"):
+        r = grade_t3(path, task)
     else:
         print(__doc__)
         return 2

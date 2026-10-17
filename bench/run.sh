@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One benchmark run: a fresh copy of the fixture, a fresh HOME, one OpenCode invocation.
 #
-#   run.sh <t1|t2|t3> <baseline|skills> <run-index> [model]
+#   run.sh <t1|t2|t3|t4> <baseline|skills> <run-index> [model]
 #
 # env: SUITE_DIR   folder holding install.sh + skills/ (default: this repository; or point it at a
 #                  checkout of flutter-pro-skills to bench the live repo)
@@ -23,7 +23,7 @@
 # analyzer works without network until the agent changes dependencies.
 set -euo pipefail
 BENCH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TASK="${1:?task t1|t2|t3}"; CONF="${2:?baseline|skills}"; IDX="${3:?run index}"
+TASK="${1:?task t1|t2|t3|t4}"; CONF="${2:?baseline|skills}"; IDX="${3:?run index}"
 MODEL="${4:-opencode/big-pickle}"
 SUITE_DIR="${SUITE_DIR:-$(cd "$BENCH/.." && pwd)}"
 RUNS_DIR="${RUNS_DIR:-$BENCH/runs}"
@@ -36,6 +36,8 @@ case "$TASK" in
       PROMPT="Is this architecture correct? List violations." ;;
   t3) FIX="$BENCH/fixtures/t3_mvn_clean"
       PROMPT="Add a login feature that calls POST /login and stores the returned token, following this project's architecture." ;;
+  t4) FIX="$BENCH/fixtures/t3_mvn_clean"
+      PROMPT="Add a products screen that loads GET /products (each product has an id, name, price and imageUrl) and shows them in a scrollable list with each product's image, name, price and a favourite icon button, with pull-to-refresh, following this project's architecture." ;;
   *) echo "unknown task $TASK" >&2; exit 2 ;;
 esac
 case "$CONF" in

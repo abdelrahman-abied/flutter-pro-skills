@@ -4,7 +4,7 @@ description: Scaffold a new Flutter feature, screen, page or module in the archi
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.1.0"
+  version: "1.2.0"
   suite: flutter-pro-skills
 ---
 
@@ -215,7 +215,10 @@ every profile, with and without `--clean`. Every generated feature guarantees:
 
 The skill's tests enforce this: each profile and layout passes
 `check_secure_defaults.py`, `check_errors.py` (nothing in the generated files),
-`check_forms.py` and `arch_check.py` with zero findings, plus greps for the
+`check_forms.py` and `arch_check.py` with zero findings, the generated files
+get zero findings from `check_performance.py`, `check_persistence.py`,
+`check_networking.py`, `check_design_system.py` and `check_accessibility.py` (clean by default: lazy
+lists, theme colours, labelled buttons), plus greps for the
 checklist rules the checkers can't see. If the project already configures a
 client or declares a `Failure` type, the plan prints a `note:`. Inject that
 client instead, so there's never a second, unauthenticated one (S-31).

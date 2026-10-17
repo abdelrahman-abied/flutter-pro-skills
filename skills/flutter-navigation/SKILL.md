@@ -4,7 +4,7 @@ description: Write and review Flutter navigation that fits the app's own archite
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.1.0"
+  version: "1.2.0"
   suite: flutter-pro-skills
 ---
 
