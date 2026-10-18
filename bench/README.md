@@ -24,9 +24,69 @@ limitations before quoting the numbers.
 | **T1 review**: "Review this Flutter app and list every real problem with file:line and severity." | MVN/Riverpod shop app | 12 planted issues (architecture, errors, security, navigation, forms, i18n, UI), plus 3 MVN decoys that look wrong but are correct |
 | **T2 architecture**: "Is this architecture correct? List violations." | bloclibrary-style weather app | 2 planted violations, plus 6 decoys that follow bloclibrary conventions |
 | **T3 write**: "Add a login feature that calls POST /login and stores the returned token, following this project's architecture." | MVN app | Scored by the suite's checkers on the result (security, architecture, error handling) and by `dart analyze` |
+| **T5 write** (added 2026-10-18): "Add a product gallery feature: load products page by page from GET /products?page=N … with infinite scroll … on tablets and desktop show a list-detail layout … look right in dark mode and work with a screen reader. Follow this project's architecture." | the T3 MVN app | Every checker; only findings the agent added count (`new_*`) |
 | **T4 write** (added 2026-10-18): "Add a products screen that loads GET /products … in a scrollable list with each product's image, name, price and a favourite icon button, with pull-to-refresh, following this project's architecture." | the T3 MVN app | Scored like T3, plus the performance, design-system and accessibility checkers, minus the fixture's own findings |
 
 ## Results
+
+### Re-run on 2026-10-18, second pass (suite v1.6.1: T1, T2 and the new T5)
+
+Same agent, model and isolation, N=2 per cell, with the machine kept awake
+(`caffeinate`), so these times are real.
+
+**T1, review (12 planted issues, 3 MVN decoys)**
+
+| | Recall | Extra claims | MVN decoys flagged | Time |
+|---|---|---|---|---|
+| Baseline r1 / r2 | 10/12, 12/12 | 6, 9 | 0, 0 | 10 min, 15 min |
+| Skills r1 / r2 | **12/12, 12/12** | 18, 19 | 1*, 0 | 45 min, 30 min |
+
+\* This "decoy" is a real race-condition finding on the same line (a stale
+search response can overwrite a newer one). It doesn't object to `ref.watch`,
+which is the decoy. The grader matches by line and keyword, so it can't tell
+the difference.
+
+**The trade-off.** The skills found everything both times, but they made
+about twice the extra claims and took about three times as long. The review
+orchestrator runs one reviewer pass per specialist, and this model runs them
+one after another.
+
+**T2, Bloc architecture (2 planted violations, 6 bloclibrary decoys)**
+
+| | Recall | Claims contradicting bloclibrary |
+|---|---|---|
+| Baseline r1 / r2 | 2/2, 2/2 | 2, 1 |
+| Skills r1 / r2 | 2/2, 2/2 | **0, 0** |
+
+**T5, a paginated gallery with list-detail on tablets, dark mode and screen
+readers** (new findings only, compared with the pristine fixture)
+
+| | New findings | Paginates / list-detail | Time |
+|---|---|---|---|
+| Baseline r1 | ARCH-007 (medium), PERF-004 (low) | yes / yes | 29 min |
+| Baseline r2 | PERF-004 (low) | yes / yes | 16 min |
+| Skills r1 | — | **wrote no code** | 11 min |
+| Skills r2 | — | **stalled** (the provider stopped answering) | killed after 57 min |
+
+**T5 with the skills is inconclusive, but it found a real problem.** Run 1
+read the skills, wrote a correct plan (pagination, two panes at ≥600 dp,
+tests) and then stopped at "Proceed?". `flutter-feature-scaffold` told the
+agent to "confirm the plan with the user before writing" unconditionally. In a
+non-interactive run that means no code. **Fixed:** the skill now decides,
+states its choices in one line, and writes (`--write` never overwrites). It
+asks only when the architecture is genuinely ambiguous. A re-run of T5 with
+the fix could not happen: the free provider stopped answering at all,
+including a "reply with ok" probe. That leaves T5's skills cell to run again.
+
+**Grader fixes in this pass:**
+- T3–T5 report `new_*` counts: findings the agent added, not those already in
+  the fixture.
+- Summary lines such as "**Detected: Bloc** … no use cases — correct
+  rulebook" are no longer read as claims, so they don't count as flagging a
+  decoy.
+- `confidence: high` is no longer read as a severity.
+
+Raw grades: `results-2026-10-18b-opencode-big-pickle.json`.
 
 ### Re-run on 2026-10-18 (suite v1.4–v1.5, T3 and the new T4)
 
@@ -129,7 +189,7 @@ by the regression fixture `calib_bloc_weather`. This table is from the run
 
 ```bash
 cd bench
-./run.sh t1 skills 1                       # one isolated run; also: t2|t3|t4, baseline|skills
+./run.sh t1 skills 1                       # one isolated run; also: t2|t3|t4|t5, baseline|skills
 N=2 PAR=4 MODEL=opencode/big-pickle ./all.sh   # the full matrix (TASKS="t3 t4" for a subset)
 python3 grade.py summary runs/             # grade everything (add --json)
 AGENT_CMD='claude -p' ./run.sh t3 skills 1     # try another agent CLI

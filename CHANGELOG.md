@@ -5,6 +5,30 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [Unreleased]
+
+### Fixed
+
+- **The scaffold no longer stops to ask before writing.**
+  `flutter-feature-scaffold` told agents to "confirm the plan with the user
+  before writing" every time. In the benchmark, an agent wrote a correct plan
+  and then waited at "Proceed?", producing no code. The skill now decides,
+  states its choices and writes (it never overwrites). It asks only when the
+  architecture is genuinely ambiguous, and in non-interactive runs it takes
+  the neighbouring features' pattern and lists its assumptions.
+- **Benchmark grader.** Summary lines ("Detected: Bloc … correct rulebook")
+  and `confidence: high` are no longer counted as claims or severities.
+
+### Changed
+
+- **Benchmark.**
+  - New task T5: a paginated, adaptive, accessible gallery.
+  - New `new_*` counts: only the findings the agent added count.
+  - A second re-run on v1.6.1. T1: the skills reach 12/12 recall in both
+    runs, with more extra claims and about 3× the time. T2: the skills make
+    0 claims contradicting bloclibrary, versus 1–2 without. T5 with the
+    skills is inconclusive (see `bench/README.md`).
+
 ## [1.6.1] - 2026-10-18
 
 ### Fixed

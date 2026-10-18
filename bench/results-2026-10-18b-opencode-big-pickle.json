@@ -1,0 +1,732 @@
+[
+ {
+  "task": "t1",
+  "run": "runs/t1-baseline-r1",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "A2",
+   "E1",
+   "E2",
+   "I1",
+   "S1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [
+   "F1",
+   "N1"
+  ],
+  "recall": 0.833,
+  "decoys_total": 3,
+  "decoys_flagged": [],
+  "claim_blocks": 23,
+  "text_chars": 9633,
+  "false_claims": 6,
+  "neutral": [
+   "generated-code",
+   "image-network",
+   "token-not-attached-or-logout",
+   "weak-email-validation"
+  ],
+  "false_claim_examples": [
+   "5. **Entire screens unreachable: `/orders` and `/profile` are dead routes** \u2014 `lib/core/router/app_router.dart:49-54`\n   The only navigation in the app is login\u2192products, products\u2192detail, products\u2192cart (`product_list_view.dart:28,54`, `login_view.dart:40`). Nothing ever links to `/orders` or `/profi",
+   "17. **Cart feature gaps threaded through the domain layer** \u2014 `lib/features/cart/domain/repositories/cart_repository.dart:4-7`, `cart_repository_impl.dart:16-21`\n    Only `addItem` exists (no remove/quantity/checkout), and the `title` parameter is required through usecase\u2192repository\u2192then silently **",
+   "18. **Wrong AppBar title + missing price on detail screen** \u2014 `lib/features/product/presentation/view/product_detail_view.dart:20,31-46`\n    Reuses `l10n.productsTitle` (\"Products\") instead of the product name, and never displays `priceCents` (fetched and parsed, then dropped).\n",
+   "21. **`EditNameField` accepts empty names and ignores updates** \u2014 `lib/features/profile/presentation/widget/edit_name_field.dart:20-21,42`\n    No empty-input validation before save, and `initialName` is read once \u2014 a rebuilt parent with a refreshed profile name won't update the field (no `didUpdateW",
+   "22. **`AppException.fromDio` over-collapses error types** \u2014 `lib/core/error/app_exception.dart:8-17`\n    Request cancellation (`DioExceptionType.cancel`) becomes `ServerException`, and all 4xx (400/404/422 validation errors) are indistinguishable from 5xx \u2014 every login failure shows the same generic",
+   "24. **No `theme:` configured** \u2014 `lib/main.dart:30-40`\n    `MaterialApp.router` runs with default theme; no dark-mode or design-system support.\n\n---\n"
+  ],
+  "decoy_examples": {},
+  "name": "t1-baseline-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 620,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 20,
+   "tools": {
+    "bash": 11,
+    "read": 62,
+    "grep": 1
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t1",
+  "run": "runs/t1-baseline-r2",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "A2",
+   "E1",
+   "E2",
+   "F1",
+   "I1",
+   "N1",
+   "S1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 3,
+  "decoys_flagged": [],
+  "claim_blocks": 30,
+  "text_chars": 7727,
+  "false_claims": 9,
+  "neutral": [
+   "config-base-url",
+   "error-state-has-no-message",
+   "image-network",
+   "only-AppException-caught",
+   "token-not-attached-or-logout",
+   "weak-email-validation"
+  ],
+  "false_claim_examples": [
+   "| 10 | `lib/core/router/app_router.dart:49-54` | Routes `/orders` and `/profile` are declared but **never navigated to** (only `push('/cart')` at `product_list_view.dart:28`) \u2192 two whole features are unreachable; no nav bar/drawer exists. |\n",
+   "| 16 | `lib/features/profile/presentation/state` / `profile_notifier.dart:33-35` | Failed save replaces `ProfileSuccess` with `ProfileError` (drops loaded data) and gives the user no success/failure feedback. |",
+   "| 23 | `lib/features/cart/data/repositories/cart_repository_impl.dart:17-21` | `title` argument is accepted through the whole stack then **dropped** \u2014 `CartItemRequest` (`cart_item_request.dart:7-8`) only sends `product_id`/`quantity`. |",
+   "| 25 | `lib/main.dart:30-40` | No `theme`/`themeMode` \u2192 system dark mode ignored, no branding. |",
+   "| 27 | `lib/features/product/presentation/widget/product_tile.dart:14-16` | Currency inferred from **UI locale** (`NumberFormat.simpleCurrency(locale:)`) rather than an API currency code; `priceCents / 100` does money math in `double`. |",
+   "| 28 | `lib/features/order/presentation/view/order_history_view.dart:33` | `totalCents` is parsed and mapped through 4 layers but never displayed \u2014 order rows show only id + date. |",
+   "| 29 | `lib/features/profile/presentation/widget/edit_name_field.dart:42` | No empty/length validation \u2192 saves `''`; `initialName` never re-applied on widget update. |",
+   "| 30 | `lib/core/error/app_exception.dart:16` | Cancellation and bad-certificate errors are all collapsed into `ServerException` \u2192 misleading error UX. |",
+   "| 31 | `lib/features/product/presentation/view/product_list_view.dart:38-49` | `RefreshIndicator` wraps a non-scrollable `Center` in loading/error states \u2192 pull-to-refresh unavailable exactly when the list is broken. |"
+  ],
+  "decoy_examples": {},
+  "name": "t1-baseline-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 928,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 32,
+   "tools": {
+    "bash": 34,
+    "glob": 1,
+    "read": 39
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t1",
+  "run": "runs/t1-skills-r1",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "A2",
+   "E1",
+   "E2",
+   "F1",
+   "I1",
+   "N1",
+   "S1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 3,
+  "decoys_flagged": [
+   "D2"
+  ],
+  "claim_blocks": 63,
+  "text_chars": 19364,
+  "false_claims": 18,
+  "neutral": [
+   "a11y",
+   "error-state-has-no-message",
+   "generated-code",
+   "image-network",
+   "null-assertion-response-data",
+   "only-AppException-caught",
+   "token-not-attached-or-logout"
+  ],
+  "false_claim_examples": [
+   "| 11 | Medium | Error states carry no typed failure \u2014 401, offline and server error all show one generic snackbar | auth_state.dart:25 + 4 more state files |",
+   "| 16 | Medium | Failed name save wipes the loaded profile and the typed text | profile_notifier.dart:33, profile_view.dart:22 |",
+   "| 17 | Medium | Double-submit accepted in login and updateName | auth_notifier.dart:14, profile_notifier.dart:28 |",
+   "| 18 | Medium | Name field has no validator (saves empty string) | edit_name_field.dart:35 |",
+   "| 19 | Medium | Stale search response can overwrite the newer list | product_list_notifier.dart:14 |",
+   "| 21 | Medium | Auth guard drops the requested destination; deep links lost after sign-in | app_router.dart:29-30, login_view.dart:40 |",
+   "| 23 | Medium | No design system: bare `MaterialApp`, no theme, dark mode or tokens | main.dart:30 + all screens |",
+   "| 25 | Medium | Price currency follows UI language (EGP on Arabic devices) | product_tile.dart:14 |",
+   "| 26 | Medium | `addItem`'s required `title` is silently dropped across 3 layers | cart_repository.dart:4, cart_repository_impl.dart:16, cart_usecase.dart:14 |",
+   "| 27 | Medium | `CartReady` vs the project-wide `\u2026Success` state vocabulary | cart_state.dart:10 |",
+   "### 17. Double-submit accepted (Medium)\n`profile_notifier.dart:28` has no busy guard and the Save button (`edit_name_field.dart:41`) is never disabled \u2014 two taps fire two PATCHes, last write wins. `auth_notifier.dart:14` is only guarded at the widget (`login_view.dart:73`). Fix: `if (state is Profil",
+   "| Low | UI-did-update-widget | `EditNameField` never applies an updated `initialName` (no `didUpdateWidget`) \u2014 field and state disagree after a save | edit_name_field.dart:20 |",
+   "| Low | FORM-focus-order | Login fields have no `textInputAction`/`onFieldSubmitted` chain | login_view.dart:55,64 |",
+   "| Low | NAME-role-vocabulary | `Login` use case is a noun; the other six are verb phrases (`FetchOrders`, \u2026) | login_usecase.dart:9 |",
+   "| Low | I18N-accept-language-missing | No `Accept-Language` header; server-rendered titles can't be localised | api_client.dart:12 |",
+   "| Low | PERF-004 | List image decoded at full source resolution (`cacheWidth` missing) | product_tile.dart:18 |",
+   "| Low | NET-no-cancellation | In-flight requests outlive autoDispose notifiers (no `CancelToken`/`ref.onDispose`) | product_list_notifier.dart:19, product_detail_notifier.dart:17 |",
+   "| Low | NET-001 | No `sendTimeout` on the shared client (POST/PATCH bodies) | api_client.dart:14 |"
+  ],
+  "decoy_examples": {
+   "D2": "### 19. Stale search response can overwrite the newer list (Medium)\n`product_list_notifier.dart:14` \u2014 query change triggers `load`, with no request identity or cancellation; two quick searches can end with the older query's results displayed. Fix: drop the response when `requested != ref.read(produc"
+  },
+  "name": "t1-skills-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 2675,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 18,
+   "tools": {
+    "skill": 1,
+    "bash": 11,
+    "read": 14,
+    "task": 9
+   },
+   "skills_loaded": [
+    "dart-flutter-review"
+   ],
+   "checker_runs": 2
+  }
+ },
+ {
+  "task": "t1",
+  "run": "runs/t1-skills-r2",
+  "issues_total": 12,
+  "credited": [
+   "A1",
+   "A2",
+   "E1",
+   "E2",
+   "F1",
+   "I1",
+   "N1",
+   "S1",
+   "S2",
+   "S3",
+   "U1",
+   "U2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 3,
+  "decoys_flagged": [],
+  "claim_blocks": 45,
+  "text_chars": 26297,
+  "false_claims": 19,
+  "neutral": [
+   "a11y",
+   "image-network",
+   "null-assertion-response-data",
+   "only-AppException-caught",
+   "token-not-attached-or-logout"
+  ],
+  "false_claim_examples": [
+   "| 42\u201346 | Info | 5 |\n\nThree findings were **disproved** in verification and dropped: an \"unlabelled icon button\" and \"fixed-height text\" (both cited files/locations that don't exist \u2014 the real `IconButton` at product_list_view.dart:25 has `tooltip: l10n.cartTitle`), and two image findings pointing a",
+   "### 11. A 401 is mapped but never acted on \u2014 every screen retries forever (Medium)\n- id: ERR-session-expiry-unhandled \u00b7 where: `lib/core/error/app_exception.dart:14-15`, `lib/core/router/app_router.dart:26-32`, `lib/features/auth/presentation/notifier/auth_notifier.dart:22`\n- evidence: `badResponse ",
+   "### 16. \"Add to cart\" double-taps send two POSTs (Medium)\n- id: NET-write-double-submit \u00b7 where: `lib/features/product/presentation/view/product_detail_view.dart:39-45`, `lib/features/cart/presentation/notifier/cart_notifier.dart:13-21`\n- evidence: `FilledButton(onPressed: () => ref.read(cartProvide",
+   "### 18. The login gate drops the deep-link target (Medium)\n- id: NAV-deep-link-target-lost \u00b7 where: `lib/core/router/app_router.dart:30`, `lib/features/auth/presentation/view/login_view.dart:40`\n- evidence: redirect returns bare `'/login'` with no `?from=`, and the view independently hard-codes `con",
+   "### 19. `/orders` and `/profile` have no entry point anywhere in the UI (Medium)\n- id: NAV-unreachable-routes \u00b7 where: `lib/core/router/app_router.dart:49`, `:53`; only navigation calls are product_list_view.dart:28, :54 and login_view.dart:40\n- evidence: no drawer, bottom bar or menu exists in `lib",
+   "### 22. Price currency changes with the UI language (ar \u2192 EGP, en \u2192 USD) (Medium)\n- id: I18N-currency-default \u00b7 where: `lib/features/product/presentation/widget/product_tile.dart:14-16`\n- evidence: `NumberFormat.simpleCurrency(locale: Localizations.localeOf(context).toString())` \u2014 locale passed, no ",
+   "| 25 | ERR-error-state-no-failure | `order_history_state.dart:20`, `product_list_state.dart:20`, `product_detail_state.dart:20`, `profile_state.dart:20`, `cart_state.dart:16` | Every `XError` carries no failure; views render a bare Retry with no text although `genericError` exists in the catalog |",
+   "| 26 | ERR-mapping-loses-cause | `app_exception.dart:7-18` + 5 source catch sites | `fromDio` returns `const` exceptions with no cause; the original stack is replaced and 400/403/404/429 all collapse into `ServerException` |",
+   "| 28 | NET-no-cancellation | `product_list_notifier.dart:19`, `product_detail_notifier.dart:17`, `profile_notifier.dart:18`, `order_history_notifier.dart:16` | No `CancelToken` anywhere; leaving a screen or changing the query leaves the request running and applies its result late |",
+   "| 29 | ARCH-014 | `product_detail_view.dart:5`, `:40` | Product feature imports cart's *presentation* notifier (cross-feature internal import; cart's domain should be the seam) |",
+   "| 31 | FORM-missing-validation | `edit_name_field.dart:35-44` | Plain `TextField`, no validator \u2014 empty/whitespace-only names can be saved |",
+   "| 32 | FORM-double-submit | `edit_name_field.dart:41-44` | Save button always enabled with no busy guard \u2014 rapid taps fire multiple saves |",
+   "| 33 | UI-did-update-widget | `edit_name_field.dart:20-21` | No `didUpdateWidget`: a changed `initialName` never reaches the mounted field |",
+   "| 37 | PERF-004 | `product_tile.dart:18` (built from `product_list_view.dart:52`) | List thumbnails decode at full source resolution \u2014 add `cacheWidth: (48 * dpr).round()` |",
+   "| 38 | PERF-rebuild-scope | `login_view.dart:46` | `ref.watch(authProvider)` at the page root rebuilds the whole form for one loading flag \u2014 use `.select((s) => s is AuthLoading)` |",
+   "| 40 | DS-no-dark-theme | `main.dart:30` | No `theme`/`darkTheme`/`themeMode`: system dark-mode users get a permanently light app (no tokens/components exist yet either) |",
+   "| 43 | ERR-012-adjacent | `main.dart:12-20` | Both global handlers exist but only write to `dart:developer` \u2014 invisible in release; wire them to a crash reporter |",
+   "| 46 | TEST-untested-widget | `edit_name_field.dart`, `main.dart`, `product_search_bar.dart`, `product_tile.dart` | Covered for free once the view tests exist |\n\n---\n",
+   "- **Worth adopting** (28 hits, informational \u2014 the project has *not* opted in): `inference_failure_on_function_invocation` \u00d716 (`ref.watch(authProvider)` \u2192 `ref.watch<AuthState>(\u2026)` or `.select`), `avoid_dynamic_calls` \u00d712 (`login_response.dart:13-15` reads JSON as `dynamic`)."
+  ],
+  "decoy_examples": {},
+  "name": "t1-skills-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 1786,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 21,
+   "tools": {
+    "skill": 1,
+    "read": 23,
+    "bash": 11,
+    "task": 13
+   },
+   "skills_loaded": [
+    "dart-flutter-review",
+    "dart-naming",
+    "flutter-accessibility",
+    "flutter-architecture",
+    "flutter-error-handling",
+    "flutter-forms",
+    "flutter-i18n",
+    "flutter-navigation",
+    "flutter-networking",
+    "flutter-performance",
+    "flutter-secure-defaults",
+    "flutter-security-audit",
+    "flutter-testing",
+    "flutter-ui-practices"
+   ],
+   "checker_runs": 8
+  }
+ },
+ {
+  "task": "t2",
+  "run": "runs/t2-baseline-r1",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [
+   "TD1",
+   "TD4"
+  ],
+  "claim_blocks": 11,
+  "text_chars": 2414,
+  "contradicting": 2,
+  "other_claims": 7,
+  "other_examples": [
+   "2. **Geocoding never enters the repository**: `weather_repository.dart:10` only exposes `getWeather`; `locationSearch` is used raw from the data client. Result: two independent `OpenMeteoApiClient` instances (app's + search page's) for one API.",
+   "3. **Leaky abstraction upward**: `weather_bloc.dart:28,42` catches bare `Exception` \u2014 data-layer failures (`LocationNotFoundFailure`, etc.) are never translated at the repository boundary, so the bloc swallows implementation details.",
+   "4. **Business logic in the view**: `weather_populated.dart:24-27` does the \u00b0C\u2192\u00b0F conversion (domain rule living in a widget); `theme_cubit.dart:30-45` maps weather\u2192color (view concern in business logic).\n",
+   "7. **Bloc passed as a route argument**: `weather_page.dart:42` \u2192 `SettingsPage.route(context.read<WeatherBloc>())` (`settings_page.dart:9-16`) hides the dependency in a static factory instead of providing it in the tree.\n",
+   "8. **`WeatherRepository.dispose()` (`weather_repository.dart:23`) is never called** \u2014 `main.dart:8` creates it with no teardown path; `http.Client` leaks.",
+   "9. **Silent failure**: `weather_bloc.dart:42-44` refresh errors do `emit(state)` (a no-op), and `weather_page.dart:60-62` awaits `stream.firstWhere(status != loading)` \u2014 on a failed refresh that never fires, so `RefreshIndicator` spins forever.",
+   "10. **`WeatherState.copyWith` (`weather_state.dart:26`)** uses `weather ?? this.weather`, so `weather` can never be cleared after first success (stale data shown alongside `failure`)."
+  ],
+  "decoy_examples": {
+   "TD4": "6. **Cross-feature coupling**: `settings/view/settings_page.dart:4` imports the weather bloc; temperature-units preference (a global setting) is stored inside `WeatherBloc` (`weather_state.dart:5,15`) instead of a settings/app-level cubit.",
+   "TD1": "11. No tests, no repository interface \u2014 blocs depend on the concrete `WeatherRepository`, so unit tests require mocking a concrete class."
+  },
+  "name": "t2-baseline-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 271,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 9,
+   "tools": {
+    "bash": 4,
+    "glob": 1,
+    "read": 19
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t2",
+  "run": "runs/t2-baseline-r2",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [
+   "TD4"
+  ],
+  "claim_blocks": 7,
+  "text_chars": 3095,
+  "contradicting": 1,
+  "other_claims": 4,
+  "other_examples": [
+   "3. **Data-layer exceptions leak through the repository into the bloc.** `lib/data/open_meteo_api_client.dart:8-14` defines `LocationRequestFailure`/`WeatherRequestFailure`/etc.; the repository (`weather_repository.dart`) never translates them, and the bloc catches bare `on Exception` (`weather_bloc.",
+   "4. **Broken refresh contract \u2192 hung indicator.** `lib/weather/bloc/weather_bloc.dart:42-44` emits `state` unchanged on refresh failure; bloc suppresses duplicate states, so `bloc.stream.firstWhere(...)` in `lib/weather/view/weather_page.dart:60` never completes and the `RefreshIndicator` spins forev",
+   "6. **Unenforced state invariant.** `lib/weather/view/weather_page.dart:55` force-unwraps `state.weather!`; `WeatherState.weather` is nullable regardless of `status == success`, so the success case isn't type-guaranteed. A single `WeatherState` sub-type per status would encode it.\n",
+   "7. **Dead lifecycle API / unmanaged client.** `WeatherRepository.dispose()` (`weather_repository.dart:23`) and the app-lifetime `OpenMeteoApiClient` created in `main.dart:8` are never closed (search closes only its own private client).\n"
+  ],
+  "decoy_examples": {
+   "TD4": "2. **Cross-feature coupling via a concrete bloc instance.** `lib/settings/view/settings_page.dart:9` takes a `WeatherBloc` argument, supplied by `lib/weather/view/weather_page.dart:42`. The weather feature constructs the settings route and the settings feature depends on weather's bloc type; setting"
+  },
+  "name": "t2-baseline-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 187,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 11,
+   "tools": {
+    "bash": 8,
+    "glob": 1,
+    "read": 19
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t2",
+  "run": "runs/t2-skills-r1",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [],
+  "claim_blocks": 6,
+  "text_chars": 4010,
+  "contradicting": 0,
+  "other_claims": 2,
+  "other_examples": [
+   "### [HIGH] Failed refresh never completes the `RefreshIndicator` future\n- id: AP-exceptions-across-layers (graded up: user-visible hang)\n- where: lib/weather/view/weather_page.dart:59-63 + lib/weather/bloc/weather_bloc.dart:43\n- evidence: `onRefresh` returns `bloc.stream.firstWhere((s) => s.status !",
+   "### [LOW] Temperature conversion lives in the widget\n- id: (presentation concern)\n- where: lib/weather/widgets/weather_populated.dart:26-27\n- evidence: `weather.temperature * 9 / 5 + 32` in `build`, while the bloc owns `TemperatureUnits`\n- rule: bloc.md \u00a72 \u2014 widgets render state; the conversion will"
+  ],
+  "decoy_examples": {},
+  "name": "t2-skills-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 400,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 22,
+   "tools": {
+    "skill": 1,
+    "bash": 25,
+    "read": 6
+   },
+   "skills_loaded": [
+    "flutter-architecture"
+   ],
+   "checker_runs": 3
+  }
+ },
+ {
+  "task": "t2",
+  "run": "runs/t2-skills-r2",
+  "issues_total": 2,
+  "credited": [
+   "V1",
+   "V2"
+  ],
+  "missed": [],
+  "recall": 1.0,
+  "decoys_total": 6,
+  "decoys_flagged": [],
+  "claim_blocks": 2,
+  "text_chars": 2575,
+  "contradicting": 0,
+  "other_claims": 0,
+  "other_examples": [],
+  "decoy_examples": {},
+  "name": "t2-skills-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 154,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 11,
+   "tools": {
+    "skill": 1,
+    "bash": 17,
+    "read": 2
+   },
+   "skills_loaded": [
+    "flutter-architecture"
+   ],
+   "checker_runs": 5
+  }
+ },
+ {
+  "task": "t5",
+  "run": "runs/t5-baseline-r1",
+  "arch_violations": 1,
+  "arch_ids": [
+   "ARCH-007"
+  ],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "perf_findings": 2,
+  "perf_high_medium": 0,
+  "perf_ids": [
+   "PERF-004"
+  ],
+  "persist_findings": 0,
+  "persist_high_medium": 0,
+  "persist_ids": [],
+  "ds_findings": 0,
+  "ds_high_medium": 0,
+  "ds_ids": [],
+  "a11y_findings": 1,
+  "a11y_high_medium": 0,
+  "a11y_ids": [
+   "A11Y-003"
+  ],
+  "net_findings": 0,
+  "net_ids": [],
+  "plat_findings": 0,
+  "plat_ids": [],
+  "adapt_findings": 0,
+  "adapt_ids": [],
+  "new_findings": 2,
+  "new_high_medium": 1,
+  "new_ids": [
+   "arch:ARCH-007(medium)",
+   "perf:PERF-004(low)"
+  ],
+  "calls_post_login": false,
+  "token_store": "other/none",
+  "paginates": true,
+  "adaptive_layout": true,
+  "lazy_list": true,
+  "login_files": 0,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t5-baseline-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 1742,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 29,
+   "tools": {
+    "task": 1,
+    "bash": 17,
+    "read": 19,
+    "write": 19,
+    "edit": 9
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t5",
+  "run": "runs/t5-baseline-r2",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "perf_findings": 2,
+  "perf_high_medium": 0,
+  "perf_ids": [
+   "PERF-004"
+  ],
+  "persist_findings": 0,
+  "persist_high_medium": 0,
+  "persist_ids": [],
+  "ds_findings": 0,
+  "ds_high_medium": 0,
+  "ds_ids": [],
+  "a11y_findings": 1,
+  "a11y_high_medium": 0,
+  "a11y_ids": [
+   "A11Y-003"
+  ],
+  "net_findings": 0,
+  "net_ids": [],
+  "plat_findings": 0,
+  "plat_ids": [],
+  "adapt_findings": 0,
+  "adapt_ids": [],
+  "new_findings": 1,
+  "new_high_medium": 0,
+  "new_ids": [
+   "perf:PERF-004(low)"
+  ],
+  "calls_post_login": false,
+  "token_store": "other/none",
+  "paginates": true,
+  "adaptive_layout": true,
+  "lazy_list": true,
+  "login_files": 0,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t5-baseline-r2",
+  "meta": {
+   "exit": 0,
+   "seconds": 974,
+   "model": "opencode/big-pickle",
+   "config": "baseline",
+   "steps": 16,
+   "tools": {
+    "task": 1,
+    "read": 5,
+    "bash": 6,
+    "todowrite": 2,
+    "write": 26,
+    "edit": 4
+   },
+   "skills_loaded": [],
+   "checker_runs": 0
+  }
+ },
+ {
+  "task": "t5",
+  "run": "runs/t5-skills-r1",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "perf_findings": 1,
+  "perf_high_medium": 0,
+  "perf_ids": [
+   "PERF-004"
+  ],
+  "persist_findings": 0,
+  "persist_high_medium": 0,
+  "persist_ids": [],
+  "ds_findings": 0,
+  "ds_high_medium": 0,
+  "ds_ids": [],
+  "a11y_findings": 1,
+  "a11y_high_medium": 0,
+  "a11y_ids": [
+   "A11Y-003"
+  ],
+  "net_findings": 0,
+  "net_ids": [],
+  "plat_findings": 0,
+  "plat_ids": [],
+  "adapt_findings": 0,
+  "adapt_ids": [],
+  "new_findings": 0,
+  "new_high_medium": 0,
+  "new_ids": [],
+  "calls_post_login": false,
+  "token_store": "other/none",
+  "paginates": false,
+  "adaptive_layout": false,
+  "lazy_list": true,
+  "login_files": 0,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t5-skills-r1",
+  "meta": {
+   "exit": 0,
+   "seconds": 664,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 4,
+   "tools": {
+    "skill": 2,
+    "task": 1,
+    "bash": 2,
+    "read": 2
+   },
+   "skills_loaded": [
+    "flutter-adaptive-layout",
+    "flutter-feature-scaffold"
+   ],
+   "checker_runs": 1
+  }
+ },
+ {
+  "task": "t5",
+  "run": "runs/t5-skills-r2",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "perf_findings": 1,
+  "perf_high_medium": 0,
+  "perf_ids": [
+   "PERF-004"
+  ],
+  "persist_findings": 0,
+  "persist_high_medium": 0,
+  "persist_ids": [],
+  "ds_findings": 0,
+  "ds_high_medium": 0,
+  "ds_ids": [],
+  "a11y_findings": 1,
+  "a11y_high_medium": 0,
+  "a11y_ids": [
+   "A11Y-003"
+  ],
+  "net_findings": 0,
+  "net_ids": [],
+  "plat_findings": 0,
+  "plat_ids": [],
+  "adapt_findings": 0,
+  "adapt_ids": [],
+  "new_findings": 0,
+  "new_high_medium": 0,
+  "new_ids": [],
+  "calls_post_login": false,
+  "token_store": "other/none",
+  "paginates": false,
+  "adaptive_layout": false,
+  "lazy_list": true,
+  "login_files": 0,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t5-skills-r2",
+  "meta": {
+   "exit": 143,
+   "seconds": 3415,
+   "model": "opencode/big-pickle",
+   "config": "skills",
+   "steps": 37,
+   "tools": {
+    "bash": 35,
+    "skill": 2
+   },
+   "skills_loaded": [
+    "flutter-architecture",
+    "flutter-feature-scaffold"
+   ],
+   "checker_runs": 1
+  }
+ }
+]

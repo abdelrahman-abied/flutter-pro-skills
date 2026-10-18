@@ -6,6 +6,8 @@ Usage:
   grade.py t2 <run-dir | output-file>          score an architecture-judgement run against ["t2"]
   grade.py t3 <run-dir>                        run the suite's checkers + dart analyze on <run-dir>/proj
   grade.py t4 <run-dir>                        same as t3, scored on the product-list task (PERF/DS/A11Y lead)
+  grade.py t5 <run-dir>                        same as t3, scored on the paginated, adaptive gallery task
+  (t3-t5 also report new_* counts: findings the agent added, i.e. not already in the pristine fixture)
   grade.py summary <runs-root>                 grade every run under <runs-root> and print the table
   add --json for machine output, --verbose to print every parsed claim and how it was classified.
 
@@ -196,13 +198,14 @@ def split_blocks(text):
     return blocks
 
 
-PROFILE_LINE_RE = re.compile(r"^\W*(detected |declared )?(architecture|profile|pattern|presentation)\b[^:\n]{0,20}[:：]", re.I)
+PROFILE_LINE_RE = re.compile(r"^\W*(?:(detected |declared )?(architecture|profile|pattern|presentation)\b[^:\n]{0,20}|detected\W*)[:：]", re.I)
 
 
 def block_is_claim(text, positive_section):
     if positive_section:
         return False
-    first = re.sub(r"\b(high|medium|low)\s+confidence", "", text.splitlines()[0], flags=re.I)
+    # "high confidence" and "confidence: **high**" describe the detection, not a finding's severity
+    first = re.sub(r"\b(high|medium|low)\s+confidence|confidence\W{0,4}(high|medium|low)\b", "", text.splitlines()[0], flags=re.I)
     if PROFILE_LINE_RE.match(text) and not SEVERITY_RE.search(first):
         return False  # the "Architecture: Bloc (high confidence)" opener, not a finding
     if NEGATION_RE.search(text):
@@ -429,6 +432,51 @@ def _checker(script, proj):
     return json.loads(out[start:]) if start >= 0 else {}
 
 
+# Every checker that scores a writing task: (short name, script, JSON key holding the hits)
+WRITE_CHECKERS = (
+    ("arch", "flutter-architecture/scripts/arch_check.py", "violations"),
+    ("sec", "flutter-secure-defaults/scripts/check_secure_defaults.py", "findings"),
+    ("err", "flutter-error-handling/scripts/check_errors.py", "findings"),
+    ("forms", "flutter-forms/scripts/check_forms.py", "findings"),
+    ("i18n", "flutter-i18n/scripts/check_i18n.py", "findings"),
+    ("perf", "flutter-performance/scripts/check_performance.py", "findings"),
+    ("persist", "flutter-persistence/scripts/check_persistence.py", "findings"),
+    ("net", "flutter-networking/scripts/check_networking.py", "findings"),
+    ("plat", "flutter-platform-integration/scripts/check_platform.py", "findings"),
+    ("ds", "flutter-design-system/scripts/check_design_system.py", "findings"),
+    ("adapt", "flutter-adaptive-layout/scripts/check_adaptive.py", "findings"),
+    ("a11y", "flutter-accessibility/scripts/check_accessibility.py", "findings"),
+)
+_PRISTINE = {}
+
+
+def _hit_keys(proj):
+    """(checker, id, file, evidence) for every low-or-above hit; line numbers are left out on purpose,
+    so an agent's edits above a pre-existing hit don't make it look new."""
+    keys = []
+    for name, script, field in WRITE_CHECKERS:
+        for f in _checker(script, proj).get(field, []):
+            if f.get("severity") == "info":
+                continue
+            keys.append((name, f["id"], f.get("severity", ""), f["file"], " ".join(str(f.get("evidence", "")).split())))
+    return keys
+
+
+def _new_hits(task, dst):
+    """Hits in the graded copy that the pristine fixture does not already have."""
+    fixture = os.path.join(BENCH, "fixtures", "t3_mvn_clean")
+    if task not in _PRISTINE:
+        _PRISTINE[task] = _hit_keys(fixture)
+    base = list(_PRISTINE[task])
+    new = []
+    for k in _hit_keys(dst):
+        if k in base:
+            base.remove(k)
+        else:
+            new.append(k)
+    return new
+
+
 def grade_t3(run_dir, task="t3"):
     proj = os.path.join(run_dir, "proj")
     work = tempfile.mkdtemp(prefix="t3grade-")
@@ -462,6 +510,15 @@ def grade_t3(run_dir, task="t3"):
         res[name + "_findings"] = len(fl)
         res[name + "_high_medium"] = len([f for f in fl if f.get("severity") in ("high", "medium")])
         res[name + "_ids"] = sorted({f["id"] for f in fl})
+    for name in ("net", "plat", "adapt"):
+        j = _checker(dict((n, s) for n, s, _ in WRITE_CHECKERS)[name], dst)
+        fl = [f for f in j.get("findings", []) if f.get("severity") != "info"]
+        res[name + "_findings"] = len(fl)
+        res[name + "_ids"] = sorted({f["id"] for f in fl})
+    new = _new_hits(task, dst)
+    res["new_findings"] = len(new)
+    res["new_high_medium"] = len([k for k in new if k[2] in ("high", "medium")])
+    res["new_ids"] = sorted("%s:%s(%s)" % (k[0], k[1], k[2]) for k in new)
     # functional sanity
     src = ""
     for root, _, fs in os.walk(os.path.join(dst, "lib")):
@@ -475,6 +532,8 @@ def grade_t3(run_dir, task="t3"):
         res["token_store"] = "shared_preferences"
     else:
         res["token_store"] = "other/none"
+    res["paginates"] = bool(re.search(r"page[=:]|[?&]page\b|['\"]page['\"]|nextPage|loadMore|fetchNext", src))
+    res["adaptive_layout"] = bool(re.search(r"LayoutBuilder|MediaQuery\.sizeOf|NavigationRail|maxWidth\s*[<>]=?", src))
     res["lazy_list"] = bool(re.search(r"\b(?:ListView|GridView|SliverList|SliverGrid)\.builder\b|SliverChildBuilderDelegate", src))
     res["login_files"] = len([1 for root, _, fs in os.walk(os.path.join(dst, "lib")) for f in fs
                               if re.search(r"(auth|login|session)", os.path.join(root, f)) and f.endswith(".dart") and not f.endswith(".g.dart")])
@@ -517,7 +576,7 @@ def summary(root, as_json=False):
         if os.path.exists(cache):
             r = json.load(open(cache))
         else:
-            r = grade_t3(d, task) if task in ("t3", "t4") else grade_review(task, d)
+            r = grade_t3(d, task) if task in ("t3", "t4", "t5") else grade_review(task, d)
             json.dump(r, open(cache, "w"), indent=1)
         r["name"] = name
         r["meta"] = meta
@@ -534,6 +593,10 @@ def summary(root, as_json=False):
         elif r["task"] == "t2":
             print("%-22s recall %d/%d  contradicting %d %s  other %d  | %s" % (
                 r["name"], len(r["credited"]), r["issues_total"], r["contradicting"], r["decoys_flagged"], r["other_claims"], tail))
+        elif r["task"] == "t5":
+            print("%-22s NEW %s (h+m %s) %s  lazy=%s paginates=%s adaptive=%s  analyze E/W %s/%s | %s" % (
+                r["name"], r.get("new_findings"), r.get("new_high_medium"), r.get("new_ids"), r.get("lazy_list"),
+                r.get("paginates"), r.get("adaptive_layout"), r.get("analyze_errors"), r.get("analyze_warnings"), tail))
         elif r["task"] == "t4":
             print("%-22s PERF %s  DS %s  A11Y %s  (h+m %s/%s/%s)  SEC %s  ARCH %s  ERR h+m %s  lazy=%s  analyze E/W %s/%s | %s" % (
                 r["name"], r.get("perf_findings"), r.get("ds_findings"), r.get("a11y_findings"), r.get("perf_high_medium"),
@@ -558,7 +621,7 @@ def main(argv):
         return 0
     if task in ("t1", "t2"):
         r = grade_review(task, path, verbose)
-    elif task in ("t3", "t4"):
+    elif task in ("t3", "t4", "t5"):
         r = grade_t3(path, task)
     else:
         print(__doc__)

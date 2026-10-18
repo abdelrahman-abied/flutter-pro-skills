@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 # One benchmark run: a fresh copy of the fixture, a fresh HOME, one OpenCode invocation.
 #
-#   run.sh <t1|t2|t3|t4> <baseline|skills> <run-index> [model]
+#   run.sh <t1|t2|t3|t4|t5> <baseline|skills> <run-index> [model]
 #
 # env: SUITE_DIR   folder holding install.sh + skills/ (default: this repository; or point it at a
 #                  checkout of flutter-pro-skills to bench the live repo)
@@ -23,7 +23,7 @@
 # analyzer works without network until the agent changes dependencies.
 set -euo pipefail
 BENCH="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-TASK="${1:?task t1|t2|t3|t4}"; CONF="${2:?baseline|skills}"; IDX="${3:?run index}"
+TASK="${1:?task t1|t2|t3|t4|t5}"; CONF="${2:?baseline|skills}"; IDX="${3:?run index}"
 MODEL="${4:-opencode/big-pickle}"
 SUITE_DIR="${SUITE_DIR:-$(cd "$BENCH/.." && pwd)}"
 RUNS_DIR="${RUNS_DIR:-$BENCH/runs}"
@@ -36,6 +36,8 @@ case "$TASK" in
       PROMPT="Is this architecture correct? List violations." ;;
   t3) FIX="$BENCH/fixtures/t3_mvn_clean"
       PROMPT="Add a login feature that calls POST /login and stores the returned token, following this project's architecture." ;;
+  t5) FIX="$BENCH/fixtures/t3_mvn_clean"
+      PROMPT="Add a product gallery feature: load products page by page from GET /products?page=N (each product has an id, name, price and imageUrl) with infinite scroll, show each product's image, name, price and a favourite icon button, and on tablets and desktop show a list-detail layout with the selected product's details next to the list. It must look right in dark mode and work with a screen reader. Follow this project's architecture." ;;
   t4) FIX="$BENCH/fixtures/t3_mvn_clean"
       PROMPT="Add a products screen that loads GET /products (each product has an id, name, price and imageUrl) and shows them in a scrollable list with each product's image, name, price and a favourite icon button, with pull-to-refresh, following this project's architecture." ;;
   *) echo "unknown task $TASK" >&2; exit 2 ;;

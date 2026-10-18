@@ -182,8 +182,8 @@ model (OpenCode + big-pickle, 2 runs each):
 | Task | Without skills | With skills |
 |---|---|---|
 | **Write**: add login and store the token | Token in `SharedPreferences` (1 high security finding, both runs) | `flutter_secure_storage`, **0 security findings** (both runs) |
-| **Review**: 12 planted issues | 92% recall, 0.5 MVN decoys flagged | 96% recall, **0** decoys flagged, more extra findings, about 6× slower |
-| **Bloc architecture**: 2 planted violations | 2/2 | 2/2, with 1.5 claims contradicting bloclibrary (a calibration bug, **fixed** since) |
+| **Review**: 12 planted issues | 92% recall, 0.5 MVN decoys flagged. Re-run on v1.6.1: 10/12 and 12/12, 10–15 min | 96% recall, **0** decoys flagged, more extra findings, about 6× slower. Re-run on v1.6.1: **12/12 both**, about 2× the extra claims, 30–45 min |
+| **Bloc architecture**: 2 planted violations | 2/2. Re-run on v1.6.1: 1.5 claims contradicting bloclibrary | 2/2. The first run had 1.5 contradicting claims, a calibration bug since fixed. Re-run on v1.6.1: **0** |
 | **Write a list screen** (T4, re-run 2026-10-18) | 1 of 2 runs added a layering violation and a swallowed catch | 0 new findings in both runs; one also fixed existing issues. A small difference on this model |
 
 T3 was re-run on 2026-10-18 with the same result (baseline: SEC-001 high in

@@ -43,11 +43,18 @@ pub, build_runner or the analyzer itself.
    every inferred convention with its evidence. `== FILES` lists each file
    with the classes and providers it declares (`+` new, `=` exists and will be
    skipped). `== DEPENDENCIES` lists what's missing from pubspec.
-3. **Confirm the plan with the user** before writing. Cover the feature name
-   (snake_case, named for the user-facing capability: `order_history`, not
+3. **Decide, say it, and keep going.** Choose the feature name (snake_case,
+   named for the user-facing capability: `order_history`, not
    `orders_screen`), the domain object name (`--entity Order` when it differs
-   from the feature), and whether to add use cases (`--clean`). If confidence
-   is `low` or the pattern looks wrong, ask, then re-run with `--profile`.
+   from the feature), and whether to add use cases (`--clean`, or what the
+   project's neighbours do). State those choices in one line and go on to
+   step 4: the user already asked for the feature, the dry run shows the
+   plan, and `--write` never overwrites. Stop and ask **only** when the
+   answer would change the architecture and the project doesn't settle it:
+   confidence is `low`, the pattern looks wrong, or two patterns coexist
+   with no declared target. Then re-run with `--profile`. If nobody can
+   answer (a non-interactive or CI run), take the pattern of the feature's
+   neighbours, list the assumption in your final message, and write.
 4. **Write**: add `--write`. Existing files are listed as `skipped … (exists, not
    overwritten)`. If the feature folder already exists the script stops (exit 2)
    unless you pass `--force-dir`, which adds only the missing files.
