@@ -45,6 +45,11 @@ checker) and `SEC-<slug>` (found by reading). The optional templates use
 `PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N), `REL-` (O), `PLAT-` (P), `ADAPT-` (Q) and `FIRE-` (R) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
+Every specialist skill keeps its review checklist and finding examples in
+its own `<skill>/references/review.md`, not in its SKILL.md, so writing code stays
+cheap. Each reviewer pass reads that file first: the template's "load the
+skill" means its SKILL.md plus `<skill>/references/review.md`.
+
 Read the `== PASS PLAN` at the end of the mechanical output first: spawn the
 core templates and only the optional ones it lists under `run:` (plus any the
 user asked about). In `mode: quick`, don't spawn: make the one combined pass

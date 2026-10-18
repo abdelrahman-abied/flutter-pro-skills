@@ -13,6 +13,14 @@ breaking change.
   change needs: a repository over a fake, logic state transitions, and one
   widget test per state. Before, only the scaffold asked for them, so agents
   that extended existing code wrote few tests (0 and 3 for Sonnet on T5).
+- **Smaller skills to load.** The review checklist and finding examples
+  moved out of 16 SKILL.md files into each skill's `references/review.md`,
+  which the review reads. The total across those skills went from about
+  75.6k to 52.6k tokens (−30%). The scaffold's per-profile details moved to
+  `references/profiles.md` (5.6k → 3.4k). `flutter-secure-defaults` now holds
+  a minimal token source inline, so storing a token doesn't need the 4.6k
+  by-layer reference. The hub sizes tests to the change: a small change gets
+  one focused test per layer it touched.
 - **Benchmark, Sonnet vs Opus.** On T3, Opus without the skills stored the
   token in `SharedPreferences` in both runs (SEC-001 high). Sonnet with the
   skills used `flutter_secure_storage` in both runs (0 findings). On T5,

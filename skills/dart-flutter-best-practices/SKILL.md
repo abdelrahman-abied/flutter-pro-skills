@@ -157,7 +157,10 @@ Spend a minute on these before you write a line.
      appended, a second request dropped while one is in flight)
    - one widget test per screen state
 
-   Use fakes, not mocks, and no real network or delays. The checklist is in
+   **Size the tests to the change:** for a small change (a login, one
+   endpoint, one widget), write one focused test per layer you touched. Write
+   the full set only for a new feature. Use fakes, not mocks, and no real
+   network or delays. The checklist is in
    `flutter-feature-scaffold` (its cross-cutting rules). Load
    `flutter-testing` only for something it doesn't cover.
 6. **Don't over-document.** Add `///` docs to public APIs whose names don't

@@ -162,7 +162,9 @@ need only Python, and `scan.sh` only bash
 ## Phase 2: judgment passes
 
 There are four core dimensions and fourteen optional ones. Each returns findings
-in the shape given in `references/finding-format.md`.
+in the shape given in `references/finding-format.md`. Each pass loads its
+skill's SKILL.md **and its `<skill>/references/review.md`** (the review checklist and
+finding examples live there, not in SKILL.md).
 
 | Pass | Loads | Starts from | IDs |
 |---|---|---|---|
