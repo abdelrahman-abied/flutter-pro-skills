@@ -7,6 +7,11 @@
 #                  checkout of flutter-pro-skills to bench the live repo)
 #      RUNS_DIR    where run folders go (default: ./runs)
 #      TIMEOUT     seconds before the agent is killed (default 3600)
+#      AGENT       opencode (default) or claude. claude runs `claude -p` (Claude Code) on your login:
+#                  HOME is NOT replaced (the login lives in the keychain under it), so isolation comes
+#                  from flags instead: --setting-sources project (no user settings, CLAUDE.md or
+#                  skills), --disable-slash-commands for baseline (no skills at all), the suite
+#                  installed into the copy's .claude/skills for skills. CLAUDE_MODEL picks the model.
 #      AGENT_CMD   override the agent command; it receives the prompt as its last argument and
 #                  runs inside the project copy, e.g. AGENT_CMD="claude -p" (output then is plain
 #                  text; save it as output.jsonl anyway, grade.py accepts plain text in .md/.txt)
@@ -62,7 +67,8 @@ cat > "$RUN/home/.config/opencode/opencode.json" <<'EOF'
 }
 EOF
 if [ "$CONF" = skills ]; then
-  bash "$SUITE_DIR/install.sh" --project "$RUN/proj" --agent agents > "$RUN/install.log"
+  INSTALL_AGENT=agents; [ "${AGENT:-opencode}" = claude ] && INSTALL_AGENT=claude
+  bash "$SUITE_DIR/install.sh" --project "$RUN/proj" --agent "$INSTALL_AGENT" > "$RUN/install.log"
 fi
 ( cd "$RUN/proj" && git init -q . && git add -A && git -c user.email=bench@local -c user.name=bench commit -qm fixture )
 
@@ -72,7 +78,16 @@ printf '%s\n' "$PROMPT" > "$RUN/prompt.txt"
 mkdir -p "$RUN/proj/.bench-tmp"; echo ".bench-tmp/" >> "$RUN/proj/.git/info/exclude"
 start=$(date +%s)
 set +e
-if [ -n "${AGENT_CMD:-}" ]; then
+if [ "${AGENT:-opencode}" = claude ]; then
+  MODEL="claude-code${CLAUDE_MODEL:+:$CLAUDE_MODEL}"
+  # --allowedTools takes a list, so it goes first: a flag after it ends the list before the prompt
+  CLAUDE_ARGS=(-p --allowedTools "Bash Edit Write MultiEdit Read Glob Grep TodoWrite Skill"
+               --output-format stream-json --verbose --setting-sources project --permission-mode acceptEdits)
+  [ "$CONF" = baseline ] && CLAUDE_ARGS+=(--disable-slash-commands)
+  [ -n "${CLAUDE_MODEL:-}" ] && CLAUDE_ARGS+=(--model "$CLAUDE_MODEL")
+  ( cd "$RUN/proj" && TMPDIR="$RUN/proj/.bench-tmp" perl -e 'alarm shift; exec @ARGV' "$TIMEOUT" claude "${CLAUDE_ARGS[@]}" "$PROMPT" ) \
+    > "$RUN/output.jsonl" 2> "$RUN/stderr.txt"
+elif [ -n "${AGENT_CMD:-}" ]; then
   ( cd "$RUN/proj" && env -u XDG_CONFIG_HOME -u XDG_DATA_HOME -u XDG_CACHE_HOME -u XDG_STATE_HOME -u PUB_CACHE \
       HOME="$RUN/home" TMPDIR="$RUN/proj/.bench-tmp" perl -e 'alarm shift; exec @ARGV' "$TIMEOUT" $AGENT_CMD "$PROMPT" ) > "$RUN/output.jsonl" 2> "$RUN/stderr.txt"
 else
@@ -92,6 +107,22 @@ for line in open(run + "/output.jsonl", errors="replace"):
         ev = json.loads(line)
     except ValueError:
         continue
+    if ev.get("type") == "system" and ev.get("subtype") == "init" and ev.get("model"):
+        model = "claude-code:" + ev["model"]
+    if ev.get("type") == "assistant":  # Claude Code stream-json: tool calls inside the message
+        steps += 1
+        for c in (ev.get("message") or {}).get("content") or []:
+            if c.get("type") != "tool_use":
+                continue
+            t = c.get("name", "?"); tools[t] = tools.get(t, 0) + 1
+            inp = json.dumps(c.get("input", {}))
+            if t == "Skill":
+                skills.add(str((c.get("input") or {}).get("skill", inp[:60])))
+            for m in re.finditer(r"\.(?:claude|agents)/skills/([\w-]+)/SKILL\.md", inp):
+                skills.add(m.group(1))
+            if re.search(r"arch_check|check_\w+\.py|review\.sh|heuristics\.py|test_gaps|scaffold\.py", inp):
+                checkers += 1
+        continue
     if ev.get("type") == "step_finish":
         steps += 1
     if ev.get("type") != "tool_use":
@@ -103,7 +134,7 @@ for line in open(run + "/output.jsonl", errors="replace"):
         m = re.search(r'"name": "([^"]+)"', inp); skills.add(m.group(1) if m else inp[:60])
     for m in re.finditer(r"\.agents/skills/([\w-]+)/SKILL\.md", inp):
         skills.add(m.group(1))
-    if re.search(r"arch_check|check_errors|check_secure|check_nav|check_forms|check_i18n|review\.sh|heuristics\.py|test_gaps|scaffold\.py", inp):
+    if re.search(r"arch_check|check_\w+\.py|review\.sh|heuristics\.py|test_gaps|scaffold\.py", inp):
         checkers += 1
 json.dump({"exit": int(rc), "seconds": int(secs), "model": model, "config": conf, "steps": steps,
            "tools": tools, "skills_loaded": sorted(skills), "checker_runs": checkers},
