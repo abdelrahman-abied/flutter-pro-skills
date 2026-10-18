@@ -74,12 +74,40 @@ pub, build_runner or the analyzer itself.
    the repository; and localized, user-facing error text. The wording follows
    `flutter-secure-defaults` › `secure-scaffold-checklist.md` §10, so filling
    them in keeps the defaults.
-8. **Check once, at the end.** Run `bash ../dart-flutter-review/scripts/review.sh
-   <project-root> --diff HEAD` (or `arch_check.py` alone) to confirm the
-   feature still has zero findings after your edits. You don't need to read the
-   performance, design-system, accessibility, networking or persistence skills
-   before writing: the generated code already passes their checkers, so load
-   one only to fix a finding it reports.
+8. **Check once, at the end, with one command:**
+   `bash <skills-dir>/dart-flutter-review/scripts/review.sh <project-root> --diff HEAD --findings-only`.
+   It runs every checker in the suite and prints only what is left at low or
+   above (plus analyzer errors and warnings), each with its fix. Fix those and
+   run it again. Don't run the checkers one by one: each run adds a turn and
+   its whole output to the context, which is what makes a feature expensive.
+
+### The screen's cross-cutting rules (no need to load the specialists)
+
+The generated code already follows these. Keep them as you fill in the UI,
+and you won't need to load the performance, design-system, accessibility,
+adaptive-layout, networking or i18n skills to write a standard feature. Load
+one only when the request is about that area itself, or when step 8 reports
+a finding whose note you can't act on.
+
+- **Lists:** `ListView.builder` / `GridView.builder` / slivers for data. For
+  pagination, fetch the next page from the logic holder behind an in-flight
+  guard (Bloc: a `droppable()` transformer).
+- **Images:** set `cacheWidth` (or `memCacheWidth`) to the display size in
+  list items, and give each a `semanticLabel`, or `excludeFromSemantics` when
+  it is decorative.
+- **Theme:** colours from `Theme.of(context).colorScheme`, text from
+  `textTheme`, no `Color(0x…)` or `fontSize:` literals. Dark mode then comes
+  for free.
+- **Semantics:** a `tooltip` on every `IconButton`, `Semantics(button: true,
+  label:)` on custom tappables, targets of at least 48 dp, and no fixed height
+  around text.
+- **Layout:** the width a widget gets (`LayoutBuilder`) or the window size
+  class picks one pane or two. Logic never reads the screen size, and keep the
+  selected item in the view or logic so it survives a resize.
+- **Network:** one shared client with timeouts, injected into the remote
+  source. The repository maps errors to the project's `Failure`.
+- **Text:** user-facing strings through the project's l10n (`AppLocalizations`),
+  never literals in widgets.
 
 Exit codes: `0` means the plan was printed or the files were written. `2` means
 a usage or environment error: no pubspec, an invalid name, an unsupported or

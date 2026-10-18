@@ -98,7 +98,9 @@ echo "$out"
 security sections), `--no-audit`, `--no-nav`, `--no-forms`, `--no-i18n`,
 `--no-perf`, `--no-persist`, `--no-net`, `--no-ds`, `--no-a11y`, `--no-release`,
 `--no-platform`, `--no-adaptive`, `--no-firebase`, or one
-`--skip extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y,release,platform,adaptive,firebase`. The script never
+`--skip extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y,release,platform,adaptive,firebase`. `--findings-only` prints only the checker findings at low or above, plus
+analyzer errors and warnings. Use it to check your own change once after
+writing; it isn't meant for a review report. The script never
 modifies the project. Exit code 0 means the report was produced, even with
 findings. Exit code 2 means there's no `pubspec.yaml` or `dart` isn't on PATH.
 Only `--ci` exits 1.

@@ -131,8 +131,10 @@ Spend a minute on these before you write a line.
    the file. When `flutter-feature-scaffold` generates the feature, its
    templates already pass every checker in the suite, so you don't need to
    pre-load the performance, design-system, accessibility, networking or
-   persistence skills to write it. Run the checkers once on what you wrote,
-   and load a sibling only for a finding you need to fix.
+   persistence skills to write it. Check once on what you wrote with
+   `bash ../dart-flutter-review/scripts/review.sh <project-root> --diff HEAD --findings-only`
+   (every checker, only what is left to fix), and load a sibling only for a
+   finding you need to fix.
 3. **Write it idiomatically the first time.** Hold the code to the judgment
    rules below as you write. Default lints don't catch them. Use the newest
    features the SDK constraint allows when they make the code clearer, and

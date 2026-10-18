@@ -13,6 +13,7 @@
   audit     <root> <files|-> <scan.sh --json output> <max> -> flutter-security-audit findings as groups
   summary   <section-dir> <scope> <ci 0|1> <fail-on> <exit-code> [arch-only]  -> GitHub step-summary Markdown
   plan      <section-dir> <n-files>                -> PASS PLAN: which judgment passes have work (SKILL.md Phase 2)
+  compact   <review.sh output file>                -> only the sections with findings (review.sh --findings-only)
 
 `defer-catch`: flutter-error-handling's check_errors.py ran too, so swallowed-catch
 keeps only its count and points at the ERROR HANDLING section (reported once, as ERR-).
@@ -1057,6 +1058,49 @@ def cmd_plan(sec_dir, nfiles):
         print('  mode: parallel sub-agents for the passes above if your agent has them; otherwise quick, one pass after another')
 
 
+COMPACT_SKIP = ('CONTEXT', 'FORMAT', 'AUTO-FIXABLE', 'EXTRA LINTS', 'CANDIDATES', 'PASS PLAN', 'ARCHITECTURE PROFILE',
+                'TEST GAPS', 'TEST SMELLS', 'SECURITY AUDIT', 'CI RESULT')
+
+
+def cmd_compact(path):
+    """Keep only finding groups (and their example locations) from the checker sections, for an agent that
+    checks its own change once: one short answer instead of 20 sections. Test gaps are left out on purpose
+    (the agent that just wrote the code is writing its tests); the analyzer keeps its errors and warnings."""
+    text = open(path, errors='replace').read()
+    sections, cur = [], None
+    for line in text.split('\n'):
+        if line.startswith('== '):
+            cur = [line, []]
+            sections.append(cur)
+        elif cur is not None:
+            cur[1].append(line)
+    out, n_groups = [], 0
+    for head, body in sections:
+        name = head[3:].split(' (')[0].strip()
+        if any(name.startswith(k) for k in COMPACT_SKIP):
+            continue
+        keep, take = [], False
+        for line in body:
+            is_group = bool(re.match(r'^\s{2}\[[A-Z]', line)) or (name.startswith('ANALYZER') and re.match(r'^\s{2}(ERROR|WARNING)\s', line))
+            if is_group and re.search(r'\(info\)', line):
+                take = False
+                continue
+            if is_group:
+                keep.append(line); n_groups += 1; take = True
+            elif take and re.match(r'^\s{6}\S', line):
+                keep.append(line)
+            else:
+                take = False
+        if keep:
+            out.append(head.split(' (')[0] if not head.startswith('== ANALYZER') else '== ANALYZER')
+            out.extend(keep)
+    if not out:
+        print('== FINDINGS: none at low or above in any checker (analyzer clean)')
+    else:
+        print('== FINDINGS (%d group(s); fix these, then run it again)' % n_groups)
+        print('\n'.join(out))
+
+
 def main():
     cmd, args = sys.argv[1], sys.argv[2:]
     if cmd == 'analyzer':
@@ -1077,6 +1121,8 @@ def main():
         cmd_scope(args[0], args[1], args[2] if len(args) > 2 else '')
     elif cmd == 'audit':
         cmd_audit(args[0], args[1], args[2], int(args[3]))
+    elif cmd == 'compact':
+        cmd_compact(args[0])
     elif cmd == 'plan':
         cmd_plan(args[0], args[1])
     elif cmd == 'summary':

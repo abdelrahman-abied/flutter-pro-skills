@@ -437,6 +437,18 @@ python3 -I "$SKILL/scripts/heuristics.py" plan "$P" 40 | grep -q '^  mode: paral
 grep -q '^== PASS PLAN' "$TMP/s_plain.txt" && section "$TMP/s_plain.txt" '== PASS PLAN' | grep -q '^  run:  F errors' \
   && pass "review.sh prints the PASS PLAN after CANDIDATES" || bad "review.sh: no PASS PLAN section"
 
+# ---- 4b3. --findings-only: one compact answer for an agent checking its own change --
+srun --findings-only > "$TMP/s_fo.txt" 2>&1; rc=$?
+head -1 "$TMP/s_fo.txt" | grep -q '^== FINDINGS (' && grep -q '^  \[ERR-001\] swallowed-catch (high) x2' "$TMP/s_fo.txt" \
+  && grep -q '^  \[NAV-003\]' "$TMP/s_fo.txt" && ! grep -q '^== CANDIDATES\|^== TEST GAPS\|^== CONTEXT\|^== PASS PLAN\|\[CANDIDATE\]' "$TMP/s_fo.txt" \
+  && [ "$rc" = 0 ] && pass "--findings-only: checker groups only, no candidates/test gaps/context, exit 0" \
+  || bad "--findings-only: rc=$rc $(head -6 "$TMP/s_fo.txt" | tr '\n' '|')"
+[ "$(wc -l < "$TMP/s_fo.txt" | tr -d ' ')" -lt "$(wc -l < "$TMP/s_plain.txt" | tr -d ' ')" ] \
+  && pass "--findings-only is shorter than the full report" || bad "--findings-only is not shorter"
+printf '== DESIGN SYSTEM\n  [DS-001] raw-color-in-widget (info) x1 — d.\n      lib/a.dart:1  x\n== FORMS\n  no form findings\n' > "$TMP/fo_in.txt"
+python3 -I "$SKILL/scripts/heuristics.py" compact "$TMP/fo_in.txt" | grep -q '^== FINDINGS: none at low or above' \
+  && pass "--findings-only: info-only and empty sections read as nothing to fix" || bad "compact: info-only not treated as clean"
+
 # ---- 4c. environment fixes on fixtures/env (stub dart 3.5.0) ----------------
 erun() { d="$1"; shift; PATH="$TMP/bin:$PATH" bash "$TMP/suite_min/dart-flutter-review/scripts/review.sh" "$d" "$@"; }
 rm -rf "$TMP/suite_min/flutter-testing"   # leave only review (+ the hub's lint set for EXTRA LINTS)

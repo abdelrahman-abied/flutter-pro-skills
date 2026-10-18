@@ -26,6 +26,8 @@
 #                    extra,arch,tests,errors,security,audit,nav,forms,i18n,perf,persist,net,ds,a11y,release,platform,adaptive,firebase
 #   --profile <p>    declared architecture for the sibling passes (auto|mvn|mvvm|bloc|mvc|getx|provider|riverpod|setstate)
 #   --max <n>        max example locations printed per rule / heuristic (default 5)
+#   --findings-only  print only the checker findings at low or above (and analyzer errors/warnings), compactly:
+#                    for an agent checking its own change once, instead of running each checker
 #   --ci             CI mode: exit 1 on new architecture violations at or above --fail-on, or on analyzer errors
 #   --fail-on <sev>  lowest architecture severity that fails --ci (default high)
 #   --baseline <f>   arch_check baseline (arch-baseline@1): report only architecture violations not in it
@@ -71,6 +73,15 @@ CHECK_DS="$SKILL_DIR/../flutter-design-system/scripts/check_design_system.py"
 CHECK_A11Y="$SKILL_DIR/../flutter-accessibility/scripts/check_accessibility.py"
 AUDIT_SCAN="${FLUTTER_SECURITY_AUDIT_SCAN:-$SKILL_DIR/../flutter-security-audit/scan.sh}"
 USAGE="usage: review.sh <project-root> [--diff <ref>] [--no-extra] [--no-arch] [--no-tests] [--no-errors] [--no-security] [--no-audit] [--no-nav] [--no-forms] [--no-i18n] [--no-perf] [--no-persist] [--no-net] [--no-ds] [--no-a11y] [--no-release] [--no-platform] [--no-adaptive] [--no-firebase] [--skip <list>] [--profile <p>] [--max n] [--ci] [--fail-on high|medium|low] [--baseline <file>]"
+FINDINGS_ONLY=0; for a in "$@"; do [[ "$a" == --findings-only ]] && FINDINGS_ONLY=1; done
+if [[ $FINDINGS_ONLY == 1 ]]; then
+  ARGS=(); for a in "$@"; do [[ "$a" == --findings-only ]] || ARGS+=("$a"); done
+  OUT="$(mktemp "${TMPDIR:-/tmp}/dart-review-compact.XXXXXX")"
+  bash "${BASH_SOURCE[0]}" "${ARGS[@]}" --no-extra > "$OUT" 2>&1; rc=$?
+  [[ $rc == 2 ]] && { cat "$OUT"; rm -f "$OUT"; exit 2; }
+  python3 -I "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/heuristics.py" compact "$OUT"
+  rm -f "$OUT"; exit $rc
+fi
 ROOT=""; DIFF_REF=""; EXTRA=1; ARCH=1; TESTS=1; ERRORS=1; SECURE=1; AUDIT=1; NAV=1; FORMS=1; I18N=1
 PERF=1; PERSIST=1; NET=1; DS=1; A11Y=1; RELEASE=1; PLATFORM=1; ADAPTIVE=1; FIREBASE=1
 PROFILE=""; MAX=5; CI=0; FAIL_ON=high; BASELINE=""

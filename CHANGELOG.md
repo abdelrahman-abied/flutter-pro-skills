@@ -22,6 +22,12 @@ breaking change.
   fewer, or no sub-agents) or parallel. In quick mode the review makes one
   combined pass instead of running the templates one by one. On the
   `smelly_app` fixture, 9 of the 14 optional passes are skipped.
+- **One check after writing.** `review.sh --findings-only` runs every
+  checker and prints only what is left to fix: about 25 lines instead of 200
+  on `smelly_app`. The scaffold and the hub now tell agents to check once with
+  it, not checker by checker. The scaffold also carries the screen's
+  cross-cutting rules (lists, images, theme, semantics, layout, network,
+  text), so a standard feature doesn't need six specialist skills loaded.
 - **A smaller reading budget when writing.** The hub tells agents to read a
   sibling's SKILL.md and only the reference section it points at. When the
   scaffold generates a feature, there's no need to pre-load the
