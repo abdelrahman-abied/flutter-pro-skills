@@ -125,6 +125,14 @@ Spend a minute on these before you write a line.
    lifecycle and `build()`. The naming skill applies whenever you introduce a
    public name, because names are the one thing tools can't fix later without
    breaking callers.
+   **Keep the reading budget small.** Read each needed sibling's SKILL.md,
+   not its `references/`: open a reference only when the SKILL.md sends you
+   there for the decision in front of you, and then read that section, not
+   the file. When `flutter-feature-scaffold` generates the feature, its
+   templates already pass every checker in the suite, so you don't need to
+   pre-load the performance, design-system, accessibility, networking or
+   persistence skills to write it. Run the checkers once on what you wrote,
+   and load a sibling only for a finding you need to fix.
 3. **Write it idiomatically the first time.** Hold the code to the judgment
    rules below as you write. Default lints don't catch them. Use the newest
    features the SDK constraint allows when they make the code clearer, and

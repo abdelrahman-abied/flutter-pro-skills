@@ -12,6 +12,7 @@
   errors    <root> <files> <machine-output>            -> "<errors> <codegen-cascade errors> <crashed 0|1>" in scope
   audit     <root> <files|-> <scan.sh --json output> <max> -> flutter-security-audit findings as groups
   summary   <section-dir> <scope> <ci 0|1> <fail-on> <exit-code> [arch-only]  -> GitHub step-summary Markdown
+  plan      <section-dir> <n-files>                -> PASS PLAN: which judgment passes have work (SKILL.md Phase 2)
 
 `defer-catch`: flutter-error-handling's check_errors.py ran too, so swallowed-catch
 keeps only its count and points at the ERROR HANDLING section (reported once, as ERR-).
@@ -1005,6 +1006,57 @@ def cmd_grep(root, files, maxn, is_flutter, defer=()):
         print("  no heuristic candidates")
 
 
+# section key -> (template letter, pass name) for the optional judgment passes (reviewer-prompts.md)
+PLAN_PASSES = (('tests', 'E', 'testing'), ('errors', 'F', 'errors'), ('nav', 'G', 'navigation'),
+               ('forms', 'H', 'forms'), ('i18n', 'I', 'i18n'), ('perf', 'J', 'performance'),
+               ('persist', 'K', 'persistence'), ('ds', 'L', 'design system'), ('a11y', 'M', 'accessibility'),
+               ('net', 'N', 'networking'), ('release', 'O', 'release'), ('platform', 'P', 'platform integration'),
+               ('adaptive', 'Q', 'adaptive layout'), ('firebase', 'R', 'firebase'))
+PLAN_GROUP_RE = re.compile(r'^\s+\[([A-Z0-9]+-[\w-]+)\][^\n]*?\((high|medium|low|info)\)')
+QUICK_MAX_FILES = 15
+
+
+def cmd_plan(sec_dir, nfiles):
+    """Which optional reviewer passes have work. A pass whose checker found nothing at low or above is
+    skipped (it costs a full reading pass for no finding); the core passes always run."""
+    print('== PASS PLAN (judgment passes with work; see SKILL.md › Phase 2)')
+    print('  core (always): A architecture, B UI, C idioms + naming, D security')
+    runs, skips = [], []
+    for key, letter, name in PLAN_PASSES:
+        path = os.path.join(sec_dir, key + '.txt')
+        if not os.path.isfile(path):
+            skips.append('%s %s: not run (switched off)' % (letter, name))
+            continue
+        text = open(path, errors='replace').read()
+        head = text.split('\n', 1)[0]
+        if '(skipped:' in head:
+            skips.append('%s %s: skill not installed' % (letter, name))
+            continue
+        if '(error:' in head:
+            runs.append('%s %s: the checker failed, so review this area by reading' % (letter, name))
+            continue
+        ids = []
+        for line in text.split('\n'):
+            m = PLAN_GROUP_RE.match(line)
+            if m and m.group(2) != 'info' and m.group(1) not in ids:
+                ids.append(m.group(1))
+        if ids:
+            runs.append('%s %s: %d group(s) to confirm (%s)' % (letter, name, len(ids), ', '.join(ids[:6]) + (' ...' if len(ids) > 6 else '')))
+        else:
+            skips.append('%s %s: no findings at low or above' % (letter, name))
+    for r in runs:
+        print('  run:  ' + r)
+    for k in skips:
+        print('  skip: ' + k)
+    if skips:
+        print('  (run a skipped pass anyway when the user asked about that area)')
+    n = int(nfiles) if str(nfiles).isdigit() else 0
+    if n <= QUICK_MAX_FILES:
+        print('  mode: quick (%d file(s) <= %d): one combined pass over the groups above, then verify the Highs' % (n, QUICK_MAX_FILES))
+    else:
+        print('  mode: parallel sub-agents for the passes above if your agent has them; otherwise quick, one pass after another')
+
+
 def main():
     cmd, args = sys.argv[1], sys.argv[2:]
     if cmd == 'analyzer':
@@ -1025,6 +1077,8 @@ def main():
         cmd_scope(args[0], args[1], args[2] if len(args) > 2 else '')
     elif cmd == 'audit':
         cmd_audit(args[0], args[1], args[2], int(args[3]))
+    elif cmd == 'plan':
+        cmd_plan(args[0], args[1])
     elif cmd == 'summary':
         cmd_summary(*args[:6])
     else:

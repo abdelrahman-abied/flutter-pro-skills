@@ -45,6 +45,11 @@ checker) and `SEC-<slug>` (found by reading). The optional templates use
 `PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N), `REL-` (O), `PLAT-` (P), `ADAPT-` (Q) and `FIRE-` (R) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
+Read the `== PASS PLAN` at the end of the mechanical output first: spawn the
+core templates and only the optional ones it lists under `run:` (plus any the
+user asked about). In `mode: quick`, don't spawn: make the one combined pass
+SKILL.md describes.
+
 Spawn A, B, C and D, plus E if the `flutter-testing` skill is installed or
 tests were asked about, F if `flutter-error-handling` is installed or error
 handling was asked about, and G to R when their skill is installed (the

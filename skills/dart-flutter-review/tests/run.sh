@@ -415,6 +415,28 @@ section "$TMP/s_prof.txt" '== ACCESSIBILITY' | grep -q '^  args: --max 5 --profi
   && pass "v1.1 checkers get --profile" || bad "v1.1 --profile: $(section "$TMP/s_prof.txt" '== ACCESSIBILITY' | head -3 | tr '\n' ' ')"
 bash "$RV" --help 2>&1 | grep -q -- '--no-a11y' && pass "--help documents the v1.1 flags" || bad "--help lacks --no-a11y"
 
+# ---- 4b2. PASS PLAN: which judgment passes have work ------------------------
+P="$TMP/plan_sec"; rm -rf "$P"; mkdir -p "$P"
+printf '== ERROR HANDLING\n  [ERR-001] swallowed-catch (high) x2 — d.\n      lib/a.dart:1  x\n' > "$P/errors.txt"
+printf '== NAVIGATION\n  no navigation findings\n' > "$P/nav.txt"
+printf '== DESIGN SYSTEM\n  [DS-001] raw-color-in-widget (info) x1 — d.\n' > "$P/ds.txt"
+printf '== FIREBASE (skipped: flutter-firebase skill not installed)\n' > "$P/firebase.txt"
+printf '== PERFORMANCE (error: check_performance.py exited 1)\n' > "$P/perf.txt"
+python3 -I "$SKILL/scripts/heuristics.py" plan "$P" 8 > "$TMP/plan.txt" 2>&1
+grep -q '^  run:  F errors: 1 group(s) to confirm (ERR-001)$' "$TMP/plan.txt" \
+  && grep -q '^  skip: G navigation: no findings at low or above$' "$TMP/plan.txt" \
+  && grep -q '^  skip: L design system: no findings at low or above$' "$TMP/plan.txt" \
+  && grep -q '^  skip: R firebase: skill not installed$' "$TMP/plan.txt" \
+  && grep -q '^  run:  J performance: the checker failed' "$TMP/plan.txt" \
+  && grep -q '^  skip: E testing: not run (switched off)$' "$TMP/plan.txt" \
+  && grep -q '^  mode: quick (8 file(s) <= 15)' "$TMP/plan.txt" \
+  && pass "PASS PLAN: run with findings, skip empty/info-only/missing, error means read it, quick mode" \
+  || bad "PASS PLAN: $(tr '\n' '|' < "$TMP/plan.txt")"
+python3 -I "$SKILL/scripts/heuristics.py" plan "$P" 40 | grep -q '^  mode: parallel' \
+  && pass "PASS PLAN: parallel mode above 15 files" || bad "PASS PLAN: no parallel mode for 40 files"
+grep -q '^== PASS PLAN' "$TMP/s_plain.txt" && section "$TMP/s_plain.txt" '== PASS PLAN' | grep -q '^  run:  F errors' \
+  && pass "review.sh prints the PASS PLAN after CANDIDATES" || bad "review.sh: no PASS PLAN section"
+
 # ---- 4c. environment fixes on fixtures/env (stub dart 3.5.0) ----------------
 erun() { d="$1"; shift; PATH="$TMP/bin:$PATH" bash "$TMP/suite_min/dart-flutter-review/scripts/review.sh" "$d" "$@"; }
 rm -rf "$TMP/suite_min/flutter-testing"   # leave only review (+ the hub's lint set for EXTRA LINTS)

@@ -183,6 +183,14 @@ in the shape given in `references/finding-format.md`.
 | (q) Adaptive layout (optional) | `flutter-adaptive-layout` | `ADAPTIVE LAYOUT` | `ADAPT-0xx`, `ADAPT-` |
 | (r) Firebase (optional) | `flutter-firebase` | `FIREBASE` | `FIRE-0xx`, `FIRE-` |
 
+**Follow the `== PASS PLAN`** at the end of the mechanical output: it is the
+cheapest way to a fast review. It lists the core passes, every optional pass
+whose checker found something at low or above (`run:`), and the ones with
+nothing to confirm (`skip:`). Run the `run:` passes. Skip the `skip:` ones
+unless the user asked about that area or reading the code turns up something
+in it: each skipped pass saves a full reading pass, and its checker already
+looked. The plan's `mode:` line says quick or parallel (below).
+
 The security pass (d) is core: "secure by default" means every review looks.
 If neither security skill is installed, run it from the template's own
 checklist and say so on Coverage. Run each optional pass when its skill is
@@ -212,12 +220,19 @@ files, or the user asked for a deep or thorough review.
 4. If a reviewer fails or returns something malformed, run that dimension
    yourself. Don't drop it silently.
 
-**Sequentially, otherwise.** For a small scope, or when sub-agents aren't
-available, run the same passes yourself in this order: (b) lifecycle and UI
-bugs first, then (a), (d), (f), (g), (h), (c), (i) and (e), each if applicable. Use the same templates as
-your checklist and the same finding format, so Phase 4 works the same way.
-For more than ~40 files without sub-agents, sample each layer and say that you
-sampled.
+**Quick mode, otherwise** (`mode: quick` in the plan: 15 files or fewer, or
+no sub-agents). Don't run the templates one by one. Make **one combined
+pass** instead:
+1. Confirm every `run:` group and every High or Medium `[CANDIDATE]` by
+   opening the file at that line. Drop what reading disproves.
+2. Read the files in scope once, in this order: lifecycle and UI bugs, the
+   architecture rules of the detected pattern, security, then error flow.
+   Note only what is at least Medium, or a Low with a one-line fix.
+3. Load a sibling skill only to settle a finding you are unsure of, and read
+   only the section the rule points at, not the whole reference.
+
+Use the same finding format, so Phase 4 works the same way. For more than ~40
+files without sub-agents, sample each layer and say that you sampled.
 
 ## Phase 3: verify every High
 

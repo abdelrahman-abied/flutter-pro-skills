@@ -43,7 +43,8 @@
 # PLATFORM (../flutter-platform-integration/scripts/check_platform.py),
 # ADAPTIVE LAYOUT (../flutter-adaptive-layout/scripts/check_adaptive.py),
 # RELEASE (../flutter-release/scripts/check_release.py; whole project even in diff mode: it reads Gradle/plist/CI files),
-# CANDIDATES (heuristics: confirm by reading), CI RESULT (--ci only). Missing sibling skills are skipped, not errors.
+# CANDIDATES (heuristics: confirm by reading), PASS PLAN (which judgment passes have work),
+# CI RESULT (--ci only). Missing sibling skills are skipped, not errors.
 # Only new architecture violations and analyzer errors can fail --ci; every other section is informational.
 # Pub workspace members use the workspace root's .dart_tool/package_config.json. Generated files are out of
 # scope (arch_check's files[] for lib/). With codegen missing, analyzer cascades are collapsed and not counted.
@@ -383,6 +384,10 @@ DEFER=""; [[ $ERR_RAN == 1 ]] && DEFER="defer-catch"
 echo "== CANDIDATES (heuristic — confirm each by reading the code before reporting)"
 python3 -I "$SKILL_DIR/scripts/heuristics.py" grep "$ROOT" "$WORK/files" "$MAX" "$IS_FLUTTER" $DEFER
 } | tee "$SEC/candidates.txt"
+
+# ---- PASS PLAN: which judgment passes have work (keeps the review fast) -------
+echo
+python3 -I "$SKILL_DIR/scripts/heuristics.py" plan "$SEC" "$NFILES" | tee "$SEC/plan.txt"
 
 # ---- CI verdict + step summary ----------------------------------------------
 RC=0

@@ -16,6 +16,18 @@ breaking change.
   states its choices and writes (it never overwrites). It asks only when the
   architecture is genuinely ambiguous, and in non-interactive runs it takes
   the neighbouring features' pattern and lists its assumptions.
+- **Faster reviews.** `review.sh` ends with a `== PASS PLAN`. It lists
+  which optional reviewer passes have findings to confirm and which have
+  nothing, so they can be skipped. Its mode line says quick (15 files or
+  fewer, or no sub-agents) or parallel. In quick mode the review makes one
+  combined pass instead of running the templates one by one. On the
+  `smelly_app` fixture, 9 of the 14 optional passes are skipped.
+- **A smaller reading budget when writing.** The hub tells agents to read a
+  sibling's SKILL.md and only the reference section it points at. When the
+  scaffold generates a feature, there's no need to pre-load the
+  performance, design-system, accessibility, networking or persistence
+  skills: the templates already pass those checkers, which run once at the
+  end.
 - **Benchmark grader.** Summary lines ("Detected: Bloc … correct rulebook")
   and `confidence: high` are no longer counted as claims or severities.
 

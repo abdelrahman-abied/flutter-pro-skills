@@ -74,8 +74,12 @@ pub, build_runner or the analyzer itself.
    the repository; and localized, user-facing error text. The wording follows
    `flutter-secure-defaults` › `secure-scaffold-checklist.md` §10, so filling
    them in keeps the defaults.
-8. Optionally re-run `arch_check.py` (or the `dart-flutter-review` skill) to
-   confirm the feature still has zero violations after your edits.
+8. **Check once, at the end.** Run `bash ../dart-flutter-review/scripts/review.sh
+   <project-root> --diff HEAD` (or `arch_check.py` alone) to confirm the
+   feature still has zero findings after your edits. You don't need to read the
+   performance, design-system, accessibility, networking or persistence skills
+   before writing: the generated code already passes their checkers, so load
+   one only to fix a finding it reports.
 
 Exit codes: `0` means the plan was printed or the files were written. `2` means
 a usage or environment error: no pubspec, an invalid name, an unsupported or
