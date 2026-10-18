@@ -20,7 +20,9 @@ breaking change.
   `references/profiles.md` (5.6k → 3.4k). `flutter-secure-defaults` now holds
   a minimal token source inline, so storing a token doesn't need the 4.6k
   by-layer reference. The hub sizes tests to the change: a small change gets
-  one focused test per layer it touched.
+  one focused test per layer it touched. Measured on T3 (Sonnet): the cost
+  with the skills fell from $6.3 to $3.4 on average (−46%), with the token
+  still in secure storage and 0 findings.
 - **Benchmark, Sonnet vs Opus.** On T3, Opus without the skills stored the
   token in `SharedPreferences` in both runs (SEC-001 high). Sonnet with the
   skills used `flutter_secure_storage` in both runs (0 findings). On T5,

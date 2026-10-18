@@ -41,6 +41,14 @@ Can a cheaper model with the skills match a stronger one without them?
 | **Opus**, no skills | `SharedPreferences` ×2 | **SEC-001 high, both runs** | $2.1, $1.8 | 5, 4 min |
 | Sonnet, no skills | `SharedPreferences` ×2 | **SEC-001 high, both runs** (plus FORM-003 low) | $1.0, $1.3 | 4, 5 min |
 | **Sonnet + skills** | `flutter_secure_storage` ×2 | **0** | $5.5, $7.1 | 12, 20 min |
+| **Sonnet + skills, smaller skills** (commit `6bc5e36`) | `flutter_secure_storage` ×2 | **0** | **$2.6, $4.3** | 8, 9 min |
+
+The smaller skills (the review half moved to `references/review.md`, a
+minimal token source inline, tests sized to the change) cut T3's cost with
+the skills by 46% ($6.3 → $3.4 on average). Security held: 0 findings, and
+the token in secure storage both times. Tests are still written (168 and 205
+lines, against 239 and 353 before; 0 without the skills). The average
+context per turn fell from about 113k to 56–91k tokens.
 
 **T5, a paginated, adaptive, accessible gallery** (new findings only)
 
