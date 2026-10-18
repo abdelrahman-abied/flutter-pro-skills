@@ -5,10 +5,13 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
-## [Unreleased]
+## [1.7.1] - 2026-10-18
+
+Cheaper writing with the skills, with the same security.
 
 ### Changed
 
+- Every skill is versioned 1.7.1.
 - **Tests on any change.** The hub's WRITE mode now asks for the tests a
   change needs: a repository over a fake, logic state transitions, and one
   widget test per state. Before, only the scaffold asked for them, so agents

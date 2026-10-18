@@ -4,7 +4,7 @@ description: Review, audit or quality-check Dart/Flutter code, a diff, branch or
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.7.0"
+  version: "1.7.1"
   suite: flutter-pro-skills
 ---
 

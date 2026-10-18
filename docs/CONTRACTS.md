@@ -1827,3 +1827,25 @@ views never call `FirebaseFirestore.instance`.
   - `grade.py` reads Claude Code's stream-json, and T3–T5 report `new_*`.
   - `progress.sh` prints one status line per run and flags STALLED.
   - Results are in `bench/README.md` and `results-2026-10-18-claude-code.json`.
+
+## 39. v1.7.1 as built: smaller skills
+
+- **The review half is in `references/review.md`.** Each skill that had a
+  "REVIEW checklist" (16 of them) now keeps it, plus its "Finding examples"
+  or "Reporting findings", in `references/review.md`, unchanged. Its SKILL.md
+  keeps a `## Reviewing` pointer, and its References table lists the file.
+  `dart-flutter-review` and its templates load a skill's SKILL.md **and** its
+  `references/review.md` for each pass. The SKILL.md files together went
+  from ~75.6k to ~52.6k tokens.
+- **The scaffold's per-profile details are in `references/profiles.md`:**
+  what each profile generates, how conventions are inferred, and what it
+  doesn't generate.
+- **`flutter-secure-defaults` carries a minimal `TokenStorage` source
+  inline.** `references/secure-defaults-by-layer.md` is for refresh,
+  multiple tokens or a full session state.
+- **The hub's WRITE mode asks for tests on any change, sized to it:** one
+  focused test per layer touched for a small change, the full set for a new
+  feature.
+- **Measured on T3 (Sonnet, N=2):** the cost with the skills went from
+  $5.5–7.1 to $2.6–4.3 per run, with 0 findings and the token still in
+  secure storage.
