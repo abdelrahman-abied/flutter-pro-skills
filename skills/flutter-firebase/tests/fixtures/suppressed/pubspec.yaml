@@ -1,0 +1,9 @@
+name: fire_suppressed
+publish_to: none
+dependencies:
+  flutter:
+    sdk: flutter
+  firebase_core: ^3.0.0
+  # fire-ignore: FIRE-011 App Check is enforced by the backend gateway in front of this project
+  cloud_firestore: ^5.0.0
+  firebase_storage: ^12.0.0

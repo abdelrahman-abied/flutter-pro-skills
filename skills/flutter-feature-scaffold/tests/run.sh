@@ -16,7 +16,7 @@ SECC="$SKILL/../flutter-secure-defaults/scripts/check_secure_defaults.py"
 ERRC="$SKILL/../flutter-error-handling/scripts/check_errors.py"
 FORMC="$SKILL/../flutter-forms/scripts/check_forms.py"
 # v1.1 checkers (CONTRACTS §21): generated code must be clean for these too
-V11C="flutter-performance:check_performance flutter-persistence:check_persistence flutter-networking:check_networking flutter-platform-integration:check_platform flutter-design-system:check_design_system flutter-adaptive-layout:check_adaptive flutter-accessibility:check_accessibility"
+V11C="flutter-performance:check_performance flutter-persistence:check_persistence flutter-networking:check_networking flutter-firebase:check_firebase flutter-platform-integration:check_platform flutter-design-system:check_design_system flutter-adaptive-layout:check_adaptive flutter-accessibility:check_accessibility"
 TMP="$(mktemp -d "${TMPDIR:-/tmp}/scaffold-tests.XXXXXX")"
 trap 'rm -rf "$TMP"' EXIT
 PASS=0

@@ -1,0 +1,14 @@
+{
+  "rules": {
+    ".read": true,
+    ".write": "auth != null",
+    "legacy": {
+      ".write": "now < 1577836800000"
+    },
+    "users": {
+      "$uid": {
+        ".write": "auth != null && auth.uid === $uid"
+      }
+    }
+  }
+}

@@ -1644,3 +1644,143 @@ size unless the app sets one.
   - **Non-canonical apps:** immich, lichess, hiddify (1 high true positive,
     `Platform.isIOS` read in a web-shipping app's notifier), wonderous,
     news_toolkit and io_flip.
+
+---
+
+# Phase 9 contracts (v1.6.0)
+
+## 36. flutter-firebase
+
+**Scope.** Using Firebase from Flutter safely, per architecture:
+- **Setup:** `firebase_core` initialisation (`await Firebase.initializeApp`
+  once, before `runApp`, with `DefaultFirebaseOptions`), and FlutterFire CLI
+  options per flavor (cross-reference `flutter-release`).
+- **Auth:** `authStateChanges` exposed through a repository, and
+  `FirebaseAuthException` mapped to failures.
+- **Firestore:** typed `withConverter`, bounded queries (`limit`, pagination
+  cursors), listeners tied to the logic holder's lifetime, offline cache
+  behaviour (cross-reference `flutter-persistence`), and transactions and
+  batched writes.
+- **Security rules:** Firestore, Storage and Realtime Database rules, never
+  left in test mode, plus App Check.
+- **Cloud Functions callables.**
+- **FCM:** permission at the moment of use (cross-reference
+  `flutter-platform-integration`), and a top-level background handler with
+  `@pragma('vm:entry-point')`.
+- **Crashlytics and Analytics:** the global handlers themselves belong to
+  `flutter-error-handling` (ERR-012).
+- **Remote Config:** it is public to the client, so it holds no secrets and
+  is no security gate.
+- **Emulators:** used in debug only.
+- **Testing:** `fake_cloud_firestore`, `firebase_auth_mocks`, the emulator
+  suite, and fakes behind repository contracts (cross-reference
+  `flutter-testing`).
+
+**Architecture placement.** Firebase SDK calls form a **data source**:
+`data/sources/` wraps FirebaseAuth, Firestore and the others. The repository
+maps `FirebaseException` and `FirebaseAuthException` to typed failures, and
+`DocumentSnapshot`s to entities. Logic (MVN notifiers through use cases, MVVM
+view models, blocs, GetX controllers) never imports a Firebase package, and
+views never call `FirebaseFirestore.instance`.
+
+**Contract values.**
+
+| Item | Value |
+|---|---|
+| Owner | Agent P9: `skills/flutter-firebase/**` |
+| Prefix | `FIRE-0xx` / `FIRE-<slug>` |
+| Checker | `scripts/check_firebase.py` (§22 CLI and output contract). It also reads `firebase.json`, `firestore.rules`, `storage.rules`, `database.rules.json` and `firestore.indexes.json` (at the project root or the repo root, reported with `../` paths), plus `pubspec.yaml`. It reports nothing in a project with no Firebase dependency |
+| Header | `== FIREBASE` |
+| Schema | `flutter-pro-skills/firebase@1` |
+| Suppression | `fire-ignore`, as a `//` comment in Dart and `.rules` files |
+
+**Ownership.** Cross-reference these; never re-detect them:
+
+| Concern | Owner |
+|---|---|
+| `FirebaseFirestore.instance` in widgets | ARCH-101 |
+| Firebase package imports in UI or logic | ARCH-005 / ARCH-007 / ARCH-012 |
+| PII or tokens in logs, analytics or crash reports | SEC-004 |
+| Tokens in plain storage | SEC-001 |
+| Hard-coded secrets | SEC-008. FIRE documents that `firebase_options.dart` API keys are identifiers, not secrets: protect the data with rules and App Check, not by hiding the key. If SEC-008 flags them, that is a SEC calibration issue for the lead |
+| Global error handlers | ERR-012 |
+| Swallowed catches | ERR-001 |
+| Permission flow | PLAT-011 / PLAT-012 |
+| Flavors and signing | REL |
+| Offline cache policy | PERSIST |
+| Unbounded eager lists in UI | PERF-001 |
+
+**Secure by default.**
+- Rules deny by default and are tested.
+- App Check is on for production.
+- Emulators are connected only in debug.
+- No secrets in Remote Config.
+- No client-trusted roles.
+
+**Review integration (lead).**
+- `== FIREBASE` runs after `== NETWORKING`, with `--no-firebase` and the
+  `--skip` key `firebase`. It is informational.
+- Add reviewer Template R and the dedupe rows.
+- Bump to v1.6.0: twenty-one skills, seventeen checkers.
+
+**Calibration (§24).**
+- **Canonical apps** (zero high or medium false positives):
+  - compass_app, the bloc examples (incl. `flutter_firebase_login`) and the
+    riverpod examples
+  - the FlutterFire `packages/*/*/example` apps and the Flutter team's
+    Firebase codelabs (`codelabs/firebase-*`), all BSD
+- **Non-canonical apps:** `news_toolkit/flutter_news_example` (BSD), `io_flip`
+  (BSD, with Firestore rules) and lichess (GPL).
+- **Copyleft fixtures** are fresh repros with no copied lines.
+
+## 37. Phase 9 as built: v1.6.0 (these entries win over §36)
+
+- **Suite size.** v1.6.0 has twenty-one skills and seventeen checkers. Every
+  `metadata.version` is `"1.6.0"`.
+- **Rules.** `firebase@1` has FIRE-001…012. Five read rules files and seven
+  read Dart.
+
+  Rules-file rules:
+  - FIRE-001 rules-open-access
+  - FIRE-002 rules-test-mode-expiry (the note says whether the date has passed)
+  - FIRE-003 rules-auth-only
+
+  Dart rules:
+  - FIRE-004 emulator-outside-debug
+  - FIRE-005 initialize-app-order (web-only apps are exempt from the
+    ensureInitialized check)
+  - FIRE-006 background-handler-not-entry-point
+  - FIRE-007 unbounded-query
+  - FIRE-008 listener-dropped
+  - FIRE-009 remote-config-secret-or-gate
+  - FIRE-010 client-writes-privilege-field
+  - FIRE-012 app-check-debug-provider
+
+  App-level:
+  - FIRE-011 app-check-missing (low, reported once per project)
+
+  There are also 15 reading slugs. `firestore.indexes.json` is only counted
+  in `stats.index_files`, not judged. Suppression with `fire-ignore` also
+  works as `#` in `pubspec.yaml`, for FIRE-011.
+- **Samples.** Example and sample apps (`example/`, `samples/`) get info for
+  FIRE-004/011/012, as `flutter-release` does. Codelab rules files are graded
+  in full: `firebase deploy` ships them.
+- **review.sh.** `== FIREBASE` runs after NETWORKING, **whole-project even in
+  diff mode**, because the rules files and the caller resolution are
+  project-wide. It takes `--no-firebase` and the `--skip` key `firebase`,
+  and has reviewer Template R.
+- **Ownership.**
+  - FIRE-008 beats the `undisposed-resource` candidate for a discarded
+    Firebase stream subscription.
+  - `firebase_options.dart` API keys are SEC-008 **info** (identifiers),
+    which was verified on lichess and io_flip.
+- **Scaffold.** Generated files get zero FIRE findings, enforced in the
+  scaffold tests.
+- **Calibration.** The run covered 215 projects, 47 of them with Firebase.
+  - **Canonical apps:** zero high or medium false positives. Their true
+    positives are:
+    - FIRE-002 ×12: the FirebaseUI Auth codelab ships test-mode rules that
+      expired on 2022-08-23.
+    - FIRE-008 ×4: FlutterFire example `State`s never cancel `listen`.
+  - **Non-canonical apps:** io_flip (open and auth-only `storage.rules`),
+    news_toolkit and lichess.

@@ -136,6 +136,12 @@ scope:          whole project — 10 non-generated .dart files
   [NET-001] client-without-timeouts (medium) x1 — A Dio client is built without connectTimeout and receiveTimeout (Dio waits forever by default), or a dart:io HttpClient without connectionTimeout. On a dead network the request never fails, so the spinner never stops and the error path never runs. Set both timeouts on the one shared client.
       lib/features/cart/presentation/view/cart_view.dart:35  final response = await Dio().get<int>('https://example.com/cart/count');   [missing connectTimeout and receiveTimeout. MVN: one client provider in core/network (@Riverpod(keepAlive: true)) injected into data/sources/<x>_remote_source.dart; the repository impl maps DTOs and errors; use cases and notifiers never see the client.]
 
+== FIREBASE
+  profile: riverpod (fallback detection from pubspec and folders)
+  classification: not needed (no Firebase dependency)
+  scanned: 0 files; no Firebase dependency in pubspec.yaml, nothing to check
+  no firebase findings
+
 == PLATFORM
   profile: mvn (arch_check, confidence low)
   classification: arch_check files[]

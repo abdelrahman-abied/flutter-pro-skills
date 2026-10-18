@@ -4,7 +4,7 @@ description: Write and review Flutter forms that are clean and secure by default
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.5.0"
+  version: "1.6.0"
   suite: flutter-pro-skills
 ---
 

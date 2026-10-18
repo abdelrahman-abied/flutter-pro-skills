@@ -5,7 +5,36 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
-## [Unreleased]
+## [1.6.0] - 2026-10-18
+
+The suite now has twenty-one skills and seventeen checkers.
+
+### Added
+
+- **flutter-firebase** treats Firebase as a data source behind the
+  repository. It maps `FirebaseException` to failures and snapshots to
+  entities, and keeps Firebase packages out of logic and views. It covers:
+  - initialisation order, and options per flavor
+  - Auth through `authStateChanges`
+  - bounded Firestore queries and listeners tied to the logic holder
+  - security rules that deny by default and are tested, plus App Check
+  - FCM background handlers marked `@pragma('vm:entry-point')`
+  - Remote Config with no secrets and no gates
+  - emulators only in debug
+  - fakes and the emulator suite in tests
+
+  It ships `check_firebase.py` with 12 rules (`FIRE-001…012`). Three of them
+  read `firestore.rules`, `storage.rules` and `database.rules.json`
+  directly: open access, test-mode expiry, and auth-only writes.
+- **dart-flutter-review** gets a `FIREBASE` section (whole project even in
+  diff mode), `--no-firebase` / `--skip firebase`, reviewer Template R and
+  dedupe rows.
+
+### Fixed
+
+- **Benchmark scoring.** `bench/grade.py` scored every checker as 0 findings
+  when the ignored `suite_snapshot/` folder was missing. It now uses the
+  repository's `skills/`, and stops with an error if a checker is missing.
 
 ### Fixed
 
@@ -15,10 +44,22 @@ breaking change.
 
 ### Changed
 
+- `flutter-feature-scaffold` output is tested to produce zero FIRE findings.
+- Every skill is versioned 1.6.0, and `install.sh` installs all twenty-one.
 - **Benchmark re-run (2026-10-18), T3 and the new T4.** T3 reproduces the
   first result: baseline stores the token in `SharedPreferences` (SEC-001
   high), and skills uses `flutter_secure_storage` (0). T4 shows only a small
   difference on this model. See `bench/README.md`.
+
+### Quality
+
+- **Calibration.** `check_firebase.py` was calibrated on 215 projects, 47
+  with Firebase: the canonical apps plus the FlutterFire examples, the
+  Flutter team's Firebase codelabs, news_toolkit, io_flip and lichess. The
+  canonical apps have no high or medium false positives.
+
+  Its true positives include the FirebaseUI Auth codelab's test-mode rules,
+  which expired in 2022.
 
 ## [1.5.0] - 2026-10-18
 

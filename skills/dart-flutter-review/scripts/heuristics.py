@@ -600,10 +600,10 @@ SEV_RANK = {'high': 0, 'medium': 1, 'low': 2, 'info': 3}
 SECTIONS = (('format', 'Format'), ('analyzer', 'Analyzer'), ('fix', 'Auto-fixable'), ('arch', 'Architecture'),
             ('tests', 'Test gaps'), ('errors', 'Error handling'), ('secure', 'Security defaults'),
             ('audit', 'Security audit (scan.sh)'), ('nav', 'Navigation'), ('forms', 'Forms'), ('i18n', 'I18n'),
-            ('perf', 'Performance'), ('persist', 'Persistence'), ('net', 'Networking'), ('platform', 'Platform'), ('ds', 'Design system'), ('adaptive', 'Adaptive layout'), ('a11y', 'Accessibility'), ('release', 'Release'),
+            ('perf', 'Performance'), ('persist', 'Persistence'), ('net', 'Networking'), ('firebase', 'Firebase'), ('platform', 'Platform'), ('ds', 'Design system'), ('adaptive', 'Adaptive layout'), ('a11y', 'Accessibility'), ('release', 'Release'),
             ('candidates', 'Candidates (unconfirmed)'))
-SECTION_RANK = {'arch': 0, 'errors': 1, 'secure': 2, 'persist': 3, 'net': 4, 'platform': 5, 'nav': 6, 'forms': 7, 'a11y': 8,
-                'i18n': 9, 'perf': 10, 'ds': 11, 'adaptive': 12, 'tests': 13, 'release': 14, 'audit': 15}
+SECTION_RANK = {'arch': 0, 'errors': 1, 'secure': 2, 'persist': 3, 'net': 4, 'firebase': 5, 'platform': 6, 'nav': 7, 'forms': 8, 'a11y': 9,
+                'i18n': 10, 'perf': 11, 'ds': 12, 'adaptive': 13, 'tests': 14, 'release': 15, 'audit': 16}
 
 
 def _groups(lines):
@@ -675,7 +675,7 @@ def cmd_summary(secdir, scope, ci, fail_on, rc, mode=''):
         rows.append((label, str(total), note))
         if key != 'candidates':
             for g in groups:
-                g['src'] = SECTION_RANK.get(key, 16)
+                g['src'] = SECTION_RANK.get(key, 17)
             top += groups
     out = ['## Flutter review', '', 'Scope: %s' % scope, '']
     if ci == '1':

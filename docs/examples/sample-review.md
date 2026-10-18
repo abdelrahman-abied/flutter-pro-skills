@@ -9,7 +9,7 @@ template in
 a 10-file fixture with deliberately planted smells. It was copied to a temp
 folder, `flutter pub get --offline` was run in the copy, and then
 `bash skills/dart-flutter-review/scripts/review.sh <copy> --max 3` was run
-(Dart 3.13.5, suite v1.5). The unedited output is in
+(Dart 3.13.5, suite v1.6). The unedited output is in
 [`review-smelly_app.txt`](review-smelly_app.txt). Every finding below comes
 from a line in that output or from reading the fixture's code, and each one was
 re-checked against the source. Nothing was added for effect.
@@ -21,7 +21,7 @@ re-checked against the source. Nothing was added for effect.
 **Scope:** whole project: lib/ 10 files (all read)
 **Toolchain:** Dart 3.13.5 · lints: `flutter_lints` (`package:flutter_lints/flutter.yaml`, no custom rules) · format: all formatted
 **Architecture:** detected: mvn, feature-first, confidence low (signals: `flutter_riverpod` dependency, 1 file under `presentation/notifier/`, 0 use cases). No notifier or use case exists yet, so only MVN rules that don't depend on them are applied
-**Coverage:** mechanical ✓ · architecture ✓ · UI ✓ · Dart/naming ✓ · security ✓ (no findings; the deep `flutter-security-audit` scan is not installed) · errors ✓ · tests ✓ · forms ✓ · performance ✓ · networking ✓ · design system ✓ · adaptive layout ✓ · accessibility ✓ · navigation, i18n, persistence, platform, release: nothing to review (no router, not localised, no local store, no native code, no android/ or ios/ folder)
+**Coverage:** mechanical ✓ · architecture ✓ · UI ✓ · Dart/naming ✓ · security ✓ (no findings; the deep `flutter-security-audit` scan is not installed) · errors ✓ · tests ✓ · forms ✓ · performance ✓ · networking ✓ · design system ✓ · adaptive layout ✓ · accessibility ✓ · navigation, i18n, persistence, Firebase, platform, release: nothing to review (no router, not localised, no local store, no Firebase, no native code, no android/ or ios/ folder)
 **Verdict:** `CartView` has four bugs to fix before merge (network I/O in the widget, a request re-fired on every rebuild, a timer that outlives the screen, and errors swallowed in `CartApi`). The rest is structure, naming and widget polish.
 
 | # | Severity | Finding | Location |

@@ -4,7 +4,7 @@ description: Plan, write and review Dart and Flutter tests the way the project's
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.5.0"
+  version: "1.6.0"
   suite: flutter-pro-skills
 ---
 

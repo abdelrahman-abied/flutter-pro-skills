@@ -19,7 +19,8 @@
 16. Template O: release reviewer (optional)
 17. Template P: platform-integration reviewer (optional)
 18. Template Q: adaptive-layout reviewer (optional)
-19. Template V: adversarial verifier (one per High finding)
+19. Template R: Firebase reviewer (optional)
+20. Template V: adversarial verifier (one per High finding)
 
 ## 1. How to use these templates
 
@@ -41,15 +42,15 @@ between the `PROMPT` fences verbatim and replace every `{{PLACEHOLDER}}`:
 The security template (D) uses `SEC-0xx` (the `flutter-secure-defaults`
 checker) and `SEC-<slug>` (found by reading). The optional templates use
 `TEST-` (E), `ERR-` (F), `NAV-` (G), `FORM-` (H), `I18N-` (I), `PERF-` (J),
-`PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N), `REL-` (O), `PLAT-` (P) and `ADAPT-` (Q) IDs: `-0xx`
+`PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N), `REL-` (O), `PLAT-` (P), `ADAPT-` (Q) and `FIRE-` (R) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
 Spawn A, B, C and D, plus E if the `flutter-testing` skill is installed or
 tests were asked about, F if `flutter-error-handling` is installed or error
-handling was asked about, and G to Q when their skill is installed (the
+handling was asked about, and G to R when their skill is installed (the
 section isn't "skipped") and the code has, respectively, a router, forms,
 user-facing strings, widgets or lists, local storage, theme code, widgets,
-HTTP calls, platform folders and CI config, native code, or more than one form factor,
+HTTP calls, platform folders and CI config, native code, more than one form factor, or Firebase,
 or the user asked about that area, **at the same time**, as read-only sub-agents, in whatever form your agent has
 (for example Claude Code's Agent/Task tool, Codex sub-agents, or another agent's equivalent). Then wait
 for all of them. Don't redo their work while they run. If your agent can't
@@ -1339,7 +1340,70 @@ PROMPT
 
 ---
 
-## 19. Template V: adversarial verifier (one per High finding)
+## 19. Template R: Firebase reviewer (optional)
+
+Use this when the `flutter-firebase` skill is installed (the mechanical output has
+a `== FIREBASE` section that isn't "skipped") and the project depends on a Firebase package or has firestore.rules, storage.rules or database.rules.json, or when the user
+asked about Firebase, Firestore, security rules, FCM, Crashlytics, Remote Config or App Check. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the FIREBASE reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-firebase` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-firebase/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): placement-by-architecture.md, firestore-data.md, security-rules-and-app-check.md, setup-messaging-config.md and testing-firebase.md, plus rules.md for the FIRE-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Firebase for Flutter and FlutterFire documentation.
+
+Start from the `== FIREBASE` section of the mechanical output:
+`grep -n '^== FIREBASE' {{MECHANICAL_OUTPUT}}`. It comes from `check_firebase.py` and lists
+`[FIRE-0xx]` groups with example locations (open security rules, test-mode rules that expire, auth-only write rules, emulators connected outside debug, initializeApp ordering, background message handlers that are not entry points, unbounded queries, dropped listeners, secrets or privilege gates in Remote Config, clients writing role fields, App Check missing or left on the debug provider). It reads the security rules files as well as lib/, and it always covers the whole project, even in diff mode. Sample and example apps get info for emulator and App Check rules. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-firebase/scripts/check_firebase.py {{PROJECT_ROOT}} [--profile <p>]`.
+
+What to do:
+1. Confirm every FIRE-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (an emulator guarded by a flavor or entry point the script missed, a listener cancelled through a helper, a query bounded by its caller, a rules file that is not deployed).
+2. Then read the files in scope for what the script can't see: rules that are never tested, roles trusted from client-written data, currentUser force-unwrapped, snapshot listeners that leak reads, callable functions that trust client input, PII in event parameters and Firestore reads per listener.
+3. Place each fix where this architecture puts it (Firebase SDK calls form a data source in data/sources; the repository maps FirebaseException and FirebaseAuthException to typed failures and snapshots to entities; MVN use cases and notifiers, MVVM view models, blocs and GetX controllers never import a Firebase package, and views never call .instance), and respect the
+   project's own consistent conventions.
+4. The FIRE- id leads, and doesn't duplicate the rest of the suite: .instance in widgets stays ARCH-101, Firebase imports in UI or logic stay ARCH-005/007/012, unmapped FirebaseException stays ERR-004, swallowed catches ERR-001, global handlers ERR-012, PII in analytics or crash reports SEC-004, API keys in firebase_options.dart are SEC-008 info (identifiers, not secrets), permissions PLAT-011/012, flavors REL and cache policy PERSIST. FIRE-008 replaces the undisposed-resource candidate when a Firebase stream subscription is discarded.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <FIRE-0xx (the script's rule) | FIRE-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-firebase › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is data exposed or a feature broken in release (open or expired rules, an emulator in production, initializeApp misordered, a background handler that is tree-shaken). MEDIUM is a weak gate (auth-only writes on a wildcard, secrets or roles in Remote Config, clients writing role fields, a dropped listener, the App Check debug provider). LOW is cost or hygiene (unbounded queries, App Check missing). Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (firebase): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 20. Template V: adversarial verifier (one per High finding)
 
 Spawn one per HIGH finding (they can run in parallel), or batch several small
 ones into one verifier. Paste the finding block verbatim. If you can't spawn

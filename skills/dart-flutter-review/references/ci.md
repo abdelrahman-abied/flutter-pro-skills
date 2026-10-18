@@ -23,7 +23,7 @@ the gate on today without fixing the whole codebase first.
 | Analyzer results when the analyzer **crashed** (often an analyzer plugin), or when the pubspec SDK constraint excludes the installed SDK | No, the section says why |
 | Architecture violations below `fail-on`, or recorded in the baseline | No, reported |
 | Analyzer warnings and infos, format, `dart fix` | No, reported |
-| Test gaps, error handling, security defaults, the `flutter-security-audit` `scan.sh` pass (whatever its own exit code), navigation, forms, i18n, performance, persistence, networking, design system, accessibility, release, platform, adaptive layout, heuristic candidates | No, informational |
+| Test gaps, error handling, security defaults, the `flutter-security-audit` `scan.sh` pass (whatever its own exit code), navigation, forms, i18n, performance, persistence, networking, design system, accessibility, release, platform, adaptive layout, firebase, heuristic candidates | No, informational |
 | A usage or environment error (no `pubspec.yaml`, bad input, missing base ref) | Yes (exit 2) |
 
 `fail-on` is `high` by default. `medium` also fails on medium violations, and
@@ -154,6 +154,7 @@ python3 -I <skills>/flutter-i18n/scripts/check_i18n.py . [--files <list>] [--pro
 python3 -I <skills>/flutter-performance/scripts/check_performance.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-persistence/scripts/check_persistence.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-networking/scripts/check_networking.py . [--files <list>] [--profile <p>]
+python3 -I <skills>/flutter-firebase/scripts/check_firebase.py . [--profile <p>]   # reads firestore/storage/database rules too
 python3 -I <skills>/flutter-platform-integration/scripts/check_platform.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-adaptive-layout/scripts/check_adaptive.py . [--files <list>] [--profile <p>]
 python3 -I <skills>/flutter-release/scripts/check_release.py . [--profile <p>]   # reads Gradle/Xcode/plist/CI files too
@@ -162,8 +163,8 @@ python3 -I <skills>/flutter-accessibility/scripts/check_accessibility.py . [--fi
 bash <skills>/flutter-security-audit/scan.sh . [--json]   # separate skill; exits 1 on Critical/High by itself
 
 # skip sections in review.sh: --no-security (both security passes), --no-audit, --no-nav,
-# --no-forms, --no-i18n, --no-perf, --no-persist, --no-net, --no-ds, --no-a11y, --no-release, --no-platform, --no-adaptive,
-# or one list: --skip audit,nav,forms,i18n,perf,persist,net,ds,a11y,release,platform,adaptive
+# --no-forms, --no-i18n, --no-perf, --no-persist, --no-net, --no-ds, --no-a11y, --no-release, --no-platform, --no-adaptive, --no-firebase,
+# or one list: --skip audit,nav,forms,i18n,perf,persist,net,ds,a11y,release,platform,adaptive,firebase
 ```
 
 `echo $?` after any of them: `0` pass, `1` CI failure, `2` usage error.

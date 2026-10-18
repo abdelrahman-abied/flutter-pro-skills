@@ -57,11 +57,12 @@ template). This format is the hand-off between passes.
 | `REL-0xx` / `REL-<slug>` | Release and delivery (`flutter-release`): `check_release.py` rules (`REL-001` release-signed-with-debug-key), which can point at Gradle, Xcode, plist or CI files, or slugs (`REL-build-number-reused`) |
 | `PLAT-0xx` / `PLAT-<slug>` | Native code (`flutter-platform-integration`): `check_platform.py` rules (`PLAT-006` native-memory-not-freed) or slugs (`PLAT-unvalidated-native-value`) |
 | `ADAPT-0xx` / `ADAPT-<slug>` | Adaptive and responsive layout (`flutter-adaptive-layout`): `check_adaptive.py` rules (`ADAPT-001` io-platform-on-web) or slugs (`ADAPT-selection-lost-on-resize`) |
+| `FIRE-0xx` / `FIRE-<slug>` | Firebase (`flutter-firebase`): `check_firebase.py` rules (`FIRE-002` rules-test-mode-expiry, which points at `firestore.rules`/`storage.rules`/`database.rules.json`) or slugs (`FIRE-rules-untested`) |
 | `DS-0xx` / `DS-<slug>` | Design system and theming (`flutter-design-system`): `check_design_system.py` rules (`DS-005` theme-extension-not-registered) or slugs (`DS-no-component-layer`) |
 | `A11Y-0xx` / `A11Y-<slug>` | Accessibility (`flutter-accessibility`): `check_accessibility.py` rules (`A11Y-001` icon-button-without-label) or slugs (`A11Y-focus-order`) |
 | `LINT:<code>` | An analyzer diagnostic with no better home: `LINT:unused_field`. When a lint is the symptom of a judgment finding, fold it into that finding's evidence |
 
-Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/NET/DS/A11Y/REL/PLAT/ADAPT are free-form but stable: lower-kebab-case,
+Slugs for NAME/UI/ED/TEST/ERR/SEC/NAV/FORM/I18N/PERF/PERSIST/NET/DS/A11Y/REL/PLAT/ADAPT/FIRE are free-form but stable: lower-kebab-case,
 named after the problem. Reuse one slug for one problem across the whole report.
 
 **Overlaps.** An empty or default-returning `catch` can surface three ways: the
@@ -97,6 +98,8 @@ they're stable and the sibling skill documents them:
 | `check_adaptive.py` | `ADAPT-001` / `ADAPT-002` (`dart:io Platform` in UI) | `PLAT-platform-check-in-widget` |
 | `check_adaptive.py` | `ADAPT-006` orientation-decides-layout, when the line reads `MediaQuery.of(context).orientation` | the `mediaquery-of` candidate on that line (elsewhere it stays) |
 | `check_adaptive.py` | `ADAPT-007` screen-size-in-logic | nothing: on a line that also passes `BuildContext` into logic, `ARCH-102` leads and ADAPT-007 is cited |
+| `check_firebase.py` | `FIRE-008` listener-dropped (a Firebase stream's `listen` result discarded) | the `undisposed-resource` candidate / `UI-lifecycle` on that line |
+| `check_firebase.py` | `FIRE-0xx` in Dart | nothing for `.instance` in widgets (`ARCH-101`), Firebase imports in UI/logic (`ARCH-005/007/012`), unmapped `FirebaseException` (`ERR-004`), PII in analytics/crash reports (`SEC-004`): those keep their IDs |
 | `check_release.py` | `REL-006` flavor-read-outside-root | `AP-hardcoded-config-in-sources` (environment and flavor reads) |
 | `check_release.py` | `REL-0xx` on Gradle/Xcode/CI files | a `scan.sh` id for the same file and line (keep REL for signing, flavors, store and CI; `scan.sh` keeps debuggable, allowBackup, ATS, pinning, RASP) |
 
