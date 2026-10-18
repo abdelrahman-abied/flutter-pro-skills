@@ -10,6 +10,12 @@ metadata:
 
 # Flutter adaptive layout
 
+> **Writing a standard feature?** If you're filling in a feature that
+> `flutter-feature-scaffold` generated, its cross-cutting rules already cover
+> this skill's write-time defaults (one or two panes by width). You can stop reading here and check
+> once at the end with `bash ../dart-flutter-review/scripts/review.sh <project-root> --diff HEAD --findings-only`.
+> Read on when the work is about this area itself, or to fix a finding it reports.
+
 One Flutter codebase runs on a 360 dp phone, a 1280 dp tablet, a foldable
 with a hinge down the middle, a resizable desktop window and a browser tab.
 Layouts written for one of them fail quietly on the others: a

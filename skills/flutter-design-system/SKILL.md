@@ -10,6 +10,12 @@ metadata:
 
 # Flutter design system
 
+> **Writing a standard feature?** If you're filling in a feature that
+> `flutter-feature-scaffold` generated, its cross-cutting rules already cover
+> this skill's write-time defaults (colours, text styles and dark mode). You can stop reading here and check
+> once at the end with `bash ../dart-flutter-review/scripts/review.sh <project-root> --diff HEAD --findings-only`.
+> Read on when the work is about this area itself, or to fix a finding it reports.
+
 A design system is what lets a Flutter app get a dark theme, a high-contrast
 mode or a rebrand by changing one folder instead of every screen. This skill
 writes tokens, themes and components that are correct for the architecture

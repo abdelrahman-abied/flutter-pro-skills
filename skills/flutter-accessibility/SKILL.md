@@ -10,6 +10,12 @@ metadata:
 
 # Flutter accessibility
 
+> **Writing a standard feature?** If you're filling in a feature that
+> `flutter-feature-scaffold` generated, its cross-cutting rules already cover
+> this skill's write-time defaults (labels, tooltips, tap targets and text scale). You can stop reading here and check
+> once at the end with `bash ../dart-flutter-review/scripts/review.sh <project-root> --diff HEAD --findings-only`.
+> Read on when the work is about this area itself, or to fix a finding it reports.
+
 About one user in five relies on some accessibility setting: a screen reader,
 larger text, switch or keyboard access, reduced motion or higher contrast.
 Flutter draws its own pixels, so the platform only knows what the app puts in

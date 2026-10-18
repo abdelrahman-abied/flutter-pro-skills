@@ -10,6 +10,12 @@ metadata:
 
 # Flutter networking
 
+> **Writing a standard feature?** If you're filling in a feature that
+> `flutter-feature-scaffold` generated, its cross-cutting rules already cover
+> this skill's write-time defaults (the shared client, timeouts and pagination). You can stop reading here and check
+> once at the end with `bash ../dart-flutter-review/scripts/review.sh <project-root> --diff HEAD --findings-only`.
+> Read on when the work is about this area itself, or to fix a finding it reports.
+
 Most API bugs aren't in the request itself. A `Dio()` with no timeouts hangs
 a spinner forever on a dead network, a client built per call skips the auth
 interceptor, a scroll listener fetches page 3 twice, a retry interceptor

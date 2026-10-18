@@ -10,6 +10,12 @@ metadata:
 
 # Flutter performance
 
+> **Writing a standard feature?** If you're filling in a feature that
+> `flutter-feature-scaffold` generated, its cross-cutting rules already cover
+> this skill's write-time defaults (lists, images and rebuilds). You can stop reading here and check
+> once at the end with `bash ../dart-flutter-review/scripts/review.sh <project-root> --diff HEAD --findings-only`.
+> Read on when the work is about this area itself, or to fix a finding it reports.
+
 Smooth Flutter apps come from a few habits applied in the right layer:
 rebuild only what changed, build only what's visible, decode images at the
 size they're shown, keep expensive paint effects out of lists, and keep

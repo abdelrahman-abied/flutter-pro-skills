@@ -108,6 +108,19 @@ a finding whose note you can't act on.
   source. The repository maps errors to the project's `Failure`.
 - **Text:** user-facing strings through the project's l10n (`AppLocalizations`),
   never literals in widgets.
+- **Tests (no need to load `flutter-testing`):** extend the generated tests to
+  cover what you filled in. Use fakes behind the contracts, not mocks, and no
+  real network or delays.
+  - **The repository** over a fake source: the success path, and each error
+    mapped to its `Failure`.
+  - **The logic holder** (notifier, view model or bloc): loading, then data,
+    empty or error. For pagination, test that the next page is appended, that
+    the in-flight guard drops a second request, and that a failed page keeps
+    the list.
+  - **The screen:** one widget test per state. For two panes, test both size
+    classes (`tester.view.physicalSize`, then `addTearDown(tester.view.reset)`).
+  - **Labels:** find controls by their label (`find.bySemanticsLabel`), so the
+    test also checks accessibility.
 
 Exit codes: `0` means the plan was printed or the files were written. `2` means
 a usage or environment error: no pubspec, an invalid name, an unsupported or
