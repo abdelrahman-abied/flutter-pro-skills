@@ -182,8 +182,10 @@ model (OpenCode + big-pickle, 2 runs each):
 | **Write**: add login and store the token | Token in `SharedPreferences` (1 high security finding, both runs) | `flutter_secure_storage`, **0 security findings** (both runs) |
 | **Review**: 12 planted issues | 92% recall, 0.5 MVN decoys flagged | 96% recall, **0** decoys flagged, more extra findings, about 6× slower |
 | **Bloc architecture**: 2 planted violations | 2/2 | 2/2, with 1.5 claims contradicting bloclibrary (a calibration bug, **fixed** since) |
+| **Write a list screen** (T4, re-run 2026-10-18) | 1 of 2 runs added a layering violation and a swallowed catch | 0 new findings in both runs; one also fixed existing issues. A small difference on this model |
 
-Small N, author-written fixtures, one model. See the full method, the
+T3 was re-run on 2026-10-18 with the same result (baseline: SEC-001 high in
+both runs; skills: 0). Small N, author-written fixtures, one model. See the full method, the
 limitations and how to re-run it in [bench/README.md](bench/README.md).
 
 ## Works alongside the official skills

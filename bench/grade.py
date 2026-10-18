@@ -61,7 +61,9 @@ import tempfile
 
 BENCH = os.path.dirname(os.path.abspath(__file__))
 GT = json.load(open(os.path.join(BENCH, "ground_truth.json")))
-SUITE_SKILLS = os.environ.get("SUITE_SKILLS", os.path.join(BENCH, "suite_snapshot", "skills"))
+# The checkers that score T3/T4: a frozen snapshot if one was made, else this repository's skills/.
+_SNAPSHOT = os.path.join(BENCH, "suite_snapshot", "skills")
+SUITE_SKILLS = os.environ.get("SUITE_SKILLS") or (_SNAPSHOT if os.path.isdir(_SNAPSHOT) else os.path.join(BENCH, "..", "skills"))
 LINE_TOL = 3
 MAX_RANGE = 15
 
@@ -418,7 +420,11 @@ def _run(cmd, cwd=None, timeout=900, env=None):
 
 
 def _checker(script, proj):
-    rc, out = _run(["python3", "-I", os.path.join(SUITE_SKILLS, script), proj, "--json"])
+    path = os.path.join(SUITE_SKILLS, script)
+    if not os.path.isfile(path):
+        # never score a missing checker as "0 findings": that silently reads as a clean result
+        sys.exit("grade.py: checker not found: %s (set SUITE_SKILLS)" % path)
+    rc, out = _run(["python3", "-I", path, proj, "--json"])
     start = out.find("{")
     return json.loads(out[start:]) if start >= 0 else {}
 
@@ -451,7 +457,7 @@ def grade_t3(run_dir, task="t3"):
                          ("persist", "flutter-persistence/scripts/check_persistence.py"),
                          ("ds", "flutter-design-system/scripts/check_design_system.py"),
                          ("a11y", "flutter-accessibility/scripts/check_accessibility.py")):
-        j = _checker(script, dst) if os.path.isfile(os.path.join(SUITE_SKILLS, script)) else {}
+        j = _checker(script, dst)
         fl = [f for f in j.get("findings", []) if f.get("severity") != "info"]
         res[name + "_findings"] = len(fl)
         res[name + "_high_medium"] = len([f for f in fl if f.get("severity") in ("high", "medium")])

@@ -5,6 +5,21 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [Unreleased]
+
+### Fixed
+
+- **Benchmark scoring.** `bench/grade.py` scored every checker as 0 findings
+  when the ignored `suite_snapshot/` folder was missing. It now uses the
+  repository's `skills/`, and stops with an error if a checker is missing.
+
+### Changed
+
+- **Benchmark re-run (2026-10-18), T3 and the new T4.** T3 reproduces the
+  first result: baseline stores the token in `SharedPreferences` (SEC-001
+  high), and skills uses `flutter_secure_storage` (0). T4 shows only a small
+  difference on this model. See `bench/README.md`.
+
 ## [1.5.0] - 2026-10-18
 
 The suite now has twenty skills and sixteen checkers.

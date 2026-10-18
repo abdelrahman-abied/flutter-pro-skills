@@ -24,8 +24,48 @@ limitations before quoting the numbers.
 | **T1 review**: "Review this Flutter app and list every real problem with file:line and severity." | MVN/Riverpod shop app | 12 planted issues (architecture, errors, security, navigation, forms, i18n, UI), plus 3 MVN decoys that look wrong but are correct |
 | **T2 architecture**: "Is this architecture correct? List violations." | bloclibrary-style weather app | 2 planted violations, plus 6 decoys that follow bloclibrary conventions |
 | **T3 write**: "Add a login feature that calls POST /login and stores the returned token, following this project's architecture." | MVN app | Scored by the suite's checkers on the result (security, architecture, error handling) and by `dart analyze` |
+| **T4 write** (added 2026-10-18): "Add a products screen that loads GET /products … in a scrollable list with each product's image, name, price and a favourite icon button, with pull-to-refresh, following this project's architecture." | the T3 MVN app | Scored like T3, plus the performance, design-system and accessibility checkers, minus the fixture's own findings |
 
 ## Results
+
+### Re-run on 2026-10-18 (suite v1.4–v1.5, T3 and the new T4)
+
+Same agent, model and isolation as below, N=2 per cell. **Wall-clock times
+are not comparable in this run**: the machine slept during several runs, so
+some report about 11 hours.
+
+**T3, add login and store the token.** This reproduces the first run:
+
+| | Token stored in | Security findings |
+|---|---|---|
+| Baseline r1 / r2 | `SharedPreferences` ×2 | **1 high each** (SEC-001; r1 also SEC-010) |
+| Skills r1 / r2 | `flutter_secure_storage` ×2 | **0** |
+
+**T4, a products screen with images and a favourite button per row** (scored
+by the performance, design-system, accessibility, architecture and error
+checkers). The fixture already has one low PERF-004 and one low A11Y-003 in
+`product_tile.dart`. They are excluded below.
+
+| | New findings in the agent's code | Lazy list | Analyzer |
+|---|---|---|---|
+| Baseline r1 | ARCH-007 (logic imports a concrete data source), ERR-001 (swallowed catch) | yes | clean |
+| Baseline r2 | none | yes | clean |
+| Skills r1 | none | yes | clean |
+| Skills r2 | none; it also fixed the fixture's two existing lows | yes | clean |
+
+**What to take from T4.** It barely separates the two configurations on this
+model. The free model writes a lazy list with labelled buttons either way. The
+only differences are one baseline run that broke a layering rule and swallowed
+an error, and one skills run that cleaned up existing issues. T4 needs a harder
+prompt to say more.
+
+**A grader bug was fixed while scoring this run.** `grade.py` looked for the
+checkers in an ignored `suite_snapshot/` folder. When that folder was missing,
+every checker silently scored 0, which read as "clean". It now falls back to
+this repository's `skills/`, and stops with an error if a checker is missing.
+The first grading of this run was all zeros for that reason.
+
+Raw grades: `results-2026-10-18-opencode-big-pickle.json`.
 
 ### T3: writing code
 
@@ -89,8 +129,8 @@ by the regression fixture `calib_bloc_weather`. This table is from the run
 
 ```bash
 cd bench
-./run.sh t1 skills 1                       # one isolated run; also: t2|t3, baseline|skills
-N=2 PAR=4 MODEL=opencode/big-pickle ./all.sh   # the full matrix
+./run.sh t1 skills 1                       # one isolated run; also: t2|t3|t4, baseline|skills
+N=2 PAR=4 MODEL=opencode/big-pickle ./all.sh   # the full matrix (TASKS="t3 t4" for a subset)
 python3 grade.py summary runs/             # grade everything (add --json)
 AGENT_CMD='claude -p' ./run.sh t3 skills 1     # try another agent CLI
 ```
