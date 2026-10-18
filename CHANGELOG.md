@@ -5,6 +5,16 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [Unreleased]
+
+### Fixed
+
+- **CI failed on GitHub's runners since v1.0.0.** The scaffold tests compared
+  generated file lists sorted with the runner's locale collation, which
+  differs from byte order (`orders_repository_remote.dart` vs
+  `orders_repository.dart`). The test now sorts with `LC_ALL=C`. The full
+  suite also passes under `en_US.UTF-8`.
+
 ## [1.6.0] - 2026-10-18
 
 The suite now has twenty-one skills and seventeen checkers.

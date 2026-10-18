@@ -5,6 +5,9 @@
 # pattern whose packages aren't in the offline pub cache is skipped, not failed.
 # Prints PASS/FAIL/SKIP lines; exits 1 on any failure.
 set -u
+# Byte-order sorting everywhere: the expected/*.txt lists and comm(1) assume it, and a
+# locale collation (en_US.UTF-8 on CI runners) orders `_remote.dart` before `.dart`.
+export LC_ALL=C
 
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SKILL="$(cd "$HERE/.." && pwd)"
