@@ -4,7 +4,7 @@ description: Write and review Flutter code that talks to native code, clean and 
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.6.1"
+  version: "1.7.0"
   suite: flutter-pro-skills
 ---
 

@@ -4,7 +4,7 @@ description: Localize Flutter apps and review localization by the app's own arch
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.6.1"
+  version: "1.7.0"
   suite: flutter-pro-skills
 ---
 

@@ -4,7 +4,7 @@ description: Write and review Firebase in Flutter, secure by default and placed 
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.6.1"
+  version: "1.7.0"
   suite: flutter-pro-skills
 ---
 

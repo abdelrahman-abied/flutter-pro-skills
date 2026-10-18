@@ -1784,3 +1784,46 @@ views never call `FirebaseFirestore.instance`.
     - FIRE-008 ×4: FlutterFire example `State`s never cancel `listen`.
   - **Non-canonical apps:** io_flip (open and auth-only `storage.rules`),
     news_toolkit and lichess.
+
+---
+
+# Phase 10 as built: v1.7.0 (speed and cost)
+
+## 38. Review speed, writing cost and the benchmark on Claude Code
+
+- **`== PASS PLAN`.** `review.sh` prints it after CANDIDATES (via
+  `heuristics.py plan <section-dir> <n-files>`).
+  - The core passes A–D always run.
+  - An optional pass whose section has a group at low or above is `run:`.
+  - One with nothing, or info only, is `skip:`.
+  - A skill that is missing is "skill not installed".
+  - A checker that failed is `run:` with "review this area by reading".
+  - `mode: quick` applies at ≤15 files, or with no sub-agents: one combined
+    pass, then verify the Highs. Otherwise the mode is parallel.
+  - The review SKILL.md and `reviewer-prompts.md` follow the plan.
+- **`review.sh --findings-only`.**
+  - It re-runs itself without the flag (and with `--no-extra`), then
+    `heuristics.py compact` keeps only checker groups at low or above, with
+    their example locations, plus analyzer ERRORs and WARNINGs.
+  - It leaves out context, format, auto-fixable, extra lints, test gaps,
+    candidates, the PASS PLAN and the security audit.
+  - It's for an agent checking its own change once; it isn't a review report.
+    Exit codes are unchanged.
+- **Scaffold step 3: decide, state the choice, write.** The agent asks only
+  when the architecture is ambiguous (low confidence, the pattern looks
+  wrong, or two patterns with no declared target). In a non-interactive run
+  it follows the neighbouring features and lists its assumptions.
+- **Scaffold step 8: check once with `--findings-only`.** The scaffold also
+  carries the screen's cross-cutting rules and a test checklist. Six
+  specialists (performance, design system, accessibility, adaptive layout,
+  networking, i18n) open with a "Writing a standard feature?" stop-early note.
+- **The hub's WRITE mode keeps the reading budget small.** Read a sibling's
+  SKILL.md and only the reference section it points at.
+- **Benchmark.**
+  - `AGENT=claude` runs `claude -p` on the user's login. HOME is kept, and
+    isolation comes from `--setting-sources project`, plus
+    `--disable-slash-commands` for baseline, with the suite in the copy's
+    `.claude/skills`.
+  - `grade.py` reads Claude Code's stream-json, and T3–T5 report `new_*`.
+  - `progress.sh` prints one status line per run and flags STALLED.
+  - Results are in `bench/README.md` and `results-2026-10-18-claude-code.json`.

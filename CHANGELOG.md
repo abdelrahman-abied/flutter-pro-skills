@@ -5,7 +5,10 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
-## [Unreleased]
+## [1.7.0] - 2026-10-18
+
+Faster reviews, cheaper writing, and a scaffold that writes instead of
+stopping to ask. Measured on Claude Code and documented in `bench/README.md`.
 
 ### Fixed
 
@@ -51,6 +54,7 @@ breaking change.
 
 ### Changed
 
+- Every skill is versioned 1.7.0.
 - **Benchmark.**
   - New task T5: a paginated, adaptive, accessible gallery.
   - New `new_*` counts: only the findings the agent added count.
