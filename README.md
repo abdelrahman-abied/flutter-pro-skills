@@ -187,7 +187,10 @@ model (OpenCode + big-pickle, 2 runs each):
 | **Write a list screen** (T4, re-run 2026-10-18) | 1 of 2 runs added a layering violation and a swallowed catch | 0 new findings in both runs; one also fixed existing issues. A small difference on this model |
 
 T3 was re-run on 2026-10-18 with the same result (baseline: SEC-001 high in
-both runs; skills: 0). Small N, author-written fixtures, one model. See the full method, the
+both runs; skills: 0). On Claude Code (Opus), both configurations write
+clean code with 0 checker findings. The skills add tests (37–43 vs 0–12
+per run) at about 3–4× the cost, and reviews hit 12/12 either way, now in
+about the same time. Small N, author-written fixtures, one model. See the full method, the
 limitations and how to re-run it in [bench/README.md](bench/README.md).
 
 ## Works alongside the official skills

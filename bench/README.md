@@ -29,6 +29,47 @@ limitations before quoting the numbers.
 
 ## Results
 
+### On Claude Code (Opus), 2026-10-18 (suite after the PASS PLAN and reading-budget changes)
+
+`AGENT=claude`, N=2 per cell, the same fixtures and graders. The model is
+much stronger than big-pickle, so this asks a different question: does the
+suite still add anything when the agent is already good?
+
+**T5, write a paginated, adaptive, accessible gallery**
+
+| | New findings | Paginates / list-detail / analyzer | Tests written | Time | Cost |
+|---|---|---|---|---|---|
+| Baseline r1 / r2 | 0, 0 | yes / yes / clean | **0 and 12** | 15, 17 min | $3.6, $6.8 |
+| Skills r1 / r2 | 0, 0 | yes / yes / clean | **43 and 37** | 22, 22 min | **$17.0, $18.3** |
+
+**T1, review (12 planted issues, 3 MVN decoys)**
+
+| | Recall | Extra claims | Decoys flagged | Time | Cost |
+|---|---|---|---|---|---|
+| Baseline r1 / r2 | 12/12, 12/12 | 8, 9 | 0, 1* | 5, 5 min | $2.0, $1.9 |
+| Skills r1 / r2 | 12/12, 12/12 | 7, 13 | 0, 0 | 6, 8 min | $2.9, $3.3 |
+
+\* As before, the matched claim is a real race-condition finding on the
+decoy's line, not an objection to `ref.watch`.
+
+**What to take from it.**
+- **On a strong model the checkers find nothing to fix either way.** Opus
+  writes clean, layered, accessible code on its own, so "0 findings" doesn't
+  separate the configurations here.
+- **The skills' measurable gain is tests and layering.** The skills runs
+  wrote 3–4× as many tests (one baseline run wrote none), plus the full MVN
+  layers (use cases), hence more files.
+- **That gain costs about 3–4× on writing** ($17–18 vs $4–7), because the
+  agent still loads about 7 skills and runs the checkers about 10 times. This
+  is the next thing to cut.
+- **Review is now close to baseline in time and cost** (6–8 vs 5 min, about
+  1.5× the cost), down from about 3× the time on big-pickle before the PASS
+  PLAN and quick mode, with the same 12/12 recall.
+- **A grader fix:** `grade.py` now reads Claude Code's stream-json (the final
+  `result`). Before that fix, every Claude review scored 0/12.
+
+Raw grades: `results-2026-10-18-claude-code.json`.
+
 ### Re-run on 2026-10-18, second pass (suite v1.6.1: T1, T2 and the new T5)
 
 Same agent, model and isolation, N=2 per cell, with the machine kept awake

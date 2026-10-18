@@ -113,6 +113,7 @@ def load_text(path):
         path = os.path.join(path, "output.jsonl")
     raw = open(path, encoding="utf-8", errors="replace").read()
     parts = []
+    claude_final, claude_texts = None, []
     is_jsonl = path.endswith(".jsonl")
     if is_jsonl:
         for line in raw.splitlines():
@@ -125,6 +126,15 @@ def load_text(path):
                 continue
             if ev.get("type") == "text":
                 parts.append((ev.get("part", {}).get("messageID"), ev.get("part", {}).get("text", "")))
+            elif ev.get("type") == "result" and isinstance(ev.get("result"), str):
+                claude_final = ev["result"]  # Claude Code stream-json: the final answer
+            elif ev.get("type") == "assistant":
+                for c in (ev.get("message") or {}).get("content") or []:
+                    if c.get("type") == "text":
+                        claude_texts.append(c.get("text", ""))
+        if claude_final is not None or claude_texts:
+            parts = [(None, claude_final if claude_final and not os.environ.get("GRADE_ALL_TEXT")
+                      else "\n\n".join(claude_texts))]
         if not os.environ.get("GRADE_ALL_TEXT") and parts:
             last = parts[-1][0]
             parts = [p for p in parts if p[0] == last]

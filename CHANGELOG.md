@@ -28,6 +28,11 @@ breaking change.
   performance, design-system, accessibility, networking or persistence
   skills: the templates already pass those checkers, which run once at the
   end.
+- **Benchmark on Claude Code.** `grade.py` reads Claude Code's stream-json.
+  New results with `AGENT=claude`:
+  - T5: 0 findings either way. The skills add 37–43 tests vs 0–12, at about
+    3–4× the cost.
+  - T1: 12/12 either way. With the skills it takes 6–8 min vs 5.
 - **Benchmark grader.** Summary lines ("Detected: Bloc … correct rulebook")
   and `confidence: high` are no longer counted as claims or severities.
 
