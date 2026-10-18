@@ -28,6 +28,8 @@ breaking change.
   it, not checker by checker. The scaffold also carries the screen's
   cross-cutting rules (lists, images, theme, semantics, layout, network,
   text), so a standard feature doesn't need six specialist skills loaded.
+  Measured on Claude Code (T5): cost $17–18 → $10.5–13.8 per run, and
+  checker runs 10–11 → 2–3, with 0 findings either way.
 - **A smaller reading budget when writing.** The hub tells agents to read a
   sibling's SKILL.md and only the reference section it points at. When the
   scaffold generates a feature, there's no need to pre-load the

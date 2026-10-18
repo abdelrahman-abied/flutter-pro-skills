@@ -54,7 +54,8 @@
    },
    "skills_loaded": [],
    "checker_runs": 0,
-   "cost_usd": 1.97
+   "cost_usd": 1.97,
+   "turns": 28
   }
  },
  {
@@ -117,7 +118,8 @@
    },
    "skills_loaded": [],
    "checker_runs": 0,
-   "cost_usd": 1.88
+   "cost_usd": 1.88,
+   "turns": 26
   }
  },
  {
@@ -179,7 +181,8 @@
     "dart-flutter-review"
    ],
    "checker_runs": 3,
-   "cost_usd": 2.91
+   "cost_usd": 2.91,
+   "turns": 30
   }
  },
  {
@@ -248,7 +251,8 @@
     "flutter-architecture"
    ],
    "checker_runs": 5,
-   "cost_usd": 3.26
+   "cost_usd": 3.26,
+   "turns": 33
   }
  },
  {
@@ -312,7 +316,8 @@
    },
    "skills_loaded": [],
    "checker_runs": 0,
-   "cost_usd": 3.64
+   "cost_usd": 3.64,
+   "turns": 58
   }
  },
  {
@@ -380,7 +385,8 @@
    },
    "skills_loaded": [],
    "checker_runs": 0,
-   "cost_usd": 6.81
+   "cost_usd": 6.81,
+   "turns": 90
   }
  },
  {
@@ -453,7 +459,8 @@
     "flutter-testing"
    ],
    "checker_runs": 11,
-   "cost_usd": 16.98
+   "cost_usd": 16.98,
+   "turns": 148
   }
  },
  {
@@ -525,7 +532,153 @@
     "flutter-testing"
    ],
    "checker_runs": 10,
-   "cost_usd": 18.31
+   "cost_usd": 18.31,
+   "turns": 143
+  }
+ },
+ {
+  "task": "t5",
+  "run": "runs/t5-skills-r3",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "perf_findings": 0,
+  "perf_high_medium": 0,
+  "perf_ids": [],
+  "persist_findings": 0,
+  "persist_high_medium": 0,
+  "persist_ids": [],
+  "ds_findings": 0,
+  "ds_high_medium": 0,
+  "ds_ids": [],
+  "a11y_findings": 0,
+  "a11y_high_medium": 0,
+  "a11y_ids": [],
+  "net_findings": 0,
+  "net_ids": [],
+  "plat_findings": 0,
+  "plat_ids": [],
+  "adapt_findings": 0,
+  "adapt_ids": [],
+  "new_findings": 0,
+  "new_high_medium": 0,
+  "new_ids": [],
+  "calls_post_login": false,
+  "token_store": "other/none",
+  "paginates": true,
+  "adaptive_layout": true,
+  "lazy_list": true,
+  "login_files": 0,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t5-skills-r3",
+  "meta": {
+   "exit": 0,
+   "seconds": 1312,
+   "model": "claude-code:claude-opus-5[1m]",
+   "config": "skills",
+   "steps": 170,
+   "tools": {
+    "Bash": 43,
+    "Skill": 6,
+    "ToolSearch": 1,
+    "TodoWrite": 5,
+    "Write": 28,
+    "Edit": 26,
+    "Read": 1
+   },
+   "skills_loaded": [
+    "flutter-accessibility",
+    "flutter-adaptive-layout",
+    "flutter-design-system",
+    "flutter-feature-scaffold",
+    "flutter-networking",
+    "flutter-testing"
+   ],
+   "checker_runs": 3,
+   "cost_usd": 13.84,
+   "turns": 117
+  }
+ },
+ {
+  "task": "t5",
+  "run": "runs/t5-skills-r4",
+  "arch_violations": 0,
+  "arch_ids": [],
+  "sec_findings": 0,
+  "sec_high": 0,
+  "sec_ids": [],
+  "err_high_medium": 0,
+  "err_ids": [],
+  "forms_findings": 0,
+  "forms_ids": [],
+  "i18n_findings": 0,
+  "i18n_ids": [],
+  "perf_findings": 0,
+  "perf_high_medium": 0,
+  "perf_ids": [],
+  "persist_findings": 0,
+  "persist_high_medium": 0,
+  "persist_ids": [],
+  "ds_findings": 0,
+  "ds_high_medium": 0,
+  "ds_ids": [],
+  "a11y_findings": 0,
+  "a11y_high_medium": 0,
+  "a11y_ids": [],
+  "net_findings": 0,
+  "net_ids": [],
+  "plat_findings": 0,
+  "plat_ids": [],
+  "adapt_findings": 0,
+  "adapt_ids": [],
+  "new_findings": 0,
+  "new_high_medium": 0,
+  "new_ids": [],
+  "calls_post_login": false,
+  "token_store": "other/none",
+  "paginates": true,
+  "adaptive_layout": true,
+  "lazy_list": true,
+  "login_files": 0,
+  "pub_get": "offline-ok",
+  "analyze_errors": 0,
+  "analyze_warnings": 0,
+  "analyze_infos": 0,
+  "analyze_error_lines": [],
+  "name": "t5-skills-r4",
+  "meta": {
+   "exit": 0,
+   "seconds": 1136,
+   "model": "claude-code:claude-opus-5[1m]",
+   "config": "skills",
+   "steps": 144,
+   "tools": {
+    "Skill": 3,
+    "Bash": 36,
+    "Read": 1,
+    "Write": 26,
+    "Edit": 25
+   },
+   "skills_loaded": [
+    "flutter-accessibility",
+    "flutter-adaptive-layout",
+    "flutter-feature-scaffold"
+   ],
+   "checker_runs": 2,
+   "cost_usd": 10.53,
+   "turns": 95
   }
  }
 ]

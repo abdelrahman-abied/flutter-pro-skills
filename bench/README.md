@@ -68,6 +68,24 @@ decoy's line, not an objection to `ref.watch`.
 - **A grader fix:** `grade.py` now reads Claude Code's stream-json (the final
   `result`). Before that fix, every Claude review scored 0/12.
 
+**After the cost cut** (`review.sh --findings-only` and the scaffold's
+cross-cutting rules, commit `c30bcc0`), T5 with the skills, 2 more runs:
+
+| | Cost | Time | Turns | Skills loaded | Checker runs | New findings | Tests |
+|---|---|---|---|---|---|---|---|
+| Skills before (r1 / r2) | $17.0, $18.3 | 22, 22 min | 148, 143 | 7, 7 | 11, 10 | 0 | 43, 37 |
+| **Skills after (r3 / r4)** | **$13.8, $10.5** | 21, 18 min | 117, 95 | 6, 3 | **3, 2** | 0 | 28, 15 |
+| Baseline (r1 / r2) | $3.6, $6.8 | 15, 17 min | 58, 90 | 0 | 0 | 0 | 0, 12 |
+
+- **Cost fell 24–42%**, and checker runs fell from 10–11 to 2–3, with the same
+  quality (0 findings, every feature).
+- **The skills still cost about 2–3× baseline.** One run still loaded 6
+  specialist skills: the prompt names dark mode and screen readers, and
+  their descriptions match.
+- **Fewer tests than before** (28 and 15 vs 43 and 37), but still more than
+  baseline (0 and 12). The run that skipped `flutter-testing` wrote the
+  fewest.
+
 Raw grades: `results-2026-10-18-claude-code.json`.
 
 ### Re-run on 2026-10-18, second pass (suite v1.6.1: T1, T2 and the new T5)
