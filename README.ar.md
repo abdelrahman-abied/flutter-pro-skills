@@ -90,6 +90,8 @@ cd flutter-pro-skills && ./install.sh
 
 ## نتايج الـ benchmark (بصراحة)
 
+**أهم نتيجة (Claude Code، v1.7.0):** لما طلبنا "ضيف login واحفظ الـ token"، **Opus من غير الـ skills حفظه في `SharedPreferences` العادي في المرتين** (ثغرة SEC-001). أما **Sonnet بالـ skills فحفظه في `flutter_secure_storage` في المرتين، ومن غير ولا مشكلة أمان**. وفي مهمة شاشة المنتجات، Sonnet بالـ skills كان قد Opus بالظبط (0 مشاكل) وبنفس التكلفة تقريبًا.
+
 | المهمة | من غير skills | بالـ skills |
 |---|---|---|
 | كتابة login وحفظ الـ token | `SharedPreferences` ❌ | `flutter_secure_storage` ✅ |

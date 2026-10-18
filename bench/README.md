@@ -29,6 +29,46 @@ limitations before quoting the numbers.
 
 ## Results
 
+### Sonnet with the skills vs Opus without them (Claude Code, 2026-10-18, v1.7.0)
+
+Can a cheaper model with the skills match a stronger one without them?
+`AGENT=claude CLAUDE_MODEL=sonnet|opus`, N=2 per cell.
+
+**T3, add login and store the token**
+
+| | Token stored in | Security findings | Cost | Time |
+|---|---|---|---|---|
+| **Opus**, no skills | `SharedPreferences` ×2 | **SEC-001 high, both runs** | $2.1, $1.8 | 5, 4 min |
+| Sonnet, no skills | `SharedPreferences` ×2 | **SEC-001 high, both runs** (plus FORM-003 low) | $1.0, $1.3 | 4, 5 min |
+| **Sonnet + skills** | `flutter_secure_storage` ×2 | **0** | $5.5, $7.1 | 12, 20 min |
+
+**T5, a paginated, adaptive, accessible gallery** (new findings only)
+
+| | New findings | Tests written | Cost | Time |
+|---|---|---|---|---|
+| **Opus**, no skills | 0, 0 | 0, 12 | $3.6, $6.8 | 15, 17 min |
+| Sonnet, no skills | PERF-004 (low) in both runs | 18, 4 | $5.0, $5.7 | 15, 18 min |
+| **Sonnet + skills** | **0, 0** | 0, 3 | $5.3, $6.0 | 14, 13 min |
+
+**What to take from it.**
+- **The strongest result in the benchmark.** The most capable model,
+  without the skills, stored the auth token in plain `SharedPreferences` in
+  both runs. Sonnet with the skills stored it in secure storage in both runs,
+  with zero security findings. Secure by default is the suite's main promise,
+  and on this task neither model delivers it on its own.
+- **On T5, Sonnet + skills matched Opus** (0 findings) at about the same cost.
+  Without the skills, Sonnet decoded full-size images in the list both times.
+- **The cost of the skills depends on the task.** On T5 the skills cost
+  Sonnet almost nothing extra ($5.3–6.0 vs $5.0–5.7). On T3, where the work
+  is small, they cost about 5× ($5.5–7.1 vs $1.0–1.3), because loading the
+  skills is a fixed cost.
+- **The Sonnet runs with the skills wrote few tests** (0 and 3). Both
+  extended the existing feature instead of scaffolding one, so the
+  scaffold's test checklist never applied. **Fixed after this run:** the
+  hub's WRITE mode now asks for tests on any change.
+
+Raw grades: `results-2026-10-18-claude-sonnet-vs-opus.json`.
+
 ### On Claude Code (Opus), 2026-10-18 (suite after the PASS PLAN and reading-budget changes)
 
 `AGENT=claude`, N=2 per cell, the same fixtures and graders. The model is

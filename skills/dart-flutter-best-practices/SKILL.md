@@ -149,11 +149,22 @@ Spend a minute on these before you write a line.
    diff hard to review. If a lint must stay, write `// ignore: rule_name`
    followed by the reason. An unexplained ignore is itself a finding. If
    `dart` isn't available, say that you couldn't verify.
-5. **Don't over-document.** Add `///` docs to public APIs whose names don't
+5. **Add the tests your change needs**, even when you extend existing code
+   rather than scaffold a feature. That means:
+   - a repository or source test over a fake: the success path and each
+     error mapping
+   - a logic-holder test of its state transitions (pagination: the next page
+     appended, a second request dropped while one is in flight)
+   - one widget test per screen state
+
+   Use fakes, not mocks, and no real network or delays. The checklist is in
+   `flutter-feature-scaffold` (its cross-cutting rules). Load
+   `flutter-testing` only for something it doesn't cover.
+6. **Don't over-document.** Add `///` docs to public APIs whose names don't
    say everything. Never write a comment that restates the name
    (`/// The user id.` on `userId`). See *Documentation* in
    `references/effective-dart.md`.
-6. **Never hand-edit generated files.** Change the source and run
+7. **Never hand-edit generated files.** Change the source and run
    `dart run build_runner build -d` (or tell the user to).
 
 ## Dart judgment rules (no default lint catches these)

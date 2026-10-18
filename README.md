@@ -176,6 +176,13 @@ See [`ci.md`](skills/dart-flutter-review/references/ci.md) for the details.
 
 ## Benchmark
 
+**Headline (Claude Code, v1.7.0):** asked to "add login and store the token",
+**Opus without the skills stored it in plain `SharedPreferences` in both runs**
+(SEC-001 high). **Sonnet with the skills used `flutter_secure_storage` in both
+runs, with 0 security findings.** On the gallery task, Sonnet + skills matched
+Opus (0 findings) at about the same cost. See
+[bench/README.md](bench/README.md).
+
 We ran the same 3 tasks with and without the skills on a free, non-Claude
 model (OpenCode + big-pickle, 2 runs each):
 

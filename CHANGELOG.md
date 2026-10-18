@@ -5,6 +5,19 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [Unreleased]
+
+### Changed
+
+- **Tests on any change.** The hub's WRITE mode now asks for the tests a
+  change needs: a repository over a fake, logic state transitions, and one
+  widget test per state. Before, only the scaffold asked for them, so agents
+  that extended existing code wrote few tests (0 and 3 for Sonnet on T5).
+- **Benchmark, Sonnet vs Opus.** On T3, Opus without the skills stored the
+  token in `SharedPreferences` in both runs (SEC-001 high). Sonnet with the
+  skills used `flutter_secure_storage` in both runs (0 findings). On T5,
+  Sonnet + skills matched Opus (0 findings) at about the same cost.
+
 ## [1.7.0] - 2026-10-18
 
 Faster reviews, cheaper writing, and a scaffold that writes instead of
