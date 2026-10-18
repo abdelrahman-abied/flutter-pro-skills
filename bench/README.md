@@ -192,6 +192,7 @@ cd bench
 ./run.sh t1 skills 1                       # one isolated run; also: t2|t3|t4|t5, baseline|skills
 N=2 PAR=4 MODEL=opencode/big-pickle ./all.sh   # the full matrix (TASKS="t3 t4" for a subset)
 python3 grade.py summary runs/             # grade everything (add --json)
+./progress.sh runs/                        # live status per run: elapsed, idle, tool calls, files changed, STALLED?
 AGENT_CMD='claude -p' ./run.sh t3 skills 1     # try another agent CLI
 ```
 
