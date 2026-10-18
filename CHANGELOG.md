@@ -5,7 +5,7 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
-## [Unreleased]
+## [1.6.1] - 2026-10-18
 
 ### Fixed
 
@@ -14,6 +14,10 @@ breaking change.
   differs from byte order (`orders_repository_remote.dart` vs
   `orders_repository.dart`). The test now sorts with `LC_ALL=C`. The full
   suite also passes under `en_US.UTF-8`.
+
+### Changed
+
+- Every skill is versioned 1.6.1.
 
 ## [1.6.0] - 2026-10-18
 

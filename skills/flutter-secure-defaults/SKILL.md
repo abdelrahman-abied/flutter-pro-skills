@@ -4,7 +4,7 @@ description: Write and review Flutter/Dart code that is secure by default, each 
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.6.0"
+  version: "1.6.1"
   suite: flutter-pro-skills
 ---
 
