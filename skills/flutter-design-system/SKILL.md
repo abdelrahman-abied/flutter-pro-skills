@@ -4,7 +4,7 @@ description: Build and review a Flutter design system, clean by default and plac
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.4.1"
+  version: "1.5.0"
   suite: flutter-pro-skills
 ---
 

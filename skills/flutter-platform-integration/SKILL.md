@@ -4,7 +4,7 @@ description: Write and review Flutter code that talks to native code, clean and 
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.4.1"
+  version: "1.5.0"
   suite: flutter-pro-skills
 ---
 
@@ -201,7 +201,7 @@ Reading-level findings (`PLAT-<slug>`; the checker can't see these):
 | PLAT-sync-ffi-on-ui-isolate | Medium | a long synchronous FFI call in `build()`, a UI callback or a frame callback |
 | PLAT-platform-view-in-list | Medium | `AndroidView`/`UiKitView`/`HtmlElementView` built per list item or animated |
 | PLAT-handwritten-channel-api | Low | a growing hand-written channel API (string method names, `Map` arguments) where Pigeon fits |
-| PLAT-platform-check-in-widget | Low | `Platform.isX`/`kIsWeb` branches in widgets deciding whether a native call works |
+| PLAT-platform-check-in-widget | Low | `Platform.isX`/`kIsWeb` branches in widgets deciding whether a native call works. Now automated as `ADAPT-001`/`ADAPT-002` (`flutter-adaptive-layout`); report the ADAPT id |
 | PLAT-generated-code-edited | Low | hand edits in Pigeon/ffigen/jnigen output, or generated files reviewed as source |
 | PLAT-no-channel-fake | Low | logic tested against the real engine because the channel can't be injected |
 

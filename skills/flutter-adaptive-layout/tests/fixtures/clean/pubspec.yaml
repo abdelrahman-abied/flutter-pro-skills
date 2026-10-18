@@ -1,0 +1,12 @@
+name: adapt_clean
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.0
+  universal_io: ^2.2.0
+  window_manager: ^0.4.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

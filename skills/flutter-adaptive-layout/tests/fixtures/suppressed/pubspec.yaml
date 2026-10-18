@@ -1,0 +1,6 @@
+name: adapt_suppressed
+environment:
+  sdk: ^3.5.0
+dependencies:
+  flutter:
+    sdk: flutter

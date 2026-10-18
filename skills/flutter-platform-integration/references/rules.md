@@ -477,7 +477,7 @@ code.
 | PLAT-sync-ffi-on-ui-isolate | Medium | a long synchronous FFI call (parsing, crypto, image work, disk) in `build()`, a gesture callback or a frame callback | `Isolate.run`, a long-lived worker isolate, or an async native API (`ffi.md` §4) |
 | PLAT-platform-view-in-list | Medium | `AndroidView`, `UiKitView`, `AppKitView`, `HtmlElementView` built per item in a scrolling list, or animated/transformed every frame | one platform view outside the list, a static snapshot, or a Flutter-native widget (`plugins-and-platform-views.md` §3, `flutter-performance`) |
 | PLAT-handwritten-channel-api | Low | a hand-written channel API that has grown past a couple of methods, with string method names and `Map` arguments | Pigeon (`channels-and-pigeon.md` §3) |
-| PLAT-platform-check-in-widget | Low | `Platform.isX`/`kIsWeb`/`defaultTargetPlatform` checks in widgets deciding whether a native call will work | an "unsupported" result from the source; widgets render it |
+| PLAT-platform-check-in-widget | Low | `Platform.isX`/`kIsWeb`/`defaultTargetPlatform` checks in widgets deciding whether a native call will work | an "unsupported" result from the source; widgets render it Now automated as `ADAPT-001` (dart:io `Platform` in a web app) and `ADAPT-002` in `flutter-adaptive-layout` (`../flutter-adaptive-layout/SKILL.md`); report the ADAPT id. |
 | PLAT-generated-code-edited | Low | hand edits in Pigeon/ffigen/jnigen output, or generated files reviewed line by line | change the schema or config and regenerate; review the schema |
 | PLAT-no-channel-fake | Low | logic tests that need the engine because the channel or source can't be injected | constructor-inject the channel or source (`testing-platform-code.md`) |
 

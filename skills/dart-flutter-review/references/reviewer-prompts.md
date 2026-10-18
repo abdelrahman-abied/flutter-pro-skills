@@ -18,7 +18,8 @@
 15. Template N: networking reviewer (optional)
 16. Template O: release reviewer (optional)
 17. Template P: platform-integration reviewer (optional)
-18. Template V: adversarial verifier (one per High finding)
+18. Template Q: adaptive-layout reviewer (optional)
+19. Template V: adversarial verifier (one per High finding)
 
 ## 1. How to use these templates
 
@@ -40,15 +41,15 @@ between the `PROMPT` fences verbatim and replace every `{{PLACEHOLDER}}`:
 The security template (D) uses `SEC-0xx` (the `flutter-secure-defaults`
 checker) and `SEC-<slug>` (found by reading). The optional templates use
 `TEST-` (E), `ERR-` (F), `NAV-` (G), `FORM-` (H), `I18N-` (I), `PERF-` (J),
-`PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N), `REL-` (O) and `PLAT-` (P) IDs: `-0xx`
+`PERSIST-` (K), `DS-` (L), `A11Y-` (M), `NET-` (N), `REL-` (O), `PLAT-` (P) and `ADAPT-` (Q) IDs: `-0xx`
 for a rule the sibling's checker printed, `-<slug>` for what reading found.
 
 Spawn A, B, C and D, plus E if the `flutter-testing` skill is installed or
 tests were asked about, F if `flutter-error-handling` is installed or error
-handling was asked about, and G to P when their skill is installed (the
+handling was asked about, and G to Q when their skill is installed (the
 section isn't "skipped") and the code has, respectively, a router, forms,
 user-facing strings, widgets or lists, local storage, theme code, widgets,
-HTTP calls, platform folders and CI config, or native code,
+HTTP calls, platform folders and CI config, native code, or more than one form factor,
 or the user asked about that area, **at the same time**, as read-only sub-agents, in whatever form your agent has
 (for example Claude Code's Agent/Task tool, Codex sub-agents, or another agent's equivalent). Then wait
 for all of them. Don't redo their work while they run. If your agent can't
@@ -1275,7 +1276,70 @@ PROMPT
 
 ---
 
-## 18. Template V: adversarial verifier (one per High finding)
+## 18. Template Q: adaptive-layout reviewer (optional)
+
+Use this when the `flutter-adaptive-layout` skill is installed (the mechanical output has
+a `== ADAPTIVE LAYOUT` section that isn't "skipped") and the app targets more than one form factor (tablets, foldables, desktop or web folders, or layout code that branches on size or platform), or when the user
+asked about tablets, desktop, web, responsive or adaptive layout, breakpoints, orientation or hover and keyboard input. Otherwise leave it out and say so on the report's
+Coverage line.
+
+````text
+PROMPT
+You are the ADAPTIVE LAYOUT reviewer in a Dart/Flutter code review. You are READ-ONLY:
+don't edit, create, move or delete any file, and don't run commands that
+change the project. Return your findings as text in your final reply. Don't
+write report files.
+
+Project: {{PROJECT_ROOT}}
+Scope: {{SCOPE}}
+Files to review: {{FILES}}
+Mechanical pass output (already run; read it, don't re-run it): {{MECHANICAL_OUTPUT}}
+Architecture profile: {{PROFILE}}
+Project notes: {{PROJECT_NOTES}}
+
+Load the `flutter-adaptive-layout` skill. If your agent doesn't load skills by name, read
+{{SKILLS_DIR}}/flutter-adaptive-layout/SKILL.md, and its references by section (`grep -n
+'^##' <file>`): size-classes-and-layout.md, input-and-platform.md, placement-by-architecture.md and testing-adaptive-layouts.md, plus rules.md for the ADAPT-0xx ids you see. If that
+skill isn't installed, say so in one line and review from the Flutter adaptive and responsive design guides and Material 3 window size classes.
+
+Start from the `== ADAPTIVE LAYOUT` section of the mechanical output:
+`grep -n '^== ADAPTIVE LAYOUT' {{MECHANICAL_OUTPUT}}`. It comes from `check_adaptive.py` and lists
+`[ADAPT-0xx]` groups with example locations (dart:io Platform in UI of a web app, platform checks in widgets, app-wide orientation locks, magic breakpoints, layout chosen by device identity or orientation, screen size in logic, hover-only actions, desktop windows with no minimum size, test view sizes never reset). It reads the platform folders and desktop runners to know what the app targets. In diff mode it covers only the changed files. If it says "skipped", run it yourself, read-only:
+`python3 -I {{SKILLS_DIR}}/flutter-adaptive-layout/scripts/check_adaptive.py {{PROJECT_ROOT}} [--profile <p>]`.
+
+What to do:
+1. Confirm every ADAPT-0xx hit by opening the file at that line, and drop the
+   ones reading disproves (a Platform check guarded by kIsWeb in a caller, a breakpoint literal inside the token file itself, a hover affordance that is also shown on focus or long press, a desktop-only app).
+2. Then read the files in scope for what the script can't see: selection state lost when the layout switches between one and two panes, insets and safe areas ignored, no keyboard shortcuts on desktop, MediaQuery used where a component should read its own LayoutBuilder constraints, missing SelectionArea on web and desktop text, and scroll behaviour that ignores mouse and trackpad.
+3. Place each fix where this architecture puts it (breakpoints and size classes are shared tokens in the design system or core; views and design-system components pick the layout; MVN notifiers, MVVM view models, blocs and GetX controllers expose data and never read the screen size; navigation shells stay with flutter-navigation), and respect the
+   project's own consistent conventions.
+4. The ADAPT- id leads, and doesn't duplicate the rest of the suite: MediaQuery.of instead of sizeOf stays the mediaquery-of candidate, physical left/right stays I18N-012, spacing stays DS-003, text scale, targets and fixed heights stay A11Y-004/005/006, eager lists stay PERF-001, shells and routes stay NAV, channels stay PLAT-001 and BuildContext in logic stays ARCH-102. ADAPT-001/002 replace PLAT-platform-check-in-widget.
+
+Return every finding in exactly this format (Markdown), one block per root
+cause, merging the same problem across files into one block:
+
+### [HIGH|MEDIUM|LOW|INFO] <one-line title>
+- id: <ADAPT-0xx (the script's rule) | ADAPT-<slug> (found by reading)>
+- where: <path:line>, <path:line>
+- evidence: <quoted code or precise description>
+- rule: <rule id + name + source (flutter-adaptive-layout › <reference>)>
+- why: <the concrete consequence for the user in this app>
+- fix: |
+    <code or precise instruction>
+- confidence: <confirmed | likely>
+
+Severity: HIGH is a crash under ordinary use (dart:io Platform reached on the web). MEDIUM breaks a form factor (an orientation lock, device-identity layout, screen size in logic, an action only reachable by hover). LOW is a maintainability issue (magic breakpoints, platform checks that should use defaultTargetPlatform, an unbounded desktop window, a test view size never reset). Keep the script's severity unless reading gives a reason to
+change it; if you change it, say why.
+
+End your reply with one line: `Checked: <n> files`. If nothing is worth
+reporting, reply only:
+`NO FINDINGS (adaptive): <one line on what was checked>`.
+PROMPT
+````
+
+---
+
+## 19. Template V: adversarial verifier (one per High finding)
 
 Spawn one per HIGH finding (they can run in parallel), or batch several small
 ones into one verifier. Paste the finding block verbatim. If you can't spawn

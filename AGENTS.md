@@ -1,6 +1,6 @@
 # Working on this repository (for AI coding agents and humans)
 
-This repo is a suite of nineteen Agent Skills for Dart & Flutter. Before changing anything:
+This repo is a suite of twenty Agent Skills for Dart & Flutter. Before changing anything:
 
 1. Read `docs/CONTRACTS.md`. It defines what crosses skill boundaries: rule IDs,
    the architecture-profile JSON, the finding format, CLIs, portability rules and

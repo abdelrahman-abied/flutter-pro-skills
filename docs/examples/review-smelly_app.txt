@@ -150,6 +150,12 @@ scope:          whole project — 10 non-generated .dart files
   [DS-001] raw-color-in-widget (info) x1 — A widget hard-codes a colour (Color(0x...), Color.fromARGB, Colors.<name>) instead of reading a role from the theme, so it ignores dark mode, high contrast and rebrands.
       lib/features/cart/presentation/view/cart_view.dart:49  Color(0xFF00897B)   [no theme tokens in this project yet; graded info. use Theme.of(context).colorScheme.<role> or the project's ThemeExtension tokens]
 
+== ADAPTIVE LAYOUT
+  profile: mvn (arch_check, confidence low)
+  classification: arch_check files[]
+  scanned: 10 files (0 generated skipped), 0 test files; platforms: none found; breakpoint tokens: none; 0 LayoutBuilder, 1 size reads, 0 width comparisons, 0 dart:io Platform checks
+  no adaptive layout findings
+
 == ACCESSIBILITY
   profile: mvn (arch_check, confidence low)
   classification: arch_check files[]

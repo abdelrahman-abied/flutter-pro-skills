@@ -5,6 +5,50 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [1.5.0] - 2026-10-18
+
+The suite now has twenty skills and sixteen checkers.
+
+### Added
+
+- **flutter-adaptive-layout** keeps one codebase working on phones, tablets,
+  foldables, desktop and the web:
+  - Material 3 window size classes defined once as shared tokens
+  - `LayoutBuilder` vs `MediaQuery.sizeOf`
+  - navigation bar, rail or drawer by size class
+  - list-detail with selection that survives a resize, and foldable hinges
+  - no app-wide orientation locks (Android 16+ ignores them on large
+    screens)
+  - hover, focus and keyboard shortcuts
+  - `defaultTargetPlatform` and `.adaptive` widgets instead of `dart:io`
+    `Platform` in UI
+  - desktop minimum window sizes
+  - tests across sizes with `tester.view`
+
+  Layout is decided in views and components. Logic and state never know the
+  screen size. It ships `check_adaptive.py` with 10 rules (`ADAPT-001…010`),
+  including `dart:io Platform` reached on the web (a crash), app-wide
+  orientation locks, layout chosen by device identity, screen size in logic
+  and actions only reachable by hover.
+- **dart-flutter-review** gets an `ADAPTIVE LAYOUT` section,
+  `--no-adaptive` / `--skip adaptive`, reviewer Template Q and dedupe rows.
+  ADAPT-001/002 replace `PLAT-platform-check-in-widget`.
+
+### Changed
+
+- `flutter-feature-scaffold` output is tested to produce zero ADAPT findings.
+- Every skill is versioned 1.5.0, and `install.sh` installs all twenty.
+
+### Quality
+
+- **Calibration.** `check_adaptive.py` was calibrated on 163 projects:
+  - the canonical apps, including the Flutter team's `material_3_demo` and
+    `desktop_photo_search`
+  - immich, lichess, hiddify, Wonderous, news_toolkit and io_flip
+
+  The canonical apps have no high or medium false positives. Their one
+  medium is a true positive.
+
 ## [1.4.1] - 2026-10-17
 
 ### Fixed

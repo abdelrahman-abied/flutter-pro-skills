@@ -4,7 +4,7 @@ description: Scaffold a new Flutter feature, screen, page or module in the archi
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.4.1"
+  version: "1.5.0"
   suite: flutter-pro-skills
 ---
 
@@ -217,7 +217,7 @@ The skill's tests enforce this: each profile and layout passes
 `check_secure_defaults.py`, `check_errors.py` (nothing in the generated files),
 `check_forms.py` and `arch_check.py` with zero findings, the generated files
 get zero findings from `check_performance.py`, `check_persistence.py`,
-`check_networking.py`, `check_platform.py`, `check_design_system.py` and `check_accessibility.py` (clean by default: lazy
+`check_networking.py`, `check_platform.py`, `check_design_system.py`, `check_adaptive.py` and `check_accessibility.py` (clean by default: lazy
 lists, theme colours, labelled buttons), plus greps for the
 checklist rules the checkers can't see. If the project already configures a
 client or declares a `Failure` type, the plan prints a `note:`. Inject that

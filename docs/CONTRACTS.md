@@ -1506,3 +1506,141 @@ plugin.
 - **Regenerated examples.** `docs/examples/*` and `docs/assets/review-preview.svg`
   were regenerated from the current scripts. `sample-review.md` was rewritten
   against the new output and the fixture's current line numbers.
+
+---
+
+# Phase 8 contracts (v1.5.0)
+
+## 34. flutter-adaptive-layout
+
+**Scope.** One codebase on phones, tablets, foldables, desktop and the web:
+- **Responsive:** layout follows the available space (`LayoutBuilder`,
+  `MediaQuery.sizeOf`, window size classes such as compact/medium/expanded
+  following Material 3 guidance), and there is one set of breakpoints.
+- **Adaptive:** behaviour follows the platform and input (navigation bar,
+  rail or drawer, list-detail panes, hover and focus, keyboard shortcuts,
+  mouse and trackpad scrolling, context menus, text selection).
+- **The platform:** `defaultTargetPlatform` / `Theme.of(context).platform`
+  rather than `dart:io` `Platform` in UI. `Platform.isX` throws on the web.
+- **Window changes:** orientation and multi-window (no app-wide orientation
+  lock; Android 16+ ignores locks on large screens), foldables
+  (`MediaQuery.displayFeaturesOf`, hinge), safe areas and insets, and desktop
+  window sizing.
+- **Testing:** `tester.view.physicalSize` / `devicePixelRatio`, golden tests
+  per size class, and `debugDefaultTargetPlatformOverride`.
+
+**Architecture placement.** Layout decisions live in views and
+design-system components.
+- The breakpoints and window size classes are shared tokens, in the design
+  system or `core/`.
+- Logic and state never know the screen size. MVN notifiers, MVVM view
+  models, blocs and GetX controllers expose data. The view picks the layout
+  (single pane or list-detail), and it can keep the selected item in its
+  state so it survives a resize.
+- Navigation shells (`StatefulShellRoute` with a bar or a rail) belong to
+  `flutter-navigation`. This skill decides which shell widget to show per size
+  class.
+
+**Contract values.**
+
+| Item | Value |
+|---|---|
+| Owner | Agent P8: `skills/flutter-adaptive-layout/**` |
+| Prefix | `ADAPT-0xx` / `ADAPT-<slug>` |
+| Checker | `scripts/check_adaptive.py` (§22 CLI and output contract). It reads Dart plus `pubspec.yaml` and the presence of `web/`, `macos/`, `windows/`, `linux/`, `android/` and `ios/`, to know which platforms the app targets |
+| Header | `== ADAPTIVE LAYOUT` |
+| Schema | `flutter-pro-skills/adaptive-layout@1` |
+| Suppression | `adapt-ignore` |
+
+**Ownership.** Cross-reference these; never re-detect them:
+
+| Concern | Owner |
+|---|---|
+| `MediaQuery.of(context).x` instead of `sizeOf` | heuristic `mediaquery-of` / UI |
+| Physical left/right geometry | I18N-012 |
+| Magic spacing | DS-003 |
+| Text scale and fixed heights around text | A11Y-004 / A11Y-006 |
+| Tap-target size | A11Y-005 |
+| Eager lists | PERF-001 |
+| Navigation shells and routes | NAV |
+| `BuildContext` in logic | ARCH-102 |
+| Store target SDK | REL |
+
+**Moves to ADAPT:** the reading slug `PLAT-platform-check-in-widget` becomes
+an ADAPT checker rule. PLAT cross-references it.
+
+**Correct and secure by default.** `dart:io` `Platform` in code that also
+runs on the web is a crash, not a style issue. Don't encode device identity
+in layout (`isTablet` from the model name). Desktop windows have no minimum
+size unless the app sets one.
+
+**Review integration (lead).**
+- `== ADAPTIVE LAYOUT` runs after `== DESIGN SYSTEM`, with
+  `--no-adaptive` and the `--skip` key `adaptive`. It is informational.
+- Add reviewer Template Q and the dedupe rows.
+- Bump to v1.5.0: twenty skills, sixteen checkers.
+
+**Calibration (§24).**
+- **Canonical apps** (zero high or medium false positives):
+  - compass_app, the bloc examples and the riverpod examples (quiet unless
+    they really break)
+  - the Flutter team's `samples/material_3_demo` (navigation rail and bar by
+    width), `samples/desktop_photo_search`, `samples/navigation_and_routing`
+    and every other flutter/samples app, all BSD
+- **Non-canonical apps:**
+  - lichess (tablet layouts; GPL)
+  - immich (tablet; AGPL)
+  - hiddify (desktop; GPL)
+  - wonderous
+  - io_flip (web)
+  - news_toolkit
+- **Copyleft fixtures** are fresh repros with no copied lines.
+
+## 35. Phase 8 as built: v1.5.0 (these entries win over §34)
+
+- **Suite size.** v1.5.0 has twenty skills and sixteen checkers. Every
+  `metadata.version` is `"1.5.0"`.
+- **Rules.** `adaptive-layout@1` has ADAPT-001…010:
+  - ADAPT-001 io-platform-on-web (high)
+  - ADAPT-002 platform-check-in-widget (replaces `PLAT-platform-check-in-widget`)
+  - ADAPT-003 app-wide-orientation-lock
+  - ADAPT-004 magic-breakpoint
+  - ADAPT-005 device-identity-layout
+  - ADAPT-006 orientation-decides-layout
+  - ADAPT-007 screen-size-in-logic
+  - ADAPT-008 hover-only-action
+  - ADAPT-009 desktop-window-unbounded (once per project)
+  - ADAPT-010 test-view-size-not-reset
+
+  There are also 14 reading slugs.
+- **Files read** (in addition to §34):
+  - the desktop runner sources, for a native minimum window size
+    (`macos/Runner/*.swift` and `*.xib`, `windows/runner/*.cpp` and `*.h`,
+    `linux/*.cc` and `linux/runner/*.cc`)
+  - `test/**` and `integration_test/**` `*_test.dart`, for ADAPT-010
+- **What counts as a `kIsWeb` guard** for ADAPT-001:
+  - a check in the same expression
+  - an enclosing `if` or collection-if
+  - an early return
+  - a project getter that checks `kIsWeb`
+  - every same-file caller being guarded
+
+  Conditional-import io files and platform-named paths are skipped.
+- **Desktop intent.** A generated `macos/` folder alone is not desktop intent
+  (ADAPT-009). Intent needs a desktop package or desktop-specific Dart code.
+- **Dedupe:**
+  - ADAPT-001/002 replace `PLAT-platform-check-in-widget`.
+  - ADAPT-006 beats the `mediaquery-of` candidate only on a line that reads
+    `MediaQuery.of(context).orientation`.
+  - On a line that passes `BuildContext` into logic, ARCH-102 leads and
+    ADAPT-007 is cited.
+- **review.sh.** `== ADAPTIVE LAYOUT` runs after DESIGN SYSTEM, with
+  `--no-adaptive` and the `--skip` key `adaptive`, and has reviewer Template
+  Q. Scaffold output gets zero ADAPT findings, enforced in the tests.
+- **Calibration** covered 163 projects, about 2,800 files.
+  - **Canonical apps:** zero high or medium false positives. The one canonical
+    medium is a true positive: `material_3_demo` shows a copy `IconButton`
+    only while a `MouseRegion` hovers.
+  - **Non-canonical apps:** immich, lichess, hiddify (1 high true positive,
+    `Platform.isIOS` read in a web-shipping app's notifier), wonderous,
+    news_toolkit and io_flip.
