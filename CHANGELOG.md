@@ -30,6 +30,11 @@ breaking change.
   text), so a standard feature doesn't need six specialist skills loaded.
   Measured on Claude Code (T5): cost $17–18 → $10.5–13.8 per run, and
   checker runs 10–11 → 2–3, with 0 findings either way.
+- **Stop reading early for scaffolded features.** Six specialist skills
+  open with a "Writing a standard feature?" note, and the scaffold's
+  checklist lists the tests to write. Measured on T5: 29 and 34 tests (15
+  and 28 after the first cut) at $12–15 a run. Across both cuts the cost with
+  the skills fell from $17.6 to about $12.9 on average (−27%).
 - **A smaller reading budget when writing.** The hub tells agents to read a
   sibling's SKILL.md and only the reference section it points at. When the
   scaffold generates a feature, there's no need to pre-load the

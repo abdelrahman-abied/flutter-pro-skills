@@ -75,7 +75,23 @@ cross-cutting rules, commit `c30bcc0`), T5 with the skills, 2 more runs:
 |---|---|---|---|---|---|---|---|
 | Skills before (r1 / r2) | $17.0, $18.3 | 22, 22 min | 148, 143 | 7, 7 | 11, 10 | 0 | 43, 37 |
 | **Skills after (r3 / r4)** | **$13.8, $10.5** | 21, 18 min | 117, 95 | 6, 3 | **3, 2** | 0 | 28, 15 |
+| **Skills, second cut (r5 / r6)** | **$14.8, $12.3** | 22, 22 min | 126, 114 | 5, 4 | 5, 4 | 1*, 0 | **29, 34** |
 | Baseline (r1 / r2) | $3.6, $6.8 | 15, 17 min | 58, 90 | 0 | 0 | 0 | 0, 12 |
+
+\* DS-003 (low): the agent added a spacing scale (`AppSpacing`), which turned
+an existing `EdgeInsets.all(12)` into a finding. It's a side effect of
+adding tokens, not new bad code.
+
+The second cut (commit `6dcb7bb`) added a "stop reading here" note to six
+specialist skills and a test checklist to the scaffold:
+- **Tests came back:** 29 and 34, against 15 and 28 after the first cut.
+- **Cost didn't fall further:** $12–15. With N=2 the spread between runs is
+  as large as the change.
+- **Across both cuts:** the average cost with the skills went from $17.6 to
+  about $12.9 (−27%), with tests at 31 instead of 40, and every run kept 0
+  bad findings and the full feature.
+- **Still about 2–3× baseline.** That remains the price of the tests and the
+  full layering the skills add on a strong model.
 
 - **Cost fell 24–42%**, and checker runs fell from 10–11 to 2–3, with the same
   quality (0 findings, every feature).
@@ -84,7 +100,7 @@ cross-cutting rules, commit `c30bcc0`), T5 with the skills, 2 more runs:
   their descriptions match.
 - **Fewer tests than before** (28 and 15 vs 43 and 37), but still more than
   baseline (0 and 12). The run that skipped `flutter-testing` wrote the
-  fewest.
+  fewest; the second cut below addresses it.
 
 Raw grades: `results-2026-10-18-claude-code.json`.
 
