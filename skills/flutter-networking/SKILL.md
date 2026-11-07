@@ -4,7 +4,7 @@ description: Write and review the API layer of Flutter and Dart apps, clean and 
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.7.1"
+  version: "1.7.2"
   suite: flutter-pro-skills
 ---
 

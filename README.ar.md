@@ -41,6 +41,16 @@ npx skills add abdelrahman-abied/flutter-pro-skills
 </div>
 
 ```bash
+npx flutter-pro-skills
+```
+
+<div dir="rtl">
+
+أو من نسخة محلية من الريبو:
+
+</div>
+
+```bash
 git clone https://github.com/abdelrahman-abied/flutter-pro-skills
 cd flutter-pro-skills && ./install.sh
 ```

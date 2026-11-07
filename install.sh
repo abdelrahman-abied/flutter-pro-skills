@@ -13,7 +13,7 @@
 #                  copilot   ~/.copilot/skills
 #                  opencode  ~/.config/opencode/skills
 #   --project    install into <dir>/.agents/skills, <dir>/.claude/skills, ... instead of $HOME
-#   --link       symlink instead of copy (for contributors: edits in the repo go live)
+#   --link       symlink instead of copy (for contributors with a clone: edits go live; not with npx, its cache is temporary)
 #   --skills     comma-separated subset (default: all twenty-one; they reference each other, so keep them together)
 #   --uninstall  remove the suite's skills from the chosen locations
 #   --list       print target folders and exit
@@ -22,7 +22,14 @@
 # pick one location per agent when that happens.
 set -euo pipefail
 
-REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# npm runs this script through a symlink in node_modules/.bin, so follow links to find the suite.
+SOURCE="${BASH_SOURCE[0]}"
+while [ -L "$SOURCE" ]; do
+  LINK_DIR="$(cd "$(dirname "$SOURCE")" && pwd)"
+  SOURCE="$(readlink "$SOURCE")"
+  case "$SOURCE" in /*) ;; *) SOURCE="$LINK_DIR/$SOURCE" ;; esac
+done
+REPO="$(cd "$(dirname "$SOURCE")" && pwd)"
 ALL_SKILLS="dart-flutter-best-practices dart-naming flutter-ui-practices flutter-architecture flutter-feature-scaffold flutter-testing flutter-error-handling flutter-secure-defaults flutter-navigation flutter-forms flutter-i18n flutter-performance flutter-persistence flutter-networking flutter-firebase flutter-platform-integration flutter-design-system flutter-adaptive-layout flutter-accessibility flutter-release dart-flutter-review"
 AGENTS=""; BASE="$HOME"; PROJECT=0; LINK=0; SKILLS="$ALL_SKILLS"; UNINSTALL=0; LIST=0
 

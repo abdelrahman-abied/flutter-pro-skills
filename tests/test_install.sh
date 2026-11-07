@@ -26,4 +26,35 @@ bash "$ROOT/install.sh" --project "$T" --agent agents --agent claude --uninstall
 left=$(ls "$T/.agents/skills" | tr '\n' ' ')
 { [ "$left" = "flutter-testing " ] && [ -z "$(ls "$T/.claude/skills")" ]; } && ok "uninstall removes only suite copies" || ko "uninstall left: [$left]"
 
+# npm runs the installer through a relative symlink in node_modules/.bin
+L="$T/linked"; mkdir -p "$L/node_modules/.bin" "$L/app"
+ln -s "$ROOT/install.sh" "$L/node_modules/flutter-pro-skills.sh"
+ln -s ../flutter-pro-skills.sh "$L/node_modules/.bin/flutter-pro-skills"
+"$L/node_modules/.bin/flutter-pro-skills" --project "$L/app" --agent claude >/dev/null 2>&1
+[ "$(ls "$L/app/.claude/skills" 2>/dev/null | wc -l | tr -d ' ')" = "$n_skills" ] && ok "installs through a symlink chain" || ko "install through a symlink"
+
+# the npm package carries the same version as every skill
+pkg_version="$(python3 -I -c 'import json, sys; print(json.load(open(sys.argv[1]))["version"])' "$ROOT/package.json")"
+versions="$(grep -h '^  version:' "$ROOT"/skills/*/SKILL.md | sort -u)"
+[ "$versions" = "  version: \"$pkg_version\"" ] && ok "package.json and every SKILL.md are at $pkg_version" || ko "version drift: package.json=$pkg_version skills=[$versions]"
+
+# package contents: `files` overrides .gitignore, so fixtures and bytecode (which holds local paths) must be excluded by name
+if command -v npm >/dev/null 2>&1; then
+  # a stray .pyc proves the exclusion works even on a clean checkout
+  stray="$ROOT/skills/dart-naming/__pycache__"; had_stray=0; [ -e "$stray" ] && had_stray=1
+  mkdir -p "$stray"; : > "$stray/probe.cpython-314.pyc"
+  listing="$(cd "$ROOT" && npm pack --dry-run --json 2>/dev/null)"
+  rm -f "$stray/probe.cpython-314.pyc"; [ $had_stray = 1 ] || rmdir "$stray"
+  verdict="$(printf '%s' "$listing" | python3 -I -c '
+import json, sys
+paths = [f["path"] for f in json.load(sys.stdin)[0]["files"]]
+bad = [p for p in paths if "/tests/" in p or "__pycache__" in p or p.endswith(".pyc")]
+skills = sum(p.endswith("/SKILL.md") for p in paths)
+print("bad:" + ",".join(bad[:3]) if bad else "skills:%d" % skills)
+' 2>&1)"
+  [ "$verdict" = "skills:$n_skills" ] && ok "npm package has all $n_skills skills, no tests or bytecode" || ko "npm package contents: $verdict"
+else
+  ok "npm package contents (skipped, npm not installed)"
+fi
+
 exit $fail

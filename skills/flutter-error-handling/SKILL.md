@@ -4,7 +4,7 @@ description: Design, write and review error handling in Flutter and Dart apps so
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.7.1"
+  version: "1.7.2"
   suite: flutter-pro-skills
 ---
 

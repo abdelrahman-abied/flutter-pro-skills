@@ -1,0 +1,41 @@
+{
+  "name": "flutter-pro-skills",
+  "version": "1.7.2",
+  "description": "Agent Skills that write and review Dart & Flutter code by your app's own architecture: MVVM, MVN, Bloc, Clean, Riverpod, GetX.",
+  "keywords": [
+    "flutter",
+    "dart",
+    "agent-skills",
+    "ai-agents",
+    "claude-code",
+    "codex",
+    "cursor",
+    "github-copilot",
+    "gemini-cli",
+    "opencode",
+    "clean-architecture",
+    "mvvm",
+    "bloc",
+    "riverpod",
+    "code-review"
+  ],
+  "homepage": "https://github.com/abdelrahman-abied/flutter-pro-skills#readme",
+  "bugs": "https://github.com/abdelrahman-abied/flutter-pro-skills/issues",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/abdelrahman-abied/flutter-pro-skills.git"
+  },
+  "license": "MIT",
+  "author": "Abdulrahman Obaid (https://github.com/abdelrahman-abied)",
+  "bin": {
+    "flutter-pro-skills": "install.sh"
+  },
+  "files": [
+    "install.sh",
+    "skills/",
+    "!skills/*/tests/",
+    "!**/__pycache__/",
+    "!**/*.pyc",
+    "NOTICE.md"
+  ]
+}

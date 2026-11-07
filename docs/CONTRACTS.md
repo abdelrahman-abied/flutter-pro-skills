@@ -13,7 +13,7 @@ Repo: `flutter-pro-skills`. Author: Abdulrahman Obaid (`abdelrahman-abied`). Lic
 
 ```
 flutter-pro-skills/
-├── README.md  LICENSE  NOTICE.md  AGENTS.md  install.sh  .gitignore
+├── README.md  LICENSE  NOTICE.md  AGENTS.md  install.sh  package.json  .gitignore
 ├── docs/CONTRACTS.md                     ← this file
 ├── tests/run_all.sh  tests/validate_skills.py
 ├── .github/workflows/test.yml
@@ -1849,3 +1849,15 @@ views never call `FirebaseFirestore.instance`.
 - **Measured on T3 (Sonnet, N=2):** the cost with the skills went from
   $5.5–7.1 to $2.6–4.3 per run, with 0 findings and the token still in
   secure storage.
+
+## 40. v1.7.2 as built: the npm package
+
+- **`package.json` is metadata only.** Its `bin` points at `install.sh`, so the
+  suite still has no Node code and §2's bash and python3 rule holds.
+- **`install.sh` must work through a symlink,** because npm runs it from
+  `node_modules/.bin`. `tests/test_install.sh` covers this.
+- **The package ships `skills/` without `skills/*/tests/`.** Skills must not
+  need their `tests/` folder at runtime.
+- **`version` in `package.json` matches every `metadata.version`.**
+  `tests/test_install.sh` fails if they drift, so every release bumps them
+  together.

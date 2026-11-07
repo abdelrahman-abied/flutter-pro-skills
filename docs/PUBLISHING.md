@@ -107,6 +107,29 @@ If the root `action.yml` exists, the release page offers **Publish this
 Action to the GitHub Marketplace**. Tick it, and choose the *Code quality*
 and *Continuous integration* categories.
 
+## 6a. npm package
+
+Publish from the tagged commit. A published version can never be reused, so
+read the file list before you publish. It should hold `install.sh`, `skills/`
+without any `tests/` or `__pycache__/` folder, `NOTICE.md`, both READMEs,
+`LICENSE` and `package.json`.
+
+```bash
+npm whoami || npm login
+npm pack --dry-run
+npm publish
+```
+
+The npm account's email is public in the package metadata, so use one you're
+happy to show.
+
+Then check the published package in a throwaway folder:
+
+```bash
+npm view flutter-pro-skills version
+cd "$(mktemp -d)" && npx --yes flutter-pro-skills --project . --agent claude && ls .claude/skills; cd -
+```
+
 ## 7. Post-publish checks
 
 ```bash
@@ -188,7 +211,7 @@ Post over a few days rather than all at once, and answer comments the same day.
 
 ## Later releases
 
-1. Bump `metadata.version` in the changed `SKILL.md` files.
+1. Bump `metadata.version` in every `SKILL.md` and `version` in `package.json`. `tests/test_install.sh` fails if they differ.
 2. `bash tests/run_all.sh` → `ALL PASSED`.
 3. If the output format changed, regenerate `docs/examples/` and `docs/assets/review-preview.svg` (see `docs/examples/README.md`).
-4. Repeat steps 5–6 with the new `VERSION`. Keep moving `v1` until a breaking change, then start `v2`.
+4. Repeat steps 5–6a with the new `VERSION`. Keep moving `v1` until a breaking change, then start `v2`.

@@ -5,6 +5,21 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [1.7.2] - 2026-11-07
+
+The suite can be installed from npm. The skills' content is unchanged.
+
+### Added
+
+- **npm package.** `npx flutter-pro-skills` runs `install.sh` and takes the
+  same options. The package leaves out each skill's `tests/` folder, so the
+  checkers' fixtures aren't redistributed.
+
+### Fixed
+
+- `install.sh` now works when it's run through a symlink, which is how npm
+  runs it.
+
 ## [1.7.1] - 2026-10-18
 
 Cheaper writing with the skills, with the same security.

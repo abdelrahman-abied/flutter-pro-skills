@@ -48,12 +48,19 @@ that is clean and secure by default, judged by your app's own architecture.**
 npx skills add abdelrahman-abied/flutter-pro-skills     # open skills CLI, 70+ agents
 ```
 
-Or use the installer, which writes to `~/.agents/skills` (Codex, Gemini CLI,
-Copilot, Cursor, OpenCode, Antigravity) and `~/.claude/skills` (Claude Code):
+Or use the installer, which needs bash and writes to `~/.agents/skills` (Codex,
+Gemini CLI, Copilot, Cursor, OpenCode, Antigravity) and `~/.claude/skills`
+(Claude Code):
+
+```bash
+npx flutter-pro-skills                         # --project path/to/app · --agent claude · --uninstall
+```
+
+Contributors can run it from a clone, where `--link` makes edits go live:
 
 ```bash
 git clone https://github.com/abdelrahman-abied/flutter-pro-skills
-cd flutter-pro-skills && ./install.sh          # --project path/to/app · --link · --uninstall
+cd flutter-pro-skills && ./install.sh --link
 ```
 
 Then just ask:
