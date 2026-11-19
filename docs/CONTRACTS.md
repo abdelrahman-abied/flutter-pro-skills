@@ -1861,3 +1861,14 @@ views never call `FirebaseFirestore.instance`.
 - **`version` in `package.json` matches every `metadata.version`.**
   `tests/test_install.sh` fails if they drift, so every release bumps them
   together.
+
+## 41. v1.7.3 as built: Antigravity's skill folders
+
+- **Antigravity reads `~/.gemini/config/skills` globally** (legacy
+  `~/.gemini/antigravity/skills` too) and `<workspace>/.agents/skills` per
+  project. It does not read `~/.agents/skills`, so the default install never
+  reached it. Source: https://antigravity.google/docs/skills
+- **`install.sh --agent antigravity`** installs to `~/.gemini/config/skills`,
+  or to `<dir>/.agents/skills` with `--project`. `tests/test_install.sh`
+  covers both, plus uninstall.
+- The `agents` target no longer claims Antigravity.

@@ -49,11 +49,14 @@ npx skills add abdelrahman-abied/flutter-pro-skills     # open skills CLI, 70+ a
 ```
 
 Or use the installer, which needs bash and writes to `~/.agents/skills` (Codex,
-Gemini CLI, Copilot, Cursor, OpenCode, Antigravity) and `~/.claude/skills`
-(Claude Code):
+Gemini CLI, Copilot, Cursor, OpenCode) and `~/.claude/skills` (Claude Code).
+Antigravity doesn't read either folder globally, so pass `--agent antigravity`
+(`~/.gemini/config/skills`), or install into a project with `--project`, which
+writes the `.agents/skills` folder Antigravity reads:
 
 ```bash
 npx flutter-pro-skills                         # --project path/to/app · --agent claude · --uninstall
+npx flutter-pro-skills --agent antigravity     # Antigravity
 ```
 
 Contributors can run it from a clone, where `--link` makes edits go live:

@@ -4,7 +4,7 @@ description: Hub for writing idiomatic Dart and Flutter code - Effective Dart, t
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.7.2"
+  version: "1.7.3"
   suite: flutter-pro-skills
 ---
 

@@ -24,7 +24,7 @@
   - مكتوبين بـ Python من غير أي مكتبات خارجية، وعليهم حوالي 2250 تست.
   - اتجرّبوا على تطبيقات مفتوحة المصدر حقيقية، زي Compass الرسمي من فريق Flutter، وأمثلة Bloc و Riverpod الرسمية، و lichess، و immich، و Wonderous، وأمثلة drift.
 - **GitHub Action بيقفل الـ PR على المشاكل الجديدة بس،** فالمشاكل القديمة في المشروع متعطّلش الفريق.
-- **شغالة مع أي agent بيقرأ `SKILL.md`:** Claude Code، و Codex، و Cursor، و GitHub Copilot، و Gemini CLI، و OpenCode. اتجربت فعلًا على Claude Code و OpenCode.
+- **شغالة مع أي agent بيقرأ `SKILL.md`:** Claude Code، و Codex، و Cursor، و GitHub Copilot، و Gemini CLI، و OpenCode، و Antigravity. اتجربت فعلًا على Claude Code و OpenCode.
 
 ## التثبيت
 
@@ -42,6 +42,7 @@ npx skills add abdelrahman-abied/flutter-pro-skills
 
 ```bash
 npx flutter-pro-skills
+npx flutter-pro-skills --agent antigravity   # Antigravity
 ```
 
 <div dir="rtl">

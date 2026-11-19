@@ -33,6 +33,15 @@ ln -s ../flutter-pro-skills.sh "$L/node_modules/.bin/flutter-pro-skills"
 "$L/node_modules/.bin/flutter-pro-skills" --project "$L/app" --agent claude >/dev/null 2>&1
 [ "$(ls "$L/app/.claude/skills" 2>/dev/null | wc -l | tr -d ' ')" = "$n_skills" ] && ok "installs through a symlink chain" || ko "install through a symlink"
 
+# Antigravity reads ~/.gemini/config/skills globally and .agents/skills per project, not ~/.agents/skills
+H="$T/home"; mkdir -p "$H"
+HOME="$H" bash "$ROOT/install.sh" --agent antigravity >/dev/null 2>&1
+[ "$(ls "$H/.gemini/config/skills" 2>/dev/null | wc -l | tr -d ' ')" = "$n_skills" ] && ok "antigravity installs to ~/.gemini/config/skills" || ko "antigravity global install"
+[ "$(HOME="$H" bash "$ROOT/install.sh" --agent antigravity --list --project "$T")" = "antigravity -> $(cd "$T" && pwd)/.agents/skills" ] && ok "antigravity with --project targets .agents/skills" || ko "antigravity project target"
+HOME="$H" bash "$ROOT/install.sh" --agent antigravity --uninstall >/dev/null 2>&1
+[ -z "$(ls "$H/.gemini/config/skills")" ] && ok "antigravity uninstall" || ko "antigravity uninstall"
+bash "$ROOT/install.sh" --help | grep -q 'antigravity' && ok "--help lists antigravity" || ko "--help misses antigravity"
+
 # the npm package carries the same version as every skill
 pkg_version="$(python3 -I -c 'import json, sys; print(json.load(open(sys.argv[1]))["version"])' "$ROOT/package.json")"
 versions="$(grep -h '^  version:' "$ROOT"/skills/*/SKILL.md | sort -u)"

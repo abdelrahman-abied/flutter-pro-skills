@@ -1,6 +1,6 @@
 {
   "name": "flutter-pro-skills",
-  "version": "1.7.2",
+  "version": "1.7.3",
   "description": "Agent Skills that write and review Dart & Flutter code by your app's own architecture: MVVM, MVN, Bloc, Clean, Riverpod, GetX.",
   "keywords": [
     "flutter",

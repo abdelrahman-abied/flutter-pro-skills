@@ -4,7 +4,7 @@ description: Choose and review names in Dart and Flutter code - classes, methods
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.7.2"
+  version: "1.7.3"
   suite: flutter-pro-skills
 ---
 

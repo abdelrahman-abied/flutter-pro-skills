@@ -4,7 +4,7 @@ description: Scaffold a new Flutter feature, screen, page or module in the archi
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.7.2"
+  version: "1.7.3"
   suite: flutter-pro-skills
 ---
 

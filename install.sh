@@ -6,8 +6,9 @@
 #
 #   --agent      where to install (repeatable). Default: agents + claude
 #                  agents    ~/.agents/skills            Codex, Gemini CLI, GitHub Copilot, Cursor,
-#                                                        OpenCode, Antigravity (the interoperable path)
+#                                                        OpenCode (the interoperable path)
 #                  claude    ~/.claude/skills            Claude Code (also read by Cursor, Copilot, OpenCode)
+#                  antigravity ~/.gemini/config/skills   Antigravity app and CLI (with --project: .agents/skills)
 #                  cursor    ~/.cursor/skills
 #                  gemini    ~/.gemini/skills
 #                  copilot   ~/.copilot/skills
@@ -41,7 +42,7 @@ while [ $# -gt 0 ]; do
     --skills) SKILLS="$(echo "${2:?--skills needs a list}" | tr ',' ' ')"; shift 2 ;;
     --uninstall) UNINSTALL=1; shift ;;
     --list) LIST=1; shift ;;
-    -h|--help) sed -n 2,24p "$0"; exit 0 ;;
+    -h|--help) sed -n 2,23p "$0"; exit 0 ;;
     *) echo "unknown option: $1 (see --help)" >&2; exit 2 ;;
   esac
 done
@@ -53,6 +54,7 @@ target_for() {
     claude)   echo "$BASE/.claude/skills" ;;
     cursor)   echo "$BASE/.cursor/skills" ;;
     gemini)   echo "$BASE/.gemini/skills" ;;
+    antigravity) if [ $PROJECT = 1 ]; then echo "$BASE/.agents/skills"; else echo "$BASE/.gemini/config/skills"; fi ;;
     copilot)  if [ $PROJECT = 1 ]; then echo "$BASE/.github/skills"; else echo "$BASE/.copilot/skills"; fi ;;
     opencode) if [ $PROJECT = 1 ]; then echo "$BASE/.opencode/skills"; else echo "$BASE/.config/opencode/skills"; fi ;;
     *) echo "unknown agent: $1" >&2; return 2 ;;

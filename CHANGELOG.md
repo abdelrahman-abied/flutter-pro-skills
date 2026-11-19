@@ -5,6 +5,19 @@ All notable changes to this project are documented here. The project follows
 `SEC-0xx`, …) are part of the public contract: renaming or removing one is a
 breaking change.
 
+## [1.7.3] - 2026-11-19
+
+Antigravity can use the suite from a global install. The skills' content is
+unchanged.
+
+### Fixed
+
+- **Antigravity.** The installer said `~/.agents/skills` reaches Antigravity,
+  but Antigravity reads `~/.gemini/config/skills` globally and
+  `.agents/skills` only inside a project. `--agent antigravity` now installs
+  to `~/.gemini/config/skills`, or to `.agents/skills` with `--project`, and
+  the README and `--help` say so.
+
 ## [1.7.2] - 2026-11-07
 
 The suite can be installed from npm. The skills' content is unchanged.

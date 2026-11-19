@@ -4,7 +4,7 @@ description: Get a Flutter app from the repo to Google Play and the App Store sa
 license: MIT
 metadata:
   author: abdelrahman-abied
-  version: "1.7.2"
+  version: "1.7.3"
   suite: flutter-pro-skills
 ---
 
